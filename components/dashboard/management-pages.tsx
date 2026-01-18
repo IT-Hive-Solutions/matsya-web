@@ -23,14 +23,6 @@ export default function ManagementPage({ type }: ManagementPageProps) {
     { id: "1", name: "Central Veterinary Office - Kathmandu" },
     { id: "2", name: "District Livestock Office - Pokhara" },
   ]);
-  const { data: districtFetched } = useQuery({
-    queryFn: () => fetch(endpoints.district.byId(1)),
-    queryKey: ["distric"],
-  });
-
-  useEffect(() => {
-    console.log({ districtFetched: districtFetched });
-  }, [districtFetched]);
 
   const config: {
     [key: string]: {
@@ -117,11 +109,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
     setShowForm(false);
   };
 
-  const handleOfficeSubmit = (office: any) => {
-    setOffices([...offices, office]);
-    setItems([...items, office]);
-    setShowForm(false);
-  };
+ 
 
   const handleDeleteItem = (id: string) => {
     setItems(items.filter((item) => item.id !== id));
@@ -166,10 +154,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                 offices={offices}
               />
             ) : type === "offices" ? (
-              <OfficeForm
-                onClose={() => setShowForm(false)}
-                onSubmit={handleOfficeSubmit}
-              />
+              <OfficeForm onClose={() => setShowForm(false)} />
             ) : (
               <Card className="shadow-xl">
                 <div className="p-6 sm:p-8">
@@ -177,7 +162,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                     Add {currentConfig.title.split(" ").pop()}
                   </h3>
                   <div className="space-y-4 mb-6">
-                    {currentConfig.fields.map((field) => (
+                    {/* {currentConfig.fields.map((field) => (
                       <div key={field.name}>
                         <label className="block text-sm font-medium text-foreground mb-2">
                           {field.label}
@@ -194,7 +179,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                           className="w-full"
                         />
                       </div>
-                    ))}
+                    ))} */}
                   </div>
                   <div className="flex gap-3">
                     <Button

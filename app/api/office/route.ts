@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
+        console.log({ body });
 
         if (!body.district_id) {
             return NextResponse.json(
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        if (!body.email_id) {
+        if (!body.office_email) {
             return NextResponse.json(
                 { success: false, error: 'Email is required' },
                 { status: 400 }
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
             createItem('office', {
                 district_id: body.district_id,
                 office_email: body.office_email,
+                office_address: body.office_address ?? "",
                 office_name: body.office_name,
                 province_id: body.province_id,
             })
@@ -69,8 +71,10 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: any) {
+        console.log({ error: error.errors });
+
         return NextResponse.json(
-            { success: false, error: error.message || 'Failed to create office' },
+            { success: false, error: error || 'Failed to create office' },
             { status: 500 }
         );
     }

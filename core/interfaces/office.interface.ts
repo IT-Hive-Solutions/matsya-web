@@ -5,6 +5,7 @@ export interface Office {
     status: Status;
     sort: number;
     office_name: string;
+    office_address: string;
     office_email: string;
     district_id: number;
     province_id: number;

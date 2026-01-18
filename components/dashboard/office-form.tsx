@@ -1,277 +1,336 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertCircle, X } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
-const PROVINCES = ["Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpaschim"]
-
-const DISTRICTS: { [key: string]: string[] } = {
-  Bagmati: ["Kathmandu", "Bhaktapur", "Lalitpur"],
-  Gandaki: ["Pokhara", "Kaski", "Lamjung"],
-  Lumbini: ["Butwal", "Palpa", "Nawalparasi"],
-  Karnali: ["Nepalgunj", "Surkhet", "Jumla"],
-  Sudurpaschim: ["Dhangadhi", "Dadeldhura", "Baitadi"],
-}
-
-const MUNICIPALITIES: { [key: string]: { [key: string]: string[] } } = {
-  Bagmati: {
-    Kathmandu: ["Kathmandu Metropolitan City", "Budhanilkantha", "Kageshwori Manohara"],
-    Bhaktapur: ["Bhaktapur Municipality", "Changunarayan"],
-    Lalitpur: ["Lalitpur Metropolitan City", "Godavari"],
-  },
-  Gandaki: {
-    Pokhara: ["Pokhara Metropolitan City"],
-    Kaski: ["Kaski Municipality"],
-    Lamjung: ["Besisahar Municipality"],
-  },
-  Lumbini: {
-    Butwal: ["Butwal Sub-Metropolitan City"],
-    Palpa: ["Tansen Municipality"],
-    Nawalparasi: ["Kawasoti Municipality"],
-  },
-  Karnali: {
-    Nepalgunj: ["Nepalgunj Sub-Metropolitan City"],
-    Surkhet: ["Birendranagar Municipality"],
-    Jumla: ["Khalanga Municipality"],
-  },
-  Sudurpaschim: {
-    Dhangadhi: ["Dhangadhi Sub-Metropolitan City"],
-    Dadeldhura: ["Dadeldhura Municipality"],
-    Baitadi: ["Baitadi Municipality"],
-  },
-}
+import { endpoints } from "@/core/contants/endpoints";
+import { CreateOfficeDTO, CreateOfficeSchema } from "@/core/dtos/office.dto";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { toast } from "sonner";
 
 interface OfficeFormProps {
-  onClose: () => void
-  onSubmit: (office: any) => void
+  onClose: () => void;
 }
 
-export default function OfficeForm({ onClose, onSubmit }: OfficeFormProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    province: "",
-    district: "",
-    municipality: "",
-    wardNumber: "",
-    phoneNumber: "",
-  })
+export default function OfficeForm({ onClose }: OfficeFormProps) {
+  const [districtData, setDistrictData] = useState([]);
+  const [provinceData, setProvinceData] = useState([]);
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const queryClient = useQueryClient();
+  const form = useForm<CreateOfficeDTO>({
+    defaultValues: {
+      district_id: undefined,
+      mun_id: undefined,
+      office_name: "",
+      office_email: "",
+      office_contact: "",
+      province_id: undefined,
+      ward_number: undefined,
+    },
+    resolver: zodResolver(CreateOfficeSchema),
+  });
+  console.log({ provinceData: form.watch() });
 
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {}
+  const { data: districtFetched } = useQuery({
+    queryKey: ["district"],
+    queryFn: () => fetchProtectedHandler(endpoints.district),
+  });
+  const { data: provinceFetched } = useQuery({
+    queryKey: ["province"],
+    queryFn: () => fetchProtectedHandler(endpoints.province),
+  });
 
-    if (!formData.name.trim()) newErrors.name = "Office name is required"
-    if (!formData.province) newErrors.province = "Province is required"
-    if (!formData.district) newErrors.district = "District is required"
-    if (!formData.municipality) newErrors.municipality = "Municipality is required"
-    if (!formData.wardNumber || Number.parseInt(formData.wardNumber) < 1) {
-      newErrors.wardNumber = "Valid ward number required"
+  useEffect(() => {
+    if (districtFetched) {
+      const data = districtFetched?.data?.map((p: any) => ({
+        label: p.district_name,
+        value: p.id,
+      }));
+      setDistrictData(data);
     }
-
-    const phoneRegex = /^(98|01)\d{8,10}$/
-    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber.replace(/\D/g, ""))) {
-      newErrors.phoneNumber = "Invalid phone format"
+  }, [districtFetched]);
+  useEffect(() => {
+    if (provinceFetched) {
+      const data = provinceFetched?.data?.map((p: any) => ({
+        label: p.province_name,
+        value: p.id,
+      }));
+      setProvinceData(data);
     }
+  }, [provinceFetched]);
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const createOfficeMutation = useMutation({
+    mutationFn: (payload: CreateOfficeDTO) =>
+      mutateProtectedHandler(endpoints.office, payload),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      queryClient.invalidateQueries({
+        queryKey: ["office"],
+      });
+      toast.success("Office created successfully!");
+      onClose();
+    },
+    onError: (err) => {
+      console.log("error...", { err });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
-
-    onSubmit({
-      id: Math.random().toString(),
-      ...formData,
-      wardNumber: Number.parseInt(formData.wardNumber),
-    })
-  }
-
-  const handleProvinceChange = (value: string) => {
-    setFormData({
-      ...formData,
-      province: value,
-      district: "",
-      municipality: "",
-    })
-  }
-
-  const handleDistrictChange = (value: string) => {
-    setFormData({
-      ...formData,
-      district: value,
-      municipality: "",
-    })
-  }
-
+      toast.error("Error creating office!");
+    },
+  });
+  const onSubmit = (data: CreateOfficeDTO) => {
+    console.log({ data });
+    createOfficeMutation.mutateAsync(data);
+  };
   return (
     <Card className="shadow-xl">
       <div className="p-6 sm:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-semibold text-foreground">Create Office</h3>
-            <p className="text-sm text-muted-foreground mt-1">Register a new livestock office</p>
+            <h3 className="text-xl font-semibold text-foreground">
+              Create Office
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Register a new livestock office
+            </p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-secondary rounded-lg transition-colors" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-secondary rounded-lg transition-colors"
+            aria-label="Close"
+          >
             <X size={20} className="text-muted-foreground" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Office Name & Phone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Office Name */}
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Office Name</label>
-              <Input
-                placeholder="e.g., District Veterinary Office"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={errors.name ? "border-destructive" : ""}
-              />
-              {errors.name && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle size={12} /> {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Contact Phone (Optional)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">+977</span>
-                <Input
-                  type="tel"
-                  placeholder="98XXXXXXXXX"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value.replace(/\D/g, "") })}
-                  className={`pl-12 ${errors.phoneNumber ? "border-destructive" : ""}`}
-                />
-              </div>
-              {errors.phoneNumber && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle size={12} /> {errors.phoneNumber}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Location Section */}
-          <div className="bg-secondary/30 rounded-lg p-4 border border-border/50">
-            <h4 className="text-sm font-semibold text-foreground mb-4">Office Location</h4>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full flex flex-col gap-4"
+          >
+            {/* Office Name & Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Province */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Province</label>
-                <Select value={formData.province} onValueChange={handleProvinceChange}>
-                  <SelectTrigger className={errors.province ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Select province" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVINCES.map((province) => (
-                      <SelectItem key={province} value={province}>
-                        {province}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.province && (
-                  <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                    <AlertCircle size={12} /> {errors.province}
-                  </p>
+              {/* Office Name */}
+              <FormField
+                control={form.control}
+                name="office_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Office Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., District Veterinary Office"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
+              />
 
-              {/* District */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">District</label>
-                <Select value={formData.district} onValueChange={handleDistrictChange} disabled={!formData.province}>
-                  <SelectTrigger className={errors.district ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Select district" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {formData.province &&
-                      DISTRICTS[formData.province]?.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                {errors.district && (
-                  <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                    <AlertCircle size={12} /> {errors.district}
-                  </p>
+              <FormField
+                control={form.control}
+                name="office_email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Office Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., someone@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-
-              {/* Municipality */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Municipality/Rural Area</label>
-                <Select
-                  value={formData.municipality}
-                  onValueChange={(value) => setFormData({ ...formData, municipality: value })}
-                  disabled={!formData.district}
-                >
-                  <SelectTrigger className={errors.municipality ? "border-destructive" : ""}>
-                    <SelectValue placeholder="Select municipality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {formData.district &&
-                      MUNICIPALITIES[formData.province]?.[formData.district]?.map((mun) => (
-                        <SelectItem key={mun} value={mun}>
-                          {mun}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                {errors.municipality && (
-                  <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                    <AlertCircle size={12} /> {errors.municipality}
-                  </p>
-                )}
-              </div>
-
-              {/* Ward Number */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Ward Number</label>
-                <Input
-                  type="number"
-                  placeholder="1-32"
-                  min="1"
-                  max="32"
-                  value={formData.wardNumber}
-                  onChange={(e) => setFormData({ ...formData, wardNumber: e.target.value })}
-                  className={errors.wardNumber ? "border-destructive" : ""}
+              />
+            </div>
+            {/* Location Section */}
+            <div className="bg-secondary/30 rounded-lg p-4 border border-border/50">
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                Office Location
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Province */}
+                <FormField
+                  control={form.control}
+                  name="province_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Province</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          value={field.value?.toString() ?? ""}
+                          onValueChange={(val) => field.onChange(parseInt(val))}
+                        >
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.province_id
+                                ? "border-destructive"
+                                : ""
+                            }
+                          >
+                            <SelectValue placeholder="Select province" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {provinceData.map((province: any) => (
+                              <SelectItem
+                                key={province.value}
+                                value={province.value.toString()}
+                              >
+                                {province?.label ?? ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.wardNumber && (
-                  <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                    <AlertCircle size={12} /> {errors.wardNumber}
-                  </p>
-                )}
+
+                <FormField
+                  control={form.control}
+                  name="district_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>District</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          value={field.value?.toString() ?? ""}
+                          onValueChange={(val) => field.onChange(parseInt(val))}
+                          disabled={!form.watch("province_id")}
+                        >
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.district_id
+                                ? "border-destructive"
+                                : ""
+                            }
+                          >
+                            <SelectValue placeholder="Select district" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {districtData.map(
+                              (district: any, index: number) => (
+                                <SelectItem
+                                  key={index}
+                                  value={district?.value?.toString()}
+                                >
+                                  {district?.label ?? ""}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* <FormField
+                  control={form.control}
+                  name="mun_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Municipality</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          value={field.value?.toString() ?? ""}
+                          onValueChange={field.onChange}
+                          disabled={!form.watch("district_id")}
+                        >
+                          <SelectTrigger
+                            className={
+                              errors.municipality ? "border-destructive" : ""
+                            }
+                          >
+                            <SelectValue placeholder="Select municipality" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {formData.district_id &&
+                              MUNICIPALITIES[formData.province_id]?.[
+                                formData.district_id
+                              ]?.map((mun) => (
+                                <SelectItem key={mun} value={mun?.toString()}>
+                                  {mun}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="mun_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ward Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="1-32"
+                          min="1"
+                          max="33"
+                          {...field}
+                          className={
+                            errors.wardNumber ? "border-destructive" : ""
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
               </div>
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-border/50">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
-              Cancel
-            </Button>
-            <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
-              Create Office
-            </Button>
-          </div>
-        </form>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-border/50">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1 bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary/90"
+              >
+                Create Office
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </Card>
-  )
+  );
 }
