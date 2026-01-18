@@ -7,6 +7,7 @@ import { AnimalType } from '../interfaces/animalType.interface';
 import { District } from '../interfaces/district.interface';
 import { ProductionCapacity } from '../interfaces/productionCapacity.interface';
 import { OwnersInfo } from '../interfaces/ownersInfo.interface';
+import { Office } from '../interfaces/office.interface';
 
 
 type Schema = {
@@ -17,7 +18,8 @@ type Schema = {
     animal_types: AnimalType[];
     district: District[];
     production_capacity: ProductionCapacity[];
-    owners_info: OwnersInfo[]
+    owners_info: OwnersInfo[];
+    office: Office[];
 };
 
 export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!)
