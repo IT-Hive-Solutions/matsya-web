@@ -1,50 +1,84 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Plus, Edit2, Trash2 } from "lucide-react"
-import UserForm from "./user-form"
-import OfficeForm from "./office-form"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Plus, Edit2, Trash2 } from "lucide-react";
+import UserForm from "./user-form";
+import OfficeForm from "./office-form";
+import { useQuery } from "@tanstack/react-query";
+import { endpoints } from "@/core/contants/endpoints";
 
 interface ManagementPageProps {
-  type: "animals" | "cattle-category" | "user-accounts" | "offices"
+  type: "animals" | "cattle-category" | "user-accounts" | "offices";
 }
 
 export default function ManagementPage({ type }: ManagementPageProps) {
-  const [showForm, setShowForm] = useState(false)
-  const [items, setItems] = useState<any[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [formData, setFormData] = useState({})
+  const [showForm, setShowForm] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [formData, setFormData] = useState({});
   const [offices, setOffices] = useState<any[]>([
     { id: "1", name: "Central Veterinary Office - Kathmandu" },
     { id: "2", name: "District Livestock Office - Pokhara" },
-  ])
+  ]);
+  const { data: districtFetched } = useQuery({
+    queryFn: () => fetch(endpoints.district.byId(1)),
+    queryKey: ["distric"],
+  });
+
+  useEffect(() => {
+    console.log({ districtFetched: districtFetched });
+  }, [districtFetched]);
 
   const config: {
     [key: string]: {
-      title: string
-      description: string
-      fields: { name: string; label: string; placeholder: string }[]
-    }
+      title: string;
+      description: string;
+      fields: { name: string; label: string; placeholder: string }[];
+    };
   } = {
     animals: {
       title: "Manage Animals",
       description: "Add and manage livestock types in your system",
       fields: [
-        { name: "name", label: "Animal Name", placeholder: "e.g., Cattle, Goat, Sheep" },
-        { name: "scientificName", label: "Scientific Name", placeholder: "e.g., Bos indicus" },
-        { name: "description", label: "Description", placeholder: "Brief description" },
+        {
+          name: "name",
+          label: "Animal Name",
+          placeholder: "e.g., Cattle, Goat, Sheep",
+        },
+        {
+          name: "scientificName",
+          label: "Scientific Name",
+          placeholder: "e.g., Bos indicus",
+        },
+        {
+          name: "description",
+          label: "Description",
+          placeholder: "Brief description",
+        },
       ],
     },
     "cattle-category": {
       title: "Cattle Categories",
       description: "Create and manage cattle breed categories",
       fields: [
-        { name: "name", label: "Category Name", placeholder: "e.g., Dairy, Beef, Dual-purpose" },
-        { name: "breed", label: "Breed", placeholder: "e.g., Holstein, Jersey" },
-        { name: "productionType", label: "Production Type", placeholder: "e.g., High milk yield" },
+        {
+          name: "name",
+          label: "Category Name",
+          placeholder: "e.g., Dairy, Beef, Dual-purpose",
+        },
+        {
+          name: "breed",
+          label: "Breed",
+          placeholder: "e.g., Holstein, Jersey",
+        },
+        {
+          name: "productionType",
+          label: "Production Type",
+          placeholder: "e.g., High milk yield",
+        },
       ],
     },
     "user-accounts": {
@@ -57,13 +91,13 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       description: "Register and manage livestock offices",
       fields: [],
     },
-  }
+  };
 
-  const currentConfig = config[type]
+  const currentConfig = config[type];
 
   const handleAddItem = () => {
-    if (type === "user-accounts") return // Use dedicated form
-    if (type === "offices") return // Use dedicated form
+    if (type === "user-accounts") return; // Use dedicated form
+    if (type === "offices") return; // Use dedicated form
 
     if (Object.values(formData).some((val) => val)) {
       setItems([
@@ -72,41 +106,50 @@ export default function ManagementPage({ type }: ManagementPageProps) {
           id: Date.now().toString(),
           ...formData,
         },
-      ])
-      setFormData({})
-      setShowForm(false)
+      ]);
+      setFormData({});
+      setShowForm(false);
     }
-  }
+  };
 
   const handleUserSubmit = (user: any) => {
-    setItems([...items, user])
-    setShowForm(false)
-  }
+    setItems([...items, user]);
+    setShowForm(false);
+  };
 
   const handleOfficeSubmit = (office: any) => {
-    setOffices([...offices, office])
-    setItems([...items, office])
-    setShowForm(false)
-  }
+    setOffices([...offices, office]);
+    setItems([...items, office]);
+    setShowForm(false);
+  };
 
   const handleDeleteItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id))
+    setItems(items.filter((item) => item.id !== id));
     if (type === "offices") {
-      setOffices(offices.filter((item) => item.id !== id))
+      setOffices(offices.filter((item) => item.id !== id));
     }
-  }
+  };
 
-  const filteredItems = items.filter((item) => item.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredItems = items.filter((item) =>
+    item.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{currentConfig.title}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{currentConfig.description}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+            {currentConfig.title}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {currentConfig.description}
+          </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2 sm:gap-2 w-full sm:w-auto">
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className="gap-2 sm:gap-2 w-full sm:w-auto"
+        >
           <Plus size={18} />
           <span>Add New</span>
         </Button>
@@ -117,9 +160,16 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-2xl my-8">
             {type === "user-accounts" ? (
-              <UserForm onClose={() => setShowForm(false)} onSubmit={handleUserSubmit} offices={offices} />
+              <UserForm
+                onClose={() => setShowForm(false)}
+                onSubmit={handleUserSubmit}
+                offices={offices}
+              />
             ) : type === "offices" ? (
-              <OfficeForm onClose={() => setShowForm(false)} onSubmit={handleOfficeSubmit} />
+              <OfficeForm
+                onClose={() => setShowForm(false)}
+                onSubmit={handleOfficeSubmit}
+              />
             ) : (
               <Card className="shadow-xl">
                 <div className="p-6 sm:p-8">
@@ -129,21 +179,36 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                   <div className="space-y-4 mb-6">
                     {currentConfig.fields.map((field) => (
                       <div key={field.name}>
-                        <label className="block text-sm font-medium text-foreground mb-2">{field.label}</label>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          {field.label}
+                        </label>
                         <Input
                           placeholder={field.placeholder}
                           value={formData[field.name] || ""}
-                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              [field.name]: e.target.value,
+                            })
+                          }
                           className="w-full"
                         />
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowForm(false)}
+                      className="flex-1"
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={handleAddItem} className="flex-1 bg-primary hover:bg-primary/90">
+                    <Button
+                      onClick={handleAddItem}
+                      className="flex-1 bg-primary hover:bg-primary/90"
+                    >
                       Create
                     </Button>
                   </div>
@@ -175,7 +240,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
           <p className="text-muted-foreground mb-4 text-sm">
             No items yet. Create your first {currentConfig.title.toLowerCase()}.
           </p>
-          <Button onClick={() => setShowForm(true)} variant="outline" className="gap-2">
+          <Button
+            onClick={() => setShowForm(true)}
+            variant="outline"
+            className="gap-2"
+          >
             <Plus size={18} />
             Create Now
           </Button>
@@ -183,11 +252,18 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="p-5 hover:shadow-md transition-shadow">
+            <Card
+              key={item.id}
+              className="p-5 hover:shadow-md transition-shadow"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h4 className="font-semibold text-foreground">{item.name}</h4>
-                  {item.phoneNumber && <p className="text-xs text-muted-foreground mt-1">+977 {item.phoneNumber}</p>}
+                  {item.phoneNumber && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      +977 {item.phoneNumber}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button className="p-2 hover:bg-secondary rounded-lg transition-colors">
@@ -203,11 +279,17 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               </div>
               <div className="space-y-2 text-sm">
                 {Object.entries(item)
-                  .filter(([key]) => !["id", "name", "phoneNumber"].includes(key))
+                  .filter(
+                    ([key]) => !["id", "name", "phoneNumber"].includes(key),
+                  )
                   .map(([key, value]) => (
                     <div key={key} className="flex justify-between">
-                      <span className="text-muted-foreground capitalize">{key}:</span>
-                      <span className="font-medium text-foreground">{value as string}</span>
+                      <span className="text-muted-foreground capitalize">
+                        {key}:
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {value as string}
+                      </span>
                     </div>
                   ))}
               </div>
@@ -216,5 +298,5 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

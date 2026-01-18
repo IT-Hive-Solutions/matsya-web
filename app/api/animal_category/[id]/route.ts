@@ -3,16 +3,18 @@ import { directus } from '@/core/lib/directus';
 import { readItem, updateItem, deleteItem } from '@directus/sdk';
 
 type Params = {
-    params: {
-        id: string;
-    };
+    params: Promise<{
+        id: number;
+    }>;
 };
 
 
 export async function GET(request: NextRequest, { params }: Params) {
     try {
+        const { id } = await params
+
         const category = await directus.request(
-            readItem('animal_category', params.id)
+            readItem('animal_category', id)
         );
 
         return NextResponse.json({
@@ -30,10 +32,12 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 export async function PUT(request: NextRequest, { params }: Params) {
     try {
+        const { id } = await params
+
         const body = await request.json();
 
         const updatedCategory = await directus.request(
-            updateItem('animal_category', params.id, {
+            updateItem('animal_category', id, {
                 category_name: body.category_name,
             })
         );
@@ -53,8 +57,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
     try {
+        const { id } = await params
+
         await directus.request(
-            deleteItem('animal_category', params.id)
+            deleteItem('animal_category', id)
         );
 
         return NextResponse.json({

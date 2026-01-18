@@ -1,4 +1,4 @@
-import { createDirectus, rest } from '@directus/sdk';
+import { createDirectus, rest, staticToken } from '@directus/sdk';
 import { Users } from '../interfaces/user.interface';
 import { Province } from '../interfaces/province.interface';
 import { AnimalCategory } from '../interfaces/animalCategory.interface';
@@ -8,7 +8,9 @@ import { District } from '../interfaces/district.interface';
 import { ProductionCapacity } from '../interfaces/productionCapacity.interface';
 import { OwnersInfo } from '../interfaces/ownersInfo.interface';
 import { Office } from '../interfaces/office.interface';
+const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
+console.log({ staticTokenValue });
 
 type Schema = {
     users: Users[];
@@ -23,5 +25,7 @@ type Schema = {
 };
 
 export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!)
-    .with(rest());
+    .with(rest())
+    .with(staticToken(staticTokenValue));
+
 
