@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        if (!body.name) {
+        if (!body.full_name) {
             return NextResponse.json(
                 { success: false, error: 'Fullname is required' },
                 { status: 400 }
@@ -50,6 +50,18 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        if (!body.user_type) {
+            return NextResponse.json(
+                { success: false, error: 'User Type is required' },
+                { status: 400 }
+            );
+        }
+        if (!body.office_id) {
+            return NextResponse.json(
+                { success: false, error: 'Office is required' },
+                { status: 400 }
+            );
+        }
 
         const newUser = await directus.request(
             createItem('users', {
@@ -57,6 +69,7 @@ export async function POST(request: NextRequest) {
                 email: body.email,
                 office_id: body.office_id,
                 phone_number: body.phone_number,
+                user_type: body.user_type,
             })
         );
 

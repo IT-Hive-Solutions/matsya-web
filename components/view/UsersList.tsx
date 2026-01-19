@@ -49,7 +49,7 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: fetchedUserList, isLoading } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["users"],
     queryFn: () => fetchProtectedHandler(endpoints.users),
   });
   useEffect(() => {

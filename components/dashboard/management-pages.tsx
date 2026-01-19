@@ -8,6 +8,7 @@ import OfficeLists from "../view/OfficeLists";
 import OfficeForm from "./office-form";
 import UserForm from "./user-form";
 import UserLists from "../view/UsersList";
+import { Input } from "../ui/input";
 
 interface ManagementPageProps {
   type: "animals" | "cattle-category" | "user-accounts" | "offices";
@@ -143,19 +144,35 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-2xl my-8">
             {type === "user-accounts" ? (
-              <UserForm
-                onClose={() => setShowForm(false)}
-                onSubmit={() => {}}
-              />
+              <UserForm onClose={() => setShowForm(false)} />
             ) : type === "offices" ? (
               <OfficeForm onClose={() => setShowForm(false)} />
             ) : (
               <Card className="shadow-xl">
-                <div className="p-6 sm:p-8">
+                {/* <div className="p-6 sm:p-8">
                   <h3 className="text-lg font-semibold text-foreground mb-6">
                     Add {currentConfig.title.split(" ").pop()}
                   </h3>
-                  <div className="space-y-4 mb-6"></div>
+                  <div className="space-y-4 mb-6">
+                    {currentConfig.fields.map((field) => (
+                      <div key={field.name}>
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          {field.label}
+                        </label>
+                        <Input
+                          placeholder={field.placeholder}
+                          value={formData[field.name] || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              [field.name]: e.target.value,
+                            })
+                          }
+                          className="w-full"
+                        />
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex gap-3">
                     <Button
                       type="button"
@@ -172,7 +189,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                       Create
                     </Button>
                   </div>
-                </div>
+                </div> */}
               </Card>
             )}
           </div>
