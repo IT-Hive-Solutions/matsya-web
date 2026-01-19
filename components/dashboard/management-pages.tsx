@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Plus, Edit2, Trash2 } from "lucide-react";
-import UserForm from "./user-form";
-import OfficeForm from "./office-form";
-import { useQuery } from "@tanstack/react-query";
-import { endpoints } from "@/core/contants/endpoints";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import OfficeLists from "../view/OfficeLists";
+import OfficeForm from "./office-form";
+import UserForm from "./user-form";
+import UserLists from "../view/UsersList";
 
 interface ManagementPageProps {
   type: "animals" | "cattle-category" | "user-accounts" | "offices";
@@ -26,13 +24,6 @@ export interface Config {
 
 export default function ManagementPage({ type }: ManagementPageProps) {
   const [showForm, setShowForm] = useState(false);
-  // const [items, setItems] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [formData, setFormData] = useState({});
-  const [offices, setOffices] = useState<any[]>([
-    { id: "1", name: "Central Veterinary Office - Kathmandu" },
-    { id: "2", name: "District Livestock Office - Pokhara" },
-  ]);
 
   const config: {
     [key: string]: Config;
@@ -155,7 +146,6 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               <UserForm
                 onClose={() => setShowForm(false)}
                 onSubmit={() => {}}
-                offices={offices}
               />
             ) : type === "offices" ? (
               <OfficeForm onClose={() => setShowForm(false)} />
@@ -165,26 +155,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
                   <h3 className="text-lg font-semibold text-foreground mb-6">
                     Add {currentConfig.title.split(" ").pop()}
                   </h3>
-                  <div className="space-y-4 mb-6">
-                    {/* {currentConfig.fields.map((field) => (
-                      <div key={field.name}>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          {field.label}
-                        </label>
-                        <Input
-                          placeholder={field.placeholder}
-                          value={formData[field.name] || ""}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              [field.name]: e.target.value,
-                            })
-                          }
-                          className="w-full"
-                        />
-                      </div>
-                    ))} */}
-                  </div>
+                  <div className="space-y-4 mb-6"></div>
                   <div className="flex gap-3">
                     <Button
                       type="button"
@@ -208,77 +179,18 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         </div>
       )}
 
-      {/* Search and Filter */}
-      {/* {items.length  0 && ( */}
       {type === "offices" && (
         <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
-
-      {/* )} */}
-
-      {/* Empty State */}
-      {/* {items.length === 0 ? (
-        <Card className="p-12 text-center border-border/50">
-          <p className="text-muted-foreground mb-4 text-sm">
-            No items yet. Create your first {currentConfig.title.toLowerCase()}.
-          </p>
-          <Button
-            onClick={() => setShowForm(true)}
-            variant="outline"
-            className="gap-2 hover:cursor-pointer"
-          >
-            <Plus size={18} />
-            Create Now
-          </Button>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredItems.map((item) => (
-            <Card
-              key={item.id}
-              className="p-5 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">{item.name}</h4>
-                  {item.phoneNumber && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      +977 {item.phoneNumber}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button className="p-2 hover:bg-secondary rounded-lg transition-colors">
-                    <Edit2 size={16} className="text-muted-foreground" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                  >
-                    <Trash2 size={16} className="text-destructive" />
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                {Object.entries(item)
-                  .filter(
-                    ([key]) => !["id", "name", "phoneNumber"].includes(key),
-                  )
-                  .map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-muted-foreground capitalize">
-                        {key}:
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {value as string}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )} */}
+      {type === "animals" && (
+        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+      )}
+      {type === "user-accounts" && (
+        <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
+      )}
+      {type === "cattle-category" && (
+        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+      )}
     </div>
   );
 }

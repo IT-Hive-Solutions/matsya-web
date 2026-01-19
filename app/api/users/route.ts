@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     try {
         const users = await directus.request(
             readItems('users', {
-                fields: ['*'],
+                fields: ['*', "office_id.*", "office_id.province_id.*", "office_id.district_id.*"],
                 sort: ['-date_created'],
             })
         );

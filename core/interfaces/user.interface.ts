@@ -1,3 +1,4 @@
+import { IOffice } from "./office.interface";
 import { Status } from "./status.interface";
 
 export interface UsersDirectus {
@@ -11,3 +12,16 @@ export interface UsersDirectus {
     date_created?: string;
     date_updated?: string;
 };
+export interface IUser {
+    id: number;
+    status: string;
+    sort: number | null;
+    user_created: string;
+    date_created: string;
+    user_updated: string | null;
+    date_updated: string | null;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    office_id: IOffice;
+}
