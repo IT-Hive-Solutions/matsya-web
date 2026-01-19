@@ -37,8 +37,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         return <DashboardCharts />
       case "animals":
         return <ManagementPage type="animals" />
-      case "cattle-category":
-        return <ManagementPage type="cattle-category" />
+      case "animal-category":
+        return <ManagementPage type="animal-category" />
       case "user-accounts":
         return <ManagementPage type="user-accounts" />
       case "offices":

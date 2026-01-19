@@ -9,9 +9,11 @@ import OfficeForm from "./office-form";
 import UserForm from "./user-form";
 import UserLists from "../view/UsersList";
 import { Input } from "../ui/input";
+import AnimalCategoriesLists from "../view/AnimalCategoriesList";
+import AnimalCategoryForm from "./animal-category-form";
 
 interface ManagementPageProps {
-  type: "animals" | "cattle-category" | "user-accounts" | "offices";
+  type: "animals" | "animal-category" | "user-accounts" | "offices";
 }
 export interface Config {
   title: string;
@@ -36,7 +38,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         {
           name: "name",
           label: "Animal Name",
-          placeholder: "e.g., Cattle, Goat, Sheep",
+          placeholder: "e.g., Animal, Goat, Sheep",
         },
         {
           name: "scientificName",
@@ -50,9 +52,9 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         },
       ],
     },
-    "cattle-category": {
-      title: "Cattle Categories",
-      description: "Create and manage cattle breed categories",
+    "animal-category": {
+      title: "Animal Categories",
+      description: "Create and manage animal breed categories",
       fields: [
         {
           name: "name",
@@ -85,39 +87,6 @@ export default function ManagementPage({ type }: ManagementPageProps) {
 
   const currentConfig = config[type];
 
-  // const handleAddItem = () => {
-  //   if (type === "user-accounts") return; // Use dedicated form
-  //   if (type === "offices") return; // Use dedicated form
-
-  //   if (Object.values(formData).some((val) => val)) {
-  //     setItems([
-  //       ...items,
-  //       {
-  //         id: Date.now().toString(),
-  //         ...formData,
-  //       },
-  //     ]);
-  //     setFormData({});
-  //     setShowForm(false);
-  //   }
-  // };
-
-  // const handleUserSubmit = (user: any) => {
-  //   setItems([...items, user]);
-  //   setShowForm(false);
-  // };
-
-  // const handleDeleteItem = (id: string) => {
-  //   setItems(items.filter((item) => item.id !== id));
-  //   if (type === "offices") {
-  //     setOffices(offices.filter((item) => item.id !== id));
-  //   }
-  // };
-
-  // const filteredItems = items.filter((item) =>
-  //   item.name?.toLowerCase().includes(searchQuery.toLowerCase()),
-  // );
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -147,6 +116,8 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               <UserForm onClose={() => setShowForm(false)} />
             ) : type === "offices" ? (
               <OfficeForm onClose={() => setShowForm(false)} />
+            ) : type === "animal-category" ? (
+              <AnimalCategoryForm onClose={() => setShowForm(false)} />
             ) : (
               <Card className="shadow-xl">
                 {/* <div className="p-6 sm:p-8">
@@ -205,8 +176,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       {type === "user-accounts" && (
         <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
-      {type === "cattle-category" && (
-        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+      {type === "animal-category" && (
+        <AnimalCategoriesLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+        />
       )}
     </div>
   );
