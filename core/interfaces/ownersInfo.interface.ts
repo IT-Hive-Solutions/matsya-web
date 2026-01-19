@@ -1,6 +1,6 @@
 import { Status } from "./status.interface";
 
-export interface OwnersInfo {
+export interface OwnersInfoDirectus {
     id: number;
     status: Status;
     sort: number;

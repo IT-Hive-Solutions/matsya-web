@@ -1,6 +1,6 @@
 import { Status } from "./status.interface";
 
-export interface AnimalType {
+export interface AnimalTypeDirectus {
     id: number;
     status: Status;
     sort: number;
