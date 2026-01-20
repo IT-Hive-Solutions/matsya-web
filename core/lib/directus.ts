@@ -1,16 +1,15 @@
 import { createDirectus, rest, staticToken } from '@directus/sdk';
-import { UsersDirectus } from '../interfaces/user.interface';
-import { ProvinceDirectus } from '../interfaces/province.interface';
-import { AnimalCategoryDirectus } from '../interfaces/animalCategory.interface';
-import { AnimalInfoDirectus } from '../interfaces/animalInfo.interface';
-import { AnimalTypeDirectus } from '../interfaces/animalType.interface';
-import { DistrictDirectus } from '../interfaces/district.interface';
-import { ProductionCapacityDirectus } from '../interfaces/productionCapacity.interface';
-import { OwnersInfoDirectus } from '../interfaces/ownersInfo.interface';
-import { OfficeDirectus } from '../interfaces/office.interface';
-const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
+import { UsersDirectus } from '@/core/interfaces/user.interface';
+import { ProvinceDirectus } from '@/core/interfaces/province.interface';
+import { AnimalCategoryDirectus } from '@/core/interfaces/animalCategory.interface';
+import { AnimalInfoDirectus } from '@/core/interfaces/animal.interface';
+import { AnimalTypeDirectus } from '@/core/interfaces/animalType.interface';
+import { DistrictDirectus } from '@/core/interfaces/district.interface';
+import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity.interface';
+import { OwnersInfoDirectus } from '@/core/interfaces/ownersInfo.interface';
+import { OfficeDirectus } from '@/core/interfaces/office.interface';
 
-console.log({ staticTokenValue });
+const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
 type Schema = {
     users: UsersDirectus[];

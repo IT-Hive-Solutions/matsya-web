@@ -9,7 +9,12 @@ export async function GET(request: NextRequest) {
     try {
         const animal_info = await directus.request(
             readItems('animal_info', {
-                fields: ['*'],
+                fields: [
+                    '*',
+                    "owners_id.*",
+                    "animal_category.*",
+                    "animal_type.*",
+                ],
                 sort: ['-date_created'],
             })
         );
@@ -37,6 +42,12 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        if (!body.tag_number) {
+            return NextResponse.json(
+                { success: false, error: 'Tag Number is required' },
+                { status: 400 }
+            );
+        }
         if (!body.animal_category) {
             return NextResponse.json(
                 { success: false, error: 'Category is required' },
@@ -50,6 +61,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (body.owners_contact) {
+            const owner = await directus.request(
+                readItems('owners_info', {
+                    filter: {
+                        owners_contact: {
+                            _eq: body.owners_contact
+                        }
+                    }
+                })
+            )
+            if (owner.length < 0) {
+                return NextResponse.json(
+                    { success: false, error: 'Owner Not Found!' },
+                    { status: 404 }
+                );
+            }
+            body.owners_id = owner[0].id;
+        }
+
+
+
         const newAnimal = await directus.request(
             createItem('animal_info', {
                 age_months: body.age_months,
@@ -60,6 +92,7 @@ export async function POST(request: NextRequest) {
                 latitude: body.latitude,
                 longitude: body.longitude,
                 owners_id: body.owners_id,
+                tag_number: body.tag_number,
                 production_capacity: body.production_capacity,
             })
         );

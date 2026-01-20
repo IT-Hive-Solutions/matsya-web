@@ -5,7 +5,7 @@ export interface OwnersInfoDirectus {
     status: Status;
     sort: number;
     local_level_name: string;
-    district: string;
+    district_id: string;
     date: string;
     owners_name: string;
     owners_contact: string;
@@ -13,3 +13,19 @@ export interface OwnersInfoDirectus {
     date_created?: string;
     date_updated?: string;
 };
+
+export interface IOwner {
+    id: number;
+    status: string;
+    sort: null | number;
+    user_created: string;
+    date_created: string;
+    user_updated: string | null;
+    date_updated: string | null;
+    local_level_name: string;
+    date: string;
+    owners_name: string;
+    ward_number: string;
+    district_id: number;
+    owners_contact: string;
+}

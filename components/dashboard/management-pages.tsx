@@ -11,6 +11,8 @@ import UserLists from "../view/UsersList";
 import { Input } from "../ui/input";
 import AnimalCategoriesLists from "../view/AnimalCategoriesList";
 import AnimalCategoryForm from "./animal-category-form";
+import AnimalLists from "../view/AnimalLists";
+import AnimalForm from "./animal-form";
 
 interface ManagementPageProps {
   type: "animals" | "animal-category" | "user-accounts" | "offices";
@@ -112,56 +114,17 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-2xl my-8">
-            {type === "user-accounts" ? (
+            {type === "user-accounts" && (
               <UserForm onClose={() => setShowForm(false)} />
-            ) : type === "offices" ? (
+            )}
+            {type === "offices" && (
               <OfficeForm onClose={() => setShowForm(false)} />
-            ) : type === "animal-category" ? (
+            )}
+            {type === "animal-category" && (
               <AnimalCategoryForm onClose={() => setShowForm(false)} />
-            ) : (
-              <Card className="shadow-xl">
-                {/* <div className="p-6 sm:p-8">
-                  <h3 className="text-lg font-semibold text-foreground mb-6">
-                    Add {currentConfig.title.split(" ").pop()}
-                  </h3>
-                  <div className="space-y-4 mb-6">
-                    {currentConfig.fields.map((field) => (
-                      <div key={field.name}>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          {field.label}
-                        </label>
-                        <Input
-                          placeholder={field.placeholder}
-                          value={formData[field.name] || ""}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              [field.name]: e.target.value,
-                            })
-                          }
-                          className="w-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowForm(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={() => {}}
-                      className="flex-1 bg-primary hover:bg-primary/90"
-                    >
-                      Create
-                    </Button>
-                  </div>
-                </div> */}
-              </Card>
+            )}
+            {type === "animals" && (
+              <AnimalForm onClose={() => setShowForm(false)} />
             )}
           </div>
         </div>
@@ -171,7 +134,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
       {type === "animals" && (
-        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+        <AnimalLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
       {type === "user-accounts" && (
         <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
