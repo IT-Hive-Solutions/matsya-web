@@ -27,7 +27,10 @@ export default function Home() {
   }, []);
   console.log({ cookieData });
 
-  const handleLogout = () => {};
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    router.push("/auth/login");
+  };
 
   return (
     <ToastProvider>

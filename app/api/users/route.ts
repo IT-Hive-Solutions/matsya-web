@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-      
+
         if (!body.phone_number) {
             return NextResponse.json(
                 { success: false, error: 'Phone Number is required' },
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
                 email: body.email,
                 password: hashedPassword,
                 office_id: body.office_id,
+                needs_password_change: true,
                 phone_number: body.phone_number,
                 user_type: body.user_type,
             })

@@ -1,15 +1,20 @@
 import { directus } from "@/core/lib/directus";
-import { readItems } from "@directus/sdk";
+import { readItems, updateItem } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from 'bcrypt';
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { phone_number, password } = body;
+        const {
+            phone_number,
+            old_password,
+            new_password,
+            confirm_new_password
+        } = body;
 
         // Validation
-        if (!phone_number || !password) {
+        if (!phone_number || !old_password || !new_password) {
             return NextResponse.json(
                 { error: 'Phone number and password are required' },
                 { status: 400 }
@@ -24,7 +29,7 @@ export async function POST(req: NextRequest) {
                         _eq: phone_number
                     }
                 },
-                fields: ['*', 'office_id.*', 'office_id.province_id.*', 'office_id.district_id.*'],
+                // fields: ['*', 'office_id.*', 'office_id.province_id.*', 'office_id.district_id.*'],
                 limit: 1
             })
         );
@@ -42,7 +47,7 @@ export async function POST(req: NextRequest) {
         console.log({ users, user });
 
         // Verify password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(old_password, user.password);
 
         console.log({ isPasswordValid });
         if (!isPasswordValid) {
@@ -52,46 +57,28 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Check if user is active (if you have a status field)
-        // if (user.status) {
-        //     return NextResponse.json(
-        //         { error: 'Your account is not active' },
-        //         { status: 403 }
-        //     );
-        // }
-
-        if (user.needs_password_change) {
-            return NextResponse.json(
-                { error: 'Password reset required',  data: { needs_password_change: true } },
-                { status: 200 }
-            );
-        }
+        const updatedUser = await directus.request(
+            updateItem('users', user.id, {
+                password: await bcrypt.hash(new_password, 10),
+                needs_password_change: false
+            })
+        );
         // Remove password from user object
-        const { password: _, ...userWithoutPassword } = user;
+        const { password: _, ...userWithoutPassword } = updatedUser;
 
-        // Create session or JWT token (simplified version)
-        const sessionData = {
-            userId: user.id,
-            phone_number: user.phone_number,
-            timestamp: Date.now()
-        };
 
         const response = NextResponse.json(
             {
-                message: 'Login successful',
-                data: userWithoutPassword
+                message: 'Password Change successful',
+                data: {
+                    password_changed: true,
+                    ...userWithoutPassword
+                }
             },
             { status: 200 }
         );
 
-        // Store session data in HTTP-only cookie
-        response.cookies.set('user_session', JSON.stringify(sessionData), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 86400, // 24 hours
-            path: '/'
-        });
+
 
         return response;
 

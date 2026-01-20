@@ -1,7 +1,7 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -10,40 +10,45 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { LoginDTO, LoginSchema } from "@/core/dtos/login.dto";
+import { endpoints } from "@/core/contants/endpoints";
+import {
+  ResetPasswordDTO,
+  ResetPasswordSchema,
+} from "@/core/dtos/reset-password.dto";
+import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { endpoints } from "@/core/contants/endpoints";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const form = useForm<LoginDTO>({
+  const params = useSearchParams();
+  const form = useForm<ResetPasswordDTO>({
     defaultValues: {
-      password: "",
-      phone_number: "",
+      phone_number: params.get("phone") || "",
+      new_password: "",
+      old_password: "",
+      confirm_new_password: "",
     },
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(ResetPasswordSchema),
   });
+  console.log({ formData: form.watch() });
 
-  const loginMutation = useMutation({
-    mutationFn: (payload: LoginDTO) =>
-      mutateHandler(endpoints.auth.login, payload),
+  const resetPasswordMutation = useMutation({
+    mutationFn: (payload: ResetPasswordDTO) =>
+      mutateHandler(endpoints.auth["reset-password"], payload),
     onSuccess: (res) => {
       console.log("error...", { res });
-      if (res.needs_password_change) {
-        toast.error("Password reset required. Please reset your password.");
-        router.push(
-          `/auth/reset-password?phone=${form.getValues("phone_number")}`,
-        );
+      if (res.password_changed) {
+        toast.success("Password Changed Successfully!.", {
+          description: "Please login with your new password.",
+        });
+        router.push("/auth/login");
         return;
       }
       localStorage.setItem("user", JSON.stringify(res));
@@ -58,8 +63,8 @@ export default function LoginPage() {
       setIsLoading(false);
     },
   });
-  const handleSubmit = async (data: LoginDTO) => {
-    await loginMutation.mutateAsync(data);
+  const handleSubmit = async (data: ResetPasswordDTO) => {
+    await resetPasswordMutation.mutateAsync(data);
   };
 
   return (
@@ -81,10 +86,10 @@ export default function LoginPage() {
           <div className="p-8">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-1">
-                Welcome Back
+                Reset Your Password
               </h2>
               <p className="text-sm text-muted-foreground">
-                Sign in with your phone number and password
+                Please enter your current password and choose a new password
               </p>
             </div>
 
@@ -95,34 +100,46 @@ export default function LoginPage() {
               >
                 <FormField
                   control={form.control}
-                  name="phone_number"
+                  name="old_password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium pointer-events-none">
-                          +977
-                        </span>
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="98XXXXXXXXX"
-                            className="pl-14"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                      </div>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="new_password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirm_new_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
                       <FormControl>
                         <Input
                           type="password"

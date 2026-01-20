@@ -38,6 +38,7 @@ export interface UsersDirectus {
     full_name: string;
     email: string;
     password: string;
+    needs_password_change: boolean;
     office_id: number;
     phone_number: string;
     user_type: UserType;
@@ -56,6 +57,7 @@ export interface IUser {
     email: string;
     phone_number: string;
     password: string;
+    needs_password_change:boolean;
     user_type: UserType;
     office_id: IOffice;
 }

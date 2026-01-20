@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 
-const phoneRegex = /^(98|01)\d{8,10}$/
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+export const phoneRegex = /^(98|01)\d{8,10}$/
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export const LoginSchema = z.object({
     phone_number: z.string().regex(phoneRegex, "Enter valid phone number (98XXXXXXXXX or 01XXXXXXXX)"),
