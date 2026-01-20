@@ -1,40 +1,45 @@
-"use client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import DashboardOverview from "./dashboard-overview"
-import TaggingForm from "./tagging-form"
-import ViewEntriesPage from "./view-entries"
-
-interface User {
-  id: string
-  name: string
-  userType: string
-  province: string
-  district: string
-  wardNumber: number
-}
+"use client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DashboardOverview from "./dashboard-overview";
+import TaggingForm from "./tagging-form";
+import ViewEntriesPage from "./view-entries";
+import { IUser } from "@/core/interfaces/user.interface";
 
 interface DashboardContentProps {
-  user: User
-  activeTab: string
-  setActiveTab: (tab: string) => void
+  user: IUser;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
-export default function DashboardContent({ user, activeTab, setActiveTab }: DashboardContentProps) {
+export default function DashboardContent({
+  user,
+  activeTab,
+  setActiveTab,
+}: DashboardContentProps) {
   if (!["overview", "new-entry", "view-entries"].includes(activeTab)) {
-    return null
+    return null;
   }
 
   return (
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all">
+          <TabsTrigger
+            value="overview"
+            className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all"
+          >
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="new-entry" className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all">
+          <TabsTrigger
+            value="new-entry"
+            className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all"
+          >
             New Entry
           </TabsTrigger>
-          <TabsTrigger value="view-entries" className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all">
+          <TabsTrigger
+            value="view-entries"
+            className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all"
+          >
             View Entries
           </TabsTrigger>
         </TabsList>
@@ -52,5 +57,5 @@ export default function DashboardContent({ user, activeTab, setActiveTab }: Dash
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

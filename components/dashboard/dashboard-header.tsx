@@ -1,16 +1,11 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-
-interface User {
-  id: string
-  name: string
-  userType: string
-}
+import { Button } from "@/components/ui/button";
+import { IUser } from "@/core/interfaces/user.interface";
 
 interface HeaderProps {
-  user: User
-  onLogout: () => void
+  user: IUser;
+  onLogout: () => void;
 }
 
 export default function DashboardHeader({ user, onLogout }: HeaderProps) {
@@ -20,9 +15,9 @@ export default function DashboardHeader({ user, onLogout }: HeaderProps) {
       "local-level": "Local Level Officer",
       "district-level": "District Level Officer",
       "province-level": "Province Level Officer",
-    }
-    return labels[type] || type
-  }
+    };
+    return labels[type] || type;
+  };
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
@@ -34,23 +29,36 @@ export default function DashboardHeader({ user, onLogout }: HeaderProps) {
               <span className="text-lg">🐄</span>
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-foreground">Matsya</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Livestock Management</p>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground">
+                Matsya
+              </h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">
+                Livestock Management
+              </p>
             </div>
           </div>
 
           {/* User Info */}
           <div className="flex items-center gap-2 sm:gap-6">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-foreground">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{getUserTypeLabel(user.userType)}</p>
+              <p className="text-sm font-medium text-foreground">
+                {user.full_name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {getUserTypeLabel(user.user_type)}
+              </p>
             </div>
-            <Button variant="outline" size="sm" onClick={onLogout} className="text-xs sm:text-sm bg-transparent">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onLogout}
+              className="text-xs sm:text-sm bg-transparent"
+            >
               Logout
             </Button>
           </div>
         </div>
       </div>
     </header>
-  )
+  );
 }

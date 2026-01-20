@@ -1,5 +1,9 @@
 export const baseUrl = process.env.NEXT_BASE_PUBLIC_URL ?? "/api"
 export const endpoints = {
+    auth: { 
+        login: `${baseUrl}/auth/login`, 
+        cookies: `${baseUrl}/auth/cookie` 
+    },
     users: Object.assign(
         `${baseUrl}/users`,
         { byId: (id: number) => `${baseUrl}/users/${id}`, }

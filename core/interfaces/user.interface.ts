@@ -37,6 +37,7 @@ export interface UsersDirectus {
     sort: number;
     full_name: string;
     email: string;
+    password: string;
     office_id: number;
     phone_number: string;
     user_type: UserType;
@@ -54,6 +55,7 @@ export interface IUser {
     full_name: string;
     email: string;
     phone_number: string;
+    password: string;
     user_type: UserType;
     office_id: IOffice;
 }

@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readItems, createItem } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
+import bcrypt from 'bcrypt';
+import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
 
 // GET - Fetch all users
 export async function GET(request: NextRequest) {
@@ -44,6 +46,7 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+      
         if (!body.phone_number) {
             return NextResponse.json(
                 { success: false, error: 'Phone Number is required' },
@@ -63,10 +66,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const newPassword = generateSecurePassword(8)
+        console.log({ newPassword }); //8w!6Kszv
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+
         const newUser = await directus.request(
             createItem('users', {
                 full_name: body.full_name,
                 email: body.email,
+                password: hashedPassword,
                 office_id: body.office_id,
                 phone_number: body.phone_number,
                 user_type: body.user_type,

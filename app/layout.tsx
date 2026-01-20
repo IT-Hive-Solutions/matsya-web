@@ -1,7 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import QueryWrapper from "@/components/wrapper/QueryWrapper";
 
@@ -45,10 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <QueryWrapper>
-          {children}
-          <Analytics />
-        </QueryWrapper>
+        <QueryWrapper>{children}</QueryWrapper>
       </body>
     </html>
   );
