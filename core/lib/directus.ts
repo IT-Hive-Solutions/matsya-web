@@ -1,25 +1,31 @@
-import { createDirectus, rest } from '@directus/sdk';
-import { Users } from '../interfaces/user.interface';
-import { Province } from '../interfaces/province.interface';
-import { AnimalCategory } from '../interfaces/animalCategory.interface';
-import { AnimalInfo } from '../interfaces/animalInfo.interface';
-import { AnimalType } from '../interfaces/animalType.interface';
-import { District } from '../interfaces/district.interface';
-import { ProductionCapacity } from '../interfaces/productionCapacity.interface';
-import { OwnersInfo } from '../interfaces/ownersInfo.interface';
+import { createDirectus, rest, staticToken } from '@directus/sdk';
+import { UsersDirectus } from '@/core/interfaces/user.interface';
+import { ProvinceDirectus } from '@/core/interfaces/province.interface';
+import { AnimalCategoryDirectus } from '@/core/interfaces/animalCategory.interface';
+import { AnimalInfoDirectus } from '@/core/interfaces/animal.interface';
+import { AnimalTypeDirectus } from '@/core/interfaces/animalType.interface';
+import { DistrictDirectus } from '@/core/interfaces/district.interface';
+import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity.interface';
+import { OwnersInfoDirectus } from '@/core/interfaces/ownersInfo.interface';
+import { OfficeDirectus } from '@/core/interfaces/office.interface';
 
+const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
 type Schema = {
-    users: Users[];
-    province: Province[];
-    animal_category: AnimalCategory[];
-    animal_info: AnimalInfo[];
-    animal_types: AnimalType[];
-    district: District[];
-    production_capacity: ProductionCapacity[];
-    owners_info: OwnersInfo[]
+    directus_users: UsersDirectus[];
+    users: UsersDirectus[];
+    province: ProvinceDirectus[];
+    animal_category: AnimalCategoryDirectus[];
+    animal_info: AnimalInfoDirectus[];
+    animal_types: AnimalTypeDirectus[];
+    district: DistrictDirectus[];
+    production_capacity: ProductionCapacityDirectus[];
+    owners_info: OwnersInfoDirectus[];
+    office: OfficeDirectus[];
 };
 
 export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!)
-    .with(rest());
+    .with(rest())
+    .with(staticToken(staticTokenValue));
+
 
