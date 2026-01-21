@@ -2,7 +2,7 @@ import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -12,52 +12,111 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
+import ConfirmationDialog from "../ui/confirmation-dialog";
+import { ResetPasswordDTO } from "@/core/dtos/reset-password.dto";
+import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import { toast } from "sonner";
 
 type Props = {
   currentConfig: Config;
   setShowForm: Dispatch<SetStateAction<boolean>>;
 };
-export const userColumns: ColumnDef<IUser>[] = [
-  {
-    accessorKey: "full_name",
-    header: "Name",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "phone_number",
-    header: "Contact",
-  },
-  {
-    accessorKey: "office_id.office_name",
-    header: "Office",
-  },
-  {
-    accessorKey: "office_id.province_id.province_name",
-    header: "Province",
-  },
-  {
-    accessorKey: "office_id.district_id.district_name",
-    header: "District",
-  },
-];
 
 const UserLists = ({ currentConfig, setShowForm }: Props) => {
   const [userLists, setUserLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const userColumns: ColumnDef<IUser>[] = [
+    {
+      accessorKey: "full_name",
+      header: "Name",
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "phone_number",
+      header: "Contact",
+    },
+    {
+      accessorKey: "office_id.office_name",
+      header: "Office",
+    },
+    {
+      accessorKey: "office_id.province_id.province_name",
+      header: "Province",
+    },
+    {
+      accessorKey: "office_id.district_id.district_name",
+      header: "District",
+    },
+    {
+      accessorKey: "action",
+      header: "Action",
+      cell: ({ row }) => {
+        return (
+          <ConfirmationDialog
+            cancelText="Cancel"
+            confirmText="Reset"
+            title="Are you sure to reset password for this user?"
+            description="User will receive an email with instructions to reset their password."
+            defaultOpen={false}
+            onCancel={(setOpen) => {
+              console.error("Reset Process Canceled!!!");
+              setOpen(false);
+            }}
+            onConfirm={async (setOpen) => {
+              setLoadingId(row.original.id);
+              console.log("Password reset for : ", row.original.full_name);
+              await resetPasswordMutation.mutateAsync({
+                phone_number: row.original.phone_number,
+              });
+              setOpen(false);
+            }}
+          >
+            <Button isLoading={loadingId === row.original.id} className="w-full">
+              Reset Password
+            </Button>
+          </ConfirmationDialog>
+        );
+      },
+    },
+  ];
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (payload: ResetPasswordDTO) =>
+      mutateHandler(endpoints.auth["reset-password"], payload),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      if (res.password_changed) {
+        toast.success("Password Changed Successfully!.", {
+          description: "Please login with your new password.",
+        });
+        return;
+      }
+
+      toast.success("User created successfully!");
+    },
+    onError: (err) => {
+      console.log("error...", { err });
+      toast.error("Error creating user!");
+    },
+    onSettled: () => {
+      setLoadingId(null);
+    },
+  });
 
   const { data: fetchedUserList, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: () => fetchProtectedHandler(endpoints.users),
   });
+
   useEffect(() => {
     if (fetchedUserList?.data) {
       setUserLists(fetchedUserList?.data);
     }
   }, [fetchedUserList]);
-  console.log({ userLists });
 
   const userTable = useCustomReactPaginatedTable<IUser, any>({
     data: userLists,

@@ -2,21 +2,20 @@ import { directus } from "@/core/lib/directus";
 import { readItems, updateItem } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from 'bcrypt';
-import { sendMail } from "@/core/services/mail/sendMail";
-import { generateSecurePassword } from "@/core/services/apiHandler/handleGeneratePassword";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const {
             phone_number,
-            needs_password_change = false
+            old_password,
+            new_password,
         } = body;
 
         // Validation
-        if (!phone_number) {
+        if (!phone_number || !old_password || !new_password) {
             return NextResponse.json(
-                { error: 'Phone number is required' },
+                { error: 'Phone number and password are required' },
                 { status: 400 }
             );
         }
@@ -46,24 +45,25 @@ export async function POST(req: NextRequest) {
         const user = users[0];
         console.log({ users, user });
 
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(old_password, user.password);
 
-        const newPassword = generateSecurePassword(8);
+        console.log({ isPasswordValid });
+        if (!isPasswordValid) {
+            return NextResponse.json(
+                { error: 'Invalid Credential!' },
+                { status: 401 }
+            );
+        }
+
         const updatedUser = await directus.request(
             updateItem('users', user.id, {
-                password: await bcrypt.hash(newPassword, 10),
-                needs_password_change: needs_password_change
+                password: await bcrypt.hash(new_password, 10),
+                needs_password_change: false
             })
         );
         // Remove password from user object
         const { password: _, ...userWithoutPassword } = updatedUser;
-
-        const mailInfo = await sendMail({
-            html: `<p>Your password has been reset. Your temporary password is: <strong>${newPassword}</strong>. Use your phone number and password to login</p>
-                   <p>Please change your password after logging in for the first time.</p>`,
-            subject: 'Your New Account Details',
-            to: user.email,
-        })
-        console.log({ mailInfo });
 
 
         const response = NextResponse.json(

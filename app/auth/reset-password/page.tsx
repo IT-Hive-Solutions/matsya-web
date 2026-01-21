@@ -13,9 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
 import {
-  ResetPasswordDTO,
-  ResetPasswordSchema,
-} from "@/core/dtos/reset-password.dto";
+  ForgotPasswordDTO,
+  ForgotPasswordSchema,
+} from "@/core/dtos/forgot-password.dto";
 import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -28,20 +28,20 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const params = useSearchParams();
-  const form = useForm<ResetPasswordDTO>({
+  const form = useForm<ForgotPasswordDTO>({
     defaultValues: {
       phone_number: params.get("phone") || "",
       new_password: "",
       old_password: "",
       confirm_new_password: "",
     },
-    resolver: zodResolver(ResetPasswordSchema),
+    resolver: zodResolver(ForgotPasswordSchema),
   });
   console.log({ formData: form.watch() });
 
   const resetPasswordMutation = useMutation({
-    mutationFn: (payload: ResetPasswordDTO) =>
-      mutateHandler(endpoints.auth["reset-password"], payload),
+    mutationFn: (payload: ForgotPasswordDTO) =>
+      mutateHandler(endpoints.auth["forgot-password"], payload),
     onSuccess: (res) => {
       console.log("error...", { res });
       if (res.password_changed) {
@@ -63,7 +63,7 @@ export default function ResetPassword() {
       setIsLoading(false);
     },
   });
-  const handleSubmit = async (data: ResetPasswordDTO) => {
+  const handleSubmit = async (data: ForgotPasswordDTO) => {
     await resetPasswordMutation.mutateAsync(data);
   };
 

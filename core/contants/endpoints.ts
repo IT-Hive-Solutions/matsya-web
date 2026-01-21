@@ -3,7 +3,8 @@ export const endpoints = {
     auth: {
         login: `${baseUrl}/auth/login`,
         cookies: `${baseUrl}/auth/cookie`,
-        "reset-password": `${baseUrl}/auth/reset-password`
+        "reset-password": `${baseUrl}/auth/reset-password`,
+        "forgot-password": `${baseUrl}/auth/forgot-password`
     },
     users: Object.assign(
         `${baseUrl}/users`,

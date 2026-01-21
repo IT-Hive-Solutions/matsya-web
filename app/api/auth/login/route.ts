@@ -52,17 +52,9 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Check if user is active (if you have a status field)
-        // if (user.status) {
-        //     return NextResponse.json(
-        //         { error: 'Your account is not active' },
-        //         { status: 403 }
-        //     );
-        // }
-
         if (user.needs_password_change) {
             return NextResponse.json(
-                { error: 'Password reset required',  data: { needs_password_change: true } },
+                { error: 'Password reset required', data: { needs_password_change: true } },
                 { status: 200 }
             );
         }
