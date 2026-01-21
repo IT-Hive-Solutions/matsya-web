@@ -71,6 +71,7 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
               console.log("Password reset for : ", row.original.full_name);
               await resetPasswordMutation.mutateAsync({
                 phone_number: row.original.phone_number,
+                needs_password_change:true,
               });
               setOpen(false);
             }}
