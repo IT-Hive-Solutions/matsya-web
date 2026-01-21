@@ -29,7 +29,7 @@ export default function LoginPage() {
   const form = useForm<LoginDTO>({
     defaultValues: {
       password: "",
-      phone_number: "",
+      email: "",
     },
     resolver: zodResolver(LoginSchema),
   });
@@ -41,9 +41,7 @@ export default function LoginPage() {
       console.log("error...", { res });
       if (res.needs_password_change) {
         toast.error("Password reset required. Please reset your password.");
-        router.push(
-          `/auth/reset-password?phone=${form.getValues("phone_number")}`,
-        );
+        router.push(`/auth/reset-password?email=${form.getValues("email")}`);
         return;
       }
       localStorage.setItem("user", JSON.stringify(res));
@@ -95,24 +93,17 @@ export default function LoginPage() {
               >
                 <FormField
                   control={form.control}
-                  name="phone_number"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium pointer-events-none">
-                          +977
-                        </span>
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="98XXXXXXXXX"
-                            className="pl-14"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                      </div>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="someone@example.com"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

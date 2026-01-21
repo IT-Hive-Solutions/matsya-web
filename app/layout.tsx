@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryWrapper from "@/components/wrapper/QueryWrapper";
+import { Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -44,7 +46,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <QueryWrapper>{children}</QueryWrapper>
+        <QueryWrapper>
+          <Suspense>
+            {children}
+            <Toaster />
+          </Suspense>
+        </QueryWrapper>
       </body>
     </html>
   );

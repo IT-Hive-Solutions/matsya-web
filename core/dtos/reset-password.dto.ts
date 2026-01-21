@@ -4,7 +4,7 @@ import { phoneRegex } from "./login.dto";
 
 
 export const ResetPasswordSchema = z.object({
-    phone_number: z.string().regex(phoneRegex, "Enter valid phone number (98XXXXXXXXX or 01XXXXXXXX)"),
+    email: z.string().email("Invalid email address"),
     needs_password_change: z.boolean().optional(),
 });
 

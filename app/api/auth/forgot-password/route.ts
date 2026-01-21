@@ -1,66 +1,53 @@
 import { directus } from "@/core/lib/directus";
-import { readItems, updateItem } from "@directus/sdk";
+import { login, readUsers, updateUser } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from 'bcrypt';
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const {
-            phone_number,
+            email,
             old_password,
             new_password,
         } = body;
 
         // Validation
-        if (!phone_number || !old_password || !new_password) {
+        if (!email || !old_password || !new_password) {
             return NextResponse.json(
                 { error: 'Phone number and password are required' },
                 { status: 400 }
             );
         }
 
-        // Fetch user from custom users table by phone_number
-        const users = await directus.request(
-            readItems('users', {
-                filter: {
-                    phone_number: {
-                        _eq: phone_number
-                    }
-                },
-                // fields: ['*', 'office_id.*', 'office_id.province_id.*', 'office_id.district_id.*'],
-                limit: 1
+        // Fetch user from custom users table by email
+        const verification = await directus.request(
+            login({
+                email,
+                password: old_password,
             })
         );
 
 
         // Check if user exists
-        if (!users || users.length === 0) {
+        if (!verification) {
             return NextResponse.json(
-                { error: 'Invalid phone number or password' },
+                { error: 'Invalid email or password' },
                 { status: 401 }
             );
         }
+        const user = await directus.request(readUsers({
+            filter: {
+                email: { _eq: email }
+            }
+        })).then(res => res[0]);
 
-        const user = users[0];
-        console.log({ users, user });
-
-        // Verify password
-        const isPasswordValid = await bcrypt.compare(old_password, user.password);
-
-        console.log({ isPasswordValid });
-        if (!isPasswordValid) {
-            return NextResponse.json(
-                { error: 'Invalid Credential!' },
-                { status: 401 }
-            );
-        }
 
         const updatedUser = await directus.request(
-            updateItem('users', user.id, {
-                password: await bcrypt.hash(new_password, 10),
+            updateUser(user.id, {
+                password: new_password,
                 needs_password_change: false
             })
+
         );
         // Remove password from user object
         const { password: _, ...userWithoutPassword } = updatedUser;

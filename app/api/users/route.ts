@@ -2,7 +2,7 @@
 // app/api/users/route.ts
 // Handles GET (all users) and POST (create item)
 import { NextRequest, NextResponse } from 'next/server';
-import { readItems, createItem } from '@directus/sdk';
+import { readItems, createItem, readCollection, readUsers } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
 import bcrypt from 'bcrypt';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
@@ -12,9 +12,8 @@ import { sendMail } from '@/core/services/mail/sendMail';
 export async function GET(request: NextRequest) {
     try {
         const users = await directus.request(
-            readItems('users', {
-                fields: ['*', "office_id.*", "office_id.province_id.*", "office_id.district_id.*"],
-                sort: ['-date_created'],
+            readUsers({
+                fields: ['*',]
             })
         );
 

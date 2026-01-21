@@ -30,7 +30,7 @@ export default function ResetPassword() {
   const params = useSearchParams();
   const form = useForm<ForgotPasswordDTO>({
     defaultValues: {
-      phone_number: params.get("phone") || "",
+      email: params.get("email") || "",
       new_password: "",
       old_password: "",
       confirm_new_password: "",
@@ -66,6 +66,7 @@ export default function ResetPassword() {
   const handleSubmit = async (data: ForgotPasswordDTO) => {
     await resetPasswordMutation.mutateAsync(data);
   };
+  console.log({ error: form.formState.errors });
 
   return (
     <main className="min-h-screen  from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">

@@ -12,6 +12,7 @@ import { OfficeDirectus } from '@/core/interfaces/office.interface';
 const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
 type Schema = {
+    directus_users: UsersDirectus[];
     users: UsersDirectus[];
     province: ProvinceDirectus[];
     animal_category: AnimalCategoryDirectus[];

@@ -1,69 +1,64 @@
 import { directus } from "@/core/lib/directus";
-import { readItems, updateItem } from "@directus/sdk";
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from 'bcrypt';
-import { sendMail } from "@/core/services/mail/sendMail";
 import { generateSecurePassword } from "@/core/services/apiHandler/handleGeneratePassword";
+import { sendMail } from "@/core/services/mail/sendMail";
+import { readUsers, updateItem, updateUser } from "@directus/sdk";
+import bcrypt from 'bcrypt';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const {
-            phone_number,
+            email,
             needs_password_change = false
         } = body;
 
         // Validation
-        if (!phone_number) {
+        if (!email) {
             return NextResponse.json(
                 { error: 'Phone number is required' },
                 { status: 400 }
             );
         }
 
-        // Fetch user from custom users table by phone_number
-        const users = await directus.request(
-            readItems('users', {
-                filter: {
-                    phone_number: {
-                        _eq: phone_number
-                    }
-                },
-                // fields: ['*', 'office_id.*', 'office_id.province_id.*', 'office_id.district_id.*'],
-                limit: 1
-            })
-        );
-
+        // Fetch user from custom users table by email
+        const user = await directus.request(readUsers({
+            filter: {
+                email: { _eq: email }
+            }
+        })).then(res => res[0]);
 
         // Check if user exists
-        if (!users || users.length === 0) {
+        if (!user) {
             return NextResponse.json(
-                { error: 'Invalid phone number or password' },
+                { error: 'User with email not found' },
                 { status: 401 }
             );
         }
 
-        const user = users[0];
-        console.log({ users, user });
+        console.log({ user });
 
 
         const newPassword = generateSecurePassword(8);
         const updatedUser = await directus.request(
-            updateItem('users', user.id, {
-                password: await bcrypt.hash(newPassword, 10),
+            updateUser(user.id, {
+                password: newPassword,
                 needs_password_change: needs_password_change
             })
+
         );
         // Remove password from user object
         const { password: _, ...userWithoutPassword } = updatedUser;
 
-        const mailInfo = await sendMail({
-            html: `<p>Your password has been reset. Your temporary password is: <strong>${newPassword}</strong>. Use your phone number and password to login</p>
-                   <p>Please change your password after logging in for the first time.</p>`,
-            subject: 'Your New Account Details',
-            to: user.email,
-        })
-        console.log({ mailInfo });
+        if (user.email) {
+            const mailInfo = await sendMail({
+                html: `<p>Your password has been reset. Your temporary password is: <strong>${newPassword}</strong>. Use your phone number and password to login</p>
+                <p>Please change your password after logging in for the first time.</p>`,
+                subject: 'Your New Account Details',
+                to: user.email,
+            })
+            console.log({ mailInfo });
+        }
 
 
         const response = NextResponse.json(
