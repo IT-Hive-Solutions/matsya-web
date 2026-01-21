@@ -6,6 +6,7 @@ import { readItems, createItem } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
 import bcrypt from 'bcrypt';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
+import { sendMail } from '@/core/services/mail/sendMail';
 
 // GET - Fetch all users
 export async function GET(request: NextRequest) {
@@ -83,6 +84,15 @@ export async function POST(request: NextRequest) {
                 user_type: body.user_type,
             })
         );
+
+        const mailInfo = await sendMail({
+            html: `<p>Your account has been created. Your temporary password is: <strong>${newPassword}</strong>. Use your phone number and password to login</p>
+                   <p>Please change your password after logging in for the first time.</p>`,
+            subject: 'Your New Account Details',
+            to: body.email,
+        })
+        console.log({ mailInfo });
+
 
         return NextResponse.json(
             { success: true, data: newUser },

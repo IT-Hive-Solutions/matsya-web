@@ -3,7 +3,7 @@ import { IOffice } from "./office.interface";
 import { IProvince } from "./province.interface";
 import { Status } from "./status.interface";
 
-export const USER_TYPES = ["admin", "province-level", "district", "local", "vaccinator"] as const;
+export const USER_TYPES = ["admin", "province-level", "district-level", "local-level", "vaccinator"] as const;
 
 export type UserType = typeof USER_TYPES[number];
 
