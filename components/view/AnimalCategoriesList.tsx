@@ -1,3 +1,4 @@
+"use client"
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";

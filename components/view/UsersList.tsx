@@ -1,3 +1,4 @@
+"use client"
 import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";

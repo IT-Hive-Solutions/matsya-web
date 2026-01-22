@@ -1,3 +1,4 @@
+"use client"
 import { endpoints } from "@/core/contants/endpoints";
 import { IOffice } from "@/core/interfaces/office.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
