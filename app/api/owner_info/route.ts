@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
                 owners_name: body.owners_name,
                 owners_contact: body.owners_contact,
                 ward_number: body.ward_number,
-                district: body.district,
+                district_id: body.district,
                 local_level_name: body.local_level_name,
                 date: body.date,
             })

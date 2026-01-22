@@ -4,7 +4,7 @@ import { readItem, updateItem, deleteItem } from '@directus/sdk';
 
 type Params = {
     params: Promise<{
-        id: number;
+        id: string;
     }>;
 };
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const production_capacity = await directus.request(
-            readItem('production_capacity', id)
+            readItem('production_capacity', parseInt(id))
         );
 
         return NextResponse.json({
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const updatedCapacity = await directus.request(
-            updateItem('production_capacity', id, {
+            updateItem('production_capacity', parseInt(id), {
                 district_name: body.district_name,
             })
         );
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         await directus.request(
-            deleteItem('production_capacity', id)
+            deleteItem('production_capacity', parseInt(id))
         );
 
         return NextResponse.json({

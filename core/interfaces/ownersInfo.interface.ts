@@ -5,7 +5,7 @@ export interface OwnersInfoDirectus {
     status: Status;
     sort: number;
     local_level_name: string;
-    district_id: string;
+    district_id: number;
     date: string;
     owners_name: string;
     owners_contact: string;

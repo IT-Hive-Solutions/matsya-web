@@ -4,7 +4,7 @@ import { readItem, updateItem, deleteItem } from '@directus/sdk';
 
 type Params = {
     params: Promise<{
-        id: number;
+        id: string;
     }>;
 };
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const type = await directus.request(
-            readItem('animal_types', id)
+            readItem('animal_types', parseInt(id))
         );
 
         return NextResponse.json({
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const updatedType = await directus.request(
-            updateItem('animal_types', id, {
+            updateItem('animal_types', parseInt(id), {
                 animal_name: body.animal_name,
             })
         );
@@ -60,7 +60,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         await directus.request(
-            deleteItem('animal_types', id)
+            deleteItem('animal_types', parseInt(id))
         );
 
         return NextResponse.json({
