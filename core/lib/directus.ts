@@ -1,4 +1,4 @@
-import { createDirectus, rest, staticToken } from '@directus/sdk';
+import { authentication, createDirectus, rest, staticToken } from '@directus/sdk';
 import { UsersDirectus } from '@/core/interfaces/user.interface';
 import { ProvinceDirectus } from '@/core/interfaces/province.interface';
 import { AnimalCategoryDirectus } from '@/core/interfaces/animalCategory.interface';
@@ -24,8 +24,7 @@ type Schema = {
     office: OfficeDirectus[];
 };
 
-export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!)
-    .with(rest())
-    .with(staticToken(staticTokenValue));
+export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!).
+    with(authentication('json')).with(rest());
 
 

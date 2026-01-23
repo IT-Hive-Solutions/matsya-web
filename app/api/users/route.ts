@@ -2,7 +2,7 @@
 // app/api/users/route.ts
 // Handles GET (all users) and POST (create item)
 import { NextRequest, NextResponse } from 'next/server';
-import { readItems, createItem, readCollection, readUsers } from '@directus/sdk';
+import { readItems, createItem, readCollection, readUsers, createUser, readRoles } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
 import bcrypt from 'bcrypt';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
@@ -71,16 +71,28 @@ export async function POST(request: NextRequest) {
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+        const [first_name, ...rest] = body.full_name.split(" ")
+        const last_name = rest.join(" ")
+        const roles = await directus.request(
+            readRoles({
+                filter: {
+                    name: { _eq: body.user_type } // or 'Admin', 'Member', etc.
+                }
+            })
+        );
 
         const newUser = await directus.request(
-            createItem('users', {
-                full_name: body.full_name,
+            createUser({
+                first_name: first_name,
+                last_name: last_name,
                 email: body.email,
                 password: hashedPassword,
                 office_id: body.office_id,
                 needs_password_change: true,
                 phone_number: body.phone_number,
                 user_type: body.user_type,
+                role: roles[0].id,
+                status: 'active',
             })
         );
 
