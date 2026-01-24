@@ -30,23 +30,59 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Checkbox } from "../ui/checkbox";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 
 interface AnimalFormProps {
   onClose: () => void;
 }
 
 export default function AnimalForm({ onClose }: AnimalFormProps) {
-  const [animalTypeOptions, setAnimalTypeOptions] = useState([]);
-  const [animalCategoryOptions, setAnimalCategoryOptions] = useState([]);
+  const [productionCapacityOptions, setProductionCapacityOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [animalTypeOptions, setAnimalTypeOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [animalCategoryOptions, setAnimalCategoryOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
 
+  const { data: productionCapacityFetched } = useQuery({
+    queryKey: ["production-types"],
+    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+  });
   const { data: animalTypesFetched } = useQuery({
     queryKey: ["animal-type"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_types),
   });
   const { data: animalCategoryFetched } = useQuery({
-    queryKey: ["animal-type"],
+    queryKey: ["animal-category"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_types),
   });
+
+  useEffect(() => {
+    if (productionCapacityFetched?.data) {
+      const payload = productionCapacityFetched?.data?.map(
+        (type: IProductionCapacity) => {
+          return {
+            label: type.capacity_name,
+            value: type.id,
+          };
+        },
+      );
+      setProductionCapacityOptions(payload);
+    }
+  }, [productionCapacityFetched]);
   useEffect(() => {
     if (animalTypesFetched?.data) {
       const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {
@@ -77,11 +113,11 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
       age_years: undefined,
       animal_category: undefined,
       animal_type: undefined,
-      is_vaccination_applied: "",
+      is_vaccination_applied: false,
       latitude: "",
       longitude: "",
       owners_contact: undefined,
-      production_capacity: "",
+      production_capacity: undefined,
     },
     resolver: zodResolver(CreateAnimalSchema),
   });
@@ -151,17 +187,20 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
 
               <FormField
                 control={form.control}
-                name="is_vaccination_applied"
+                name={"is_vaccination_applied"}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Is Vaccination Applied</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Yes/No"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                  <FormItem className="flex items-end space-y-0">
+                    <div className="flex items-center gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="mt-0! cursor-pointer">
+                        FMD Vaccine Applied
+                      </FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -182,16 +221,33 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
               />
               <FormField
                 control={form.control}
-                name="production_capacity"
+                name={`production_capacity`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Production Capacity</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Total production capacity"
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>
+                      Production Capacity{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(parseInt(val))}
+                      value={String(field.value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select capacity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {productionCapacityOptions.map((type) => (
+                          <SelectItem
+                            key={type.value.toString()}
+                            value={type.value.toString()}
+                          >
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
