@@ -53,8 +53,8 @@ export async function POST(request: NextRequest) {
             const data = animalLists.map((animal: any) => ({
                 animal_category: animal.animal_category,
                 animal_type: animal.animal_type,
-                animal_months: animal.animal_months,
-                animal_years: animal.animal_years,
+                age_months: animal.age_months,
+                age_years: animal.age_years,
                 tag_number: animal.tag_number,
                 is_vaccination_applied: animal.is_vaccination_applied,
                 production_capacity: animal.production_capacity,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
                 owners_id: owner_id,
             }));
 
-            payload.push(data)
+            payload = data
         }
 
         console.log("payloadddd: ", payload);

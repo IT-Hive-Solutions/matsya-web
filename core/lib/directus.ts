@@ -25,6 +25,6 @@ type Schema = {
 };
 
 export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!).
-    with(authentication('json')).with(rest());
+    with(rest()).with(staticToken(staticTokenValue));
 
 

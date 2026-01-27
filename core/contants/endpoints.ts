@@ -30,7 +30,7 @@ export const endpoints = {
         `${baseUrl}/animal_info`,
         {
             byId: (id: number) => `${baseUrl}/animal_info/${id}`,
-            "create-multiple": `${baseUrl}/animal_info/create-multiple/`,
+            "create-multiple": `${baseUrl}/animal_info/create-multiple`,
         }
     ),
     office: Object.assign(
