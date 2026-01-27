@@ -2,6 +2,7 @@ export enum VerificationStatus {
     Pending = "pending",
     Verified = "verified",
     Validated = "validated",
+    Rejected = "rejected",
 }
 
 export const verificationStatusOptions = Object.entries(VerificationStatus).map(([label, value]) => ({

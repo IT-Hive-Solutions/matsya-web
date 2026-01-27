@@ -31,6 +31,7 @@ export const endpoints = {
         {
             byId: (id: number) => `${baseUrl}/animal_info/${id}`,
             "create-multiple": `${baseUrl}/animal_info/create-multiple`,
+            "update_animal_status": (id: number) => `${baseUrl}/animal_info/${id}/update_animal_status`,
         }
     ),
     office: Object.assign(

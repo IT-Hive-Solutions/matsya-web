@@ -1,62 +1,160 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { endpoints } from "@/core/contants/endpoints";
+import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
-import { endpoints } from "@/core/contants/endpoints";
-import { animalColumns } from "../view/AnimalLists";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
-import { IAnimal } from "@/core/interfaces/animal.interface";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCheckIcon,
+  CheckCircleIcon,
+  Edit2,
+  LucideOctagonMinus,
+  MoreVertical,
+  Plus,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import Loading from "../loading";
-import { useQuery } from "@tanstack/react-query";
-import { DataTableWithPagination } from "../ui/data-table-with-pagination";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
-
-interface Entry {
-  id: string;
-  tagNumber: string;
-  ownerName: string;
-  animalType: string;
-  district: string;
-  date: string;
-  status: "completed" | "pending" | "review";
-}
+import { DataTableWithPagination } from "../ui/data-table-with-pagination";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { animalColumns } from "../view/AnimalLists";
+import { ColumnDef } from "@tanstack/react-table";
+import { updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { VerificationStatus } from "@/core/enums/verification-status.enum";
+import { toast } from "sonner";
 
 interface ViewEntriesPageProps {
   user: IUser;
   setActiveTab: (tab: string) => void;
 }
 
-export default function ViewEntriesPage({ user, setActiveTab }: ViewEntriesPageProps) {
+export default function ViewEntriesPage({
+  user,
+  setActiveTab,
+}: ViewEntriesPageProps) {
+  const queryClient = useQueryClient();
+
+  const entityColumn: ColumnDef<IAnimal>[] = [
+    ...animalColumns,
+    {
+      accessorKey: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        return (
+          <Popover>
+            <PopoverTrigger
+              className="hover:bg-transparent hover:text-primary hover:scale-[1.1]"
+              asChild
+            >
+              <Button
+                variant="ghost"
+                className={
+                  "w-full justify-start text-left font-normal text-primary hover:cursor-pointer"
+                }
+              >
+                <MoreVertical
+                  className={"   "}
+                  strokeWidth={2}
+                  cursor={"pointer"}
+                />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="bg-white px-4 py-2 rounded-md shadow-lg flex flex-col w-max h-max p-2 gap-1 z-99999">
+              <div className="flex flex-col w-full h-full  gap-4 px-2 hover:bg-primary/80 hover:text-primary-foreground rounded ">
+                <div
+                  className={`flex py-2 text-left items-center gap-2 transition-all hover:cursor-pointer`}
+                >
+                  <Edit2
+                    className="hover:scale-[1.1] w-4 h-4"
+                    strokeWidth={2}
+                    cursor={"pointer"}
+                  />
+                  <label className="text-sm ">Edit</label>
+                </div>
+              </div>
+              <div className="h-px bg-gray-400 w-full rounded-full" />
+              <AlertDialogWrapper
+                title="Are you sure?"
+                description="This data will be verifed and cannot be undone!"
+                onConfirm={async (setOpen) => {
+                  await handleUpdateVerificationStatusMutation.mutateAsync({
+                    id: row.original.id,
+                    verification_status: VerificationStatus.Verified,
+                  });
+                  setOpen && setOpen(false);
+                }}
+              >
+                <div className="w-full flex items-center gap-2 py-2 px-2 hover:bg-primary/80 hover:text-primary-foreground rounded ">
+                  <CheckCircleIcon className="hover:scale-[1.1] w-4 h-4" />
+                  <label className="text-sm ">Verify</label>
+                </div>
+              </AlertDialogWrapper>
+              <AlertDialogWrapper
+                title="Are you sure?"
+                description="This data will be validated and cannot be undone!"
+                onConfirm={async (setOpen) => {
+                  await handleUpdateVerificationStatusMutation.mutateAsync({
+                    id: row.original.id,
+                    verification_status: VerificationStatus.Validated,
+                  });
+                  setOpen && setOpen(false);
+                }}
+              >
+                <div className="w-full flex items-center gap-2 py-2 px-2 hover:bg-primary/80 hover:text-primary-foreground rounded ">
+                  <CheckCheckIcon className="hover:scale-[1.1] w-4 h-4" />
+                  <label className="text-sm ">Validate</label>
+                </div>
+              </AlertDialogWrapper>
+              <AlertDialogWrapper
+                title="Are you sure?"
+                description="This data will be rejected and cannot be undone!"
+                onConfirm={async (setOpen) => {
+                  await handleUpdateVerificationStatusMutation.mutateAsync({
+                    id: row.original.id,
+                    verification_status: VerificationStatus.Rejected,
+                  });
+                  setOpen && setOpen(false);
+                }}
+              >
+                <div className="w-full flex items-center gap-2 py-2 px-2 hover:bg-primary/80 hover:text-primary-foreground rounded ">
+                  <LucideOctagonMinus className="hover:scale-[1.1] w-4 h-4 text-destructive" />
+                  <label className="text-sm ">Reject</label>
+                </div>
+              </AlertDialogWrapper>
+            </PopoverContent>
+          </Popover>
+        );
+      },
+    },
+  ];
   const [animalLists, setAnimalLists] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterDistrict, setFilterDistrict] = useState(
-    user.office_id.district_id.district_name ?? "",
-  );
-  const [filterStatus, setFilterStatus] = useState("all");
 
-  const getStatusColor = (status: string) => {
-    const colors: { [key: string]: string } = {
-      completed: "bg-accent/10 text-accent",
-      pending: "bg-yellow-100 text-yellow-700",
-      review: "bg-orange-100 text-orange-700",
-    };
-    return colors[status] || "bg-muted text-muted-foreground";
-  };
+  const handleUpdateVerificationStatusMutation = useMutation({
+    mutationFn: (payload: {
+      id: number;
+      verification_status: VerificationStatus;
+    }) =>
+      updateProtectedHandler(
+        endpoints.animal_info.update_animal_status(payload.id),
+        { verification_status: payload.verification_status },
+      ),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      queryClient.invalidateQueries({
+        queryKey: ["animals"],
+      });
+      toast.success("Status updated successfully!");
+    },
+    onError: (err) => {
+      console.log("error...", { err });
 
-  const getStatusLabel = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
+      toast.error("Error creating animal category!");
+    },
+  });
 
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
@@ -67,11 +165,10 @@ export default function ViewEntriesPage({ user, setActiveTab }: ViewEntriesPageP
       setAnimalLists(fetchedAnimalList?.data);
     }
   }, [fetchedAnimalList]);
-  console.log({ animalLists });
 
   const animalTable = useCustomReactPaginatedTable<IAnimal, any>({
     data: animalLists,
-    columns: animalColumns,
+    columns: entityColumn,
   });
 
   if (isLoading) {

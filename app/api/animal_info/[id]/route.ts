@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         const updatedAnimal = await directus.request(
             updateItem('animal_info', parseInt(id), {
-                onths: body.age_months,
+                age_months: body.age_months,
                 age_years: body.age_years,
                 animal_category: body.animal_category,
                 animal_type: body.animal_type,
