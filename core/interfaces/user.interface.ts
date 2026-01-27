@@ -52,10 +52,12 @@ export interface IUser {
     user_updated: string | null;
     date_updated: string | null;
     full_name: string;
+    first_name: string;
+    last_name: string;
     email: string;
     phone_number: string;
     password: string;
-    needs_password_change:boolean;
+    needs_password_change: boolean;
     user_type: UserType;
     office_id: IOffice;
 }

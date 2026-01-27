@@ -133,9 +133,9 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       {type === "offices" && (
         <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
-      {type === "animals" && (
+      {/* {type === "animals" && (
         <AnimalLists currentConfig={currentConfig} setShowForm={setShowForm} />
-      )}
+      )} */}
       {type === "user-accounts" && (
         <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}

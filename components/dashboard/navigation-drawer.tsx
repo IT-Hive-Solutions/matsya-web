@@ -24,7 +24,7 @@ export default function NavigationDrawer({ onNavigate, currentSection }: Navigat
     { id: "overview", label: "Dashboard", icon: <BarChart3 size={20} />, section: "overview" },
     { id: "new-entry", label: "New Entry", icon: <Plus size={20} />, section: "new-entry" },
     { id: "view-entries", label: "View Entries", icon: <Layers size={20} />, section: "view-entries" },
-    { id: "animals", label: "Manage Animals", icon: <Home size={20} />, section: "animals" },
+    // { id: "animals", label: "Manage Animals", icon: <Home size={20} />, section: "animals" },
     { id: "animal-category", label: "Cattle Categories", icon: <Settings size={20} />, section: "animal-category" },
     { id: "user-accounts", label: "User Accounts", icon: <Users size={20} />, section: "user-accounts" },
     { id: "offices", label: "Create Office", icon: <Settings size={20} />, section: "offices" },
