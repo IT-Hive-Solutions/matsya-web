@@ -94,7 +94,6 @@ export const animalColumns: ColumnDef<IAnimal>[] = [
 const AnimalLists = ({ currentConfig, setShowForm }: Props) => {
   const [animalLists, setAnimalLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_info),

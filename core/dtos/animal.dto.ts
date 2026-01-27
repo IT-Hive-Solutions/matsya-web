@@ -83,3 +83,4 @@ export const CreateAnimalSchema = z.object({
 });
 
 export type CreateAnimalDTO = z.infer<typeof CreateAnimalSchema>;
+export type UpdateAnimalDTO = Partial<CreateAnimalDTO>;

@@ -26,6 +26,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { toast } from "sonner";
+import AnimalForm from "./animal-form";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -37,6 +38,8 @@ export default function ViewEntriesPage({
   setActiveTab,
 }: ViewEntriesPageProps) {
   const queryClient = useQueryClient();
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedAnimal, setSelectedAnimal] = useState<number | null>(null);
 
   const entityColumn: ColumnDef<IAnimal>[] = [
     ...animalColumns,
@@ -67,6 +70,10 @@ export default function ViewEntriesPage({
               <div className="flex flex-col w-full h-full  gap-4 px-2 hover:bg-primary/80 hover:text-primary-foreground rounded ">
                 <div
                   className={`flex py-2 text-left items-center gap-2 transition-all hover:cursor-pointer`}
+                  onClick={() => {
+                    setEditDialogOpen(true);
+                    setSelectedAnimal(row.original.id);
+                  }}
                 >
                   <Edit2
                     className="hover:scale-[1.1] w-4 h-4"
@@ -249,6 +256,14 @@ export default function ViewEntriesPage({
               Create Now
             </Button>
           </Card>
+        )}
+        {isEditDialogOpen && selectedAnimal && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
+            <AnimalForm
+              onClose={() => setEditDialogOpen(false)}
+              animalId={selectedAnimal}
+            />
+          </div>
         )}
       </div>
     </div>

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const animal = await directus.request(
-            readItem('animal_info', parseInt(id))
+            readItem('animal_info', parseInt(id), { fields: ["*", "owners_id.*", "animal_type.*", "animal_category.*"] })
         );
 
         return NextResponse.json({

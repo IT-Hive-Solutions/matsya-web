@@ -95,6 +95,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     queryKey: ["animal-category"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_category),
   });
+  
   useEffect(() => {
     if (productionCapacityFetched?.data) {
       const payload = productionCapacityFetched?.data?.map(
@@ -108,6 +109,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       setProductionCapacityOptions(payload);
     }
   }, [productionCapacityFetched]);
+
   useEffect(() => {
     if (animalTypesFetched?.data) {
       const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {

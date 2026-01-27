@@ -19,11 +19,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { endpoints } from "@/core/contants/endpoints";
-import { CreateAnimalDTO, CreateAnimalSchema } from "@/core/dtos/animal.dto";
+import {
+  CreateAnimalDTO,
+  CreateAnimalSchema,
+  UpdateAnimalDTO,
+} from "@/core/dtos/animal.dto";
 import { monthOptions } from "@/core/enums/month.enum";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateProtectedHandler,
+  updateProtectedHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -35,9 +42,10 @@ import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interf
 
 interface AnimalFormProps {
   onClose: () => void;
+  animalId?: number;
 }
 
-export default function AnimalForm({ onClose }: AnimalFormProps) {
+export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   const [productionCapacityOptions, setProductionCapacityOptions] = useState<
     {
       label: string;
@@ -57,6 +65,12 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
     }[]
   >([]);
 
+  const { data: fetchedAnimalData } = useQuery({
+    queryKey: ["animal"],
+    queryFn: () =>
+      fetchProtectedHandler(endpoints.animal_info.byId(animalId ?? -1)),
+    enabled: !!animalId,
+  });
   const { data: productionCapacityFetched } = useQuery({
     queryKey: ["production-types"],
     queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
@@ -70,6 +84,25 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
     queryFn: () => fetchProtectedHandler(endpoints.animal_types),
   });
 
+  useEffect(() => {
+    const data = fetchedAnimalData?.data;
+    if (data) {
+      const payload: UpdateAnimalDTO = {
+        age_months: data?.age_months,
+        age_years: data?.age_years,
+        animal_type: data?.animal_type?.id,
+        animal_category: data?.animal_category?.id,
+        is_vaccination_applied: data?.is_vaccination_applied,
+        latitude: data?.latitude,
+        longitude: data?.longitude,
+        num_of_animals: data?.num_of_animals,
+        production_capacity: parseInt(data?.production_capacity),
+        tag_number: data?.tag_number,
+        owners_contact: data?.owners_id?.owners_contact,
+      };
+      form.reset(payload);
+    }
+  }, [fetchedAnimalData]);
   useEffect(() => {
     if (productionCapacityFetched?.data) {
       const payload = productionCapacityFetched?.data?.map(
@@ -107,7 +140,7 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
   }, [animalCategoryFetched]);
 
   const queryClient = useQueryClient();
-  const form = useForm<CreateAnimalDTO>({
+  const form = useForm<CreateAnimalDTO | UpdateAnimalDTO>({
     defaultValues: {
       age_months: undefined,
       age_years: undefined,
@@ -140,9 +173,30 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
       toast.error("Error creating animal!");
     },
   });
-  const onSubmit = (data: CreateAnimalDTO) => {
+  const updateAnimalMutation = useMutation({
+    mutationFn: (payload: UpdateAnimalDTO) =>
+      updateProtectedHandler(endpoints.animal_info, payload),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      queryClient.invalidateQueries({
+        queryKey: ["animals"],
+      });
+      toast.success("Animal updated successfully!");
+      onClose();
+    },
+    onError: (err) => {
+      console.log("error...", { err });
+
+      toast.error("Error updating animal!");
+    },
+  });
+  const onSubmit = (data: CreateAnimalDTO | UpdateAnimalDTO) => {
     console.log({ data });
-    createAnimalMutation.mutateAsync(data);
+    if (animalId) {
+      updateAnimalMutation.mutateAsync(data as UpdateAnimalDTO);
+    } else {
+      createAnimalMutation.mutateAsync(data as CreateAnimalDTO);
+    }
   };
   return (
     <Card className="shadow-xl">
