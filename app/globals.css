@@ -123,3 +123,257 @@
     @apply bg-background text-foreground;
   }
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Smooth slide-in animation */
+@keyframes slide-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-right 0.5s ease-out forwards;
+}
+
+/* Slide in from right utility */
+.slide-in-from-right {
+  animation-name: slide-in-from-right;
+}
+
+/* Card stagger animation for animal cards */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+/* Smooth transitions for layout changes */
+.transition-layout {
+  transition:
+    width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile overlay for animal details */
+@media (max-width: 768px) {
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .mobile-details-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100vw;
+    background: white;
+    z-index: 50;
+    animation: slide-in-from-right 0.3s ease-out;
+    overflow-y: auto;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Selected owner card glow effect */
+.selected-owner-glow {
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Hover scale for cards */
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-subtle {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+}
+
+/* Status indicator animation */
+@keyframes pulse-status {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.status-pending-animate {
+  animation: pulse-status 2s ease-in-out infinite;
+}
+
+/* Smooth color transitions */
+.transition-colors-smooth {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Glass morphism effect for header */
+.glass-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Responsive grid transitions */
+.grid-responsive {
+  display: grid;
+  transition: grid-template-columns 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 0px, #e2e8f0 40px, #f1f5f9 80px);
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Focus visible styles for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Truncate text with ellipsis */
+.truncate-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: inherit;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Badge pulse animation */
+@keyframes badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.badge-animate {
+  animation: badge-pulse 0.5s ease-out;
+}
+
+/* Smooth height transitions */
+.transition-height {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-bg {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  }
+
+  .dark-mode-card {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: #334155;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
