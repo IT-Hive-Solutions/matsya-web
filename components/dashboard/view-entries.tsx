@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,6 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IUser } from "@/core/interfaces/user.interface";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { endpoints } from "@/core/contants/endpoints";
+import { animalColumns } from "../view/AnimalLists";
+import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import { IAnimal } from "@/core/interfaces/animal.interface";
+import Loading from "../loading";
+import { useQuery } from "@tanstack/react-query";
+import { DataTableWithPagination } from "../ui/data-table-with-pagination";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
 
 interface Entry {
   id: string;
@@ -24,66 +34,16 @@ interface Entry {
 
 interface ViewEntriesPageProps {
   user: IUser;
+  setActiveTab: (tab: string) => void;
 }
 
-export default function ViewEntriesPage({ user }: ViewEntriesPageProps) {
+export default function ViewEntriesPage({ user, setActiveTab }: ViewEntriesPageProps) {
+  const [animalLists, setAnimalLists] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDistrict, setFilterDistrict] = useState(
     user.office_id.district_id.district_name ?? "",
   );
   const [filterStatus, setFilterStatus] = useState("all");
-
-  // Mock data
-  const allEntries: Entry[] = [
-    {
-      id: "1",
-      tagNumber: "TAG-001-2024",
-      ownerName: "Ram Kumar",
-      animalType: "Cow",
-      district: user.office_id.district_id.district_name ?? "",
-      date: "2024-12-20",
-      status: "completed",
-    },
-    {
-      id: "2",
-      tagNumber: "TAG-002-2024",
-      ownerName: "Sita Sharma",
-      animalType: "Buffalo",
-      district: user.office_id.district_id.district_name ?? "",
-      date: "2024-12-19",
-      status: "completed",
-    },
-    {
-      id: "3",
-      tagNumber: "TAG-003-2024",
-      ownerName: "Hari Prasad",
-      animalType: "Goat",
-      district: user.office_id.district_id.district_name ?? "",
-      date: "2024-12-18",
-      status: "pending",
-    },
-    {
-      id: "4",
-      tagNumber: "TAG-004-2024",
-      ownerName: "Gita Devi",
-      animalType: "Cow",
-      district: "Bhaktapur",
-      date: "2024-12-17",
-      status: "review",
-    },
-  ];
-
-  const filteredEntries = allEntries.filter((entry) => {
-    const matchesSearch =
-      entry.tagNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.ownerName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDistrict =
-      !filterDistrict || entry.district === filterDistrict;
-    const matchesStatus =
-      filterStatus === "all" || entry.status === filterStatus;
-
-    return matchesSearch && matchesDistrict && matchesStatus;
-  });
 
   const getStatusColor = (status: string) => {
     const colors: { [key: string]: string } = {
@@ -98,10 +58,30 @@ export default function ViewEntriesPage({ user }: ViewEntriesPageProps) {
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
+  const { data: fetchedAnimalList, isLoading } = useQuery({
+    queryKey: ["animals"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_info),
+  });
+  useEffect(() => {
+    if (fetchedAnimalList?.data) {
+      setAnimalLists(fetchedAnimalList?.data);
+    }
+  }, [fetchedAnimalList]);
+  console.log({ animalLists });
+
+  const animalTable = useCustomReactPaginatedTable<IAnimal, any>({
+    data: animalLists,
+    columns: animalColumns,
+  });
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <Card className="p-4 sm:p-6">
+      {/* <Card className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Filters</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
@@ -152,125 +132,28 @@ export default function ViewEntriesPage({ user }: ViewEntriesPageProps) {
             </Select>
           </div>
         </div>
-      </Card>
+      </Card> */}
 
       {/* Entries List */}
       <div className="space-y-3">
-        {filteredEntries.length > 0 ? (
-          <>
-            {/* Desktop View */}
-            <div className="hidden sm:block">
-              <div className="overflow-hidden rounded-lg border border-border">
-                <table className="w-full">
-                  <thead className="bg-secondary">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Tag Number
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Owner
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Animal Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredEntries.map((entry) => (
-                      <tr
-                        key={entry.id}
-                        className="hover:bg-secondary/50 transition"
-                      >
-                        <td className="px-6 py-4 text-sm font-medium text-foreground">
-                          {entry.tagNumber}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          {entry.ownerName}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          {entry.animalType}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          {new Date(entry.date).toLocaleDateString("en-NP")}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(entry.status)}`}
-                          >
-                            {getStatusLabel(entry.status)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Mobile View */}
-            <div className="sm:hidden space-y-3">
-              {filteredEntries.map((entry) => (
-                <Card key={entry.id} className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        {entry.tagNumber}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {entry.ownerName}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(entry.status)}`}
-                    >
-                      {getStatusLabel(entry.status)}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <p className="text-muted-foreground">Type</p>
-                      <p className="font-medium text-foreground">
-                        {entry.animalType}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Date</p>
-                      <p className="font-medium text-foreground">
-                        {new Date(entry.date).toLocaleDateString("en-NP")}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </>
+        {animalLists?.length > 0 ? (
+          <DataTableWithPagination table={animalTable} />
         ) : (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">No entries found</p>
+          <Card className="p-12 text-center border-border/50">
+            <p className="text-muted-foreground mb-4 text-sm">
+              No entries created yet! Create your first Entry
+            </p>
+            <Button
+              onClick={() => setActiveTab("new-entry")}
+              variant="outline"
+              className="gap-2 hover:cursor-pointer"
+            >
+              <Plus size={18} />
+              Create Now
+            </Button>
           </Card>
         )}
       </div>
-
-      {/* Summary */}
-      <Card className="p-4 sm:p-6 bg-secondary/50">
-        <p className="text-sm text-muted-foreground">
-          Showing{" "}
-          <span className="font-semibold text-foreground">
-            {filteredEntries.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-semibold text-foreground">
-            {allEntries.length}
-          </span>{" "}
-          entries
-        </p>
-      </Card>
     </div>
   );
 }

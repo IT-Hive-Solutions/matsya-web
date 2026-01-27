@@ -1,6 +1,7 @@
 "use client";
 
 import { flexRender, Table as TableType } from "@tanstack/react-table";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -8,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./table";
+} from "@/components/ui/table";
 import { Button } from "./button";
-import { ChevronLeftIcon, ChevronRightIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface DataTableProps<TData> {
   table: TableType<TData>;
@@ -21,6 +22,7 @@ export function DataTableWithPagination<TData>({
   table,
   isLoading,
 }: DataTableProps<TData>) {
+  console.log({ length: table.getCanNextPage() });
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
@@ -86,7 +88,7 @@ export function DataTableWithPagination<TData>({
       </div>
       <div className="flex items-center justify-end px-2 pb-4  ">
         <div className=" flex items-center  gap-4 ">
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          <div className="flex w-25 items-center justify-center text-sm font-medium">
             Page {table?.getState().pagination.pageIndex + 1} of{" "}
             {table?.getPageCount()}
           </div>

@@ -4,6 +4,7 @@ import DashboardOverview from "./dashboard-overview";
 import TaggingForm from "./tagging-form";
 import ViewEntriesPage from "./view-entries";
 import { IUser } from "@/core/interfaces/user.interface";
+import AnimalLists from "../view/AnimalLists";
 
 interface DashboardContentProps {
   user: IUser;
@@ -53,7 +54,7 @@ export default function DashboardContent({
         </TabsContent>
 
         <TabsContent value="view-entries" className="mt-6">
-          <ViewEntriesPage user={user} />
+          <ViewEntriesPage user={user} setActiveTab={setActiveTab} />
         </TabsContent>
       </Tabs>
     </div>
