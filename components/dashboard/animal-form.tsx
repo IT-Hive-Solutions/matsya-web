@@ -39,6 +39,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Checkbox } from "../ui/checkbox";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { formatDateWithHyphen } from "@/core/services/dateTime/formatDate";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 
 interface AnimalFormProps {
   onClose: () => void;
@@ -81,7 +83,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   });
   const { data: animalCategoryFetched } = useQuery({
     queryKey: ["animal-category"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
+    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
   });
 
   useEffect(() => {
@@ -99,7 +101,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         production_capacity: parseInt(data?.production_capacity),
         tag_number: data?.tag_number,
         owners_contact: data?.owners_id?.owners_contact,
+        vaccinated_date: data?.vaccinated_date,
       };
+      console.log({ fetchedData: data });
+
       form.reset(payload);
     }
   }, [fetchedAnimalData]);
@@ -129,9 +134,9 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   }, [animalTypesFetched]);
   useEffect(() => {
     if (animalCategoryFetched?.data) {
-      const payload = animalCategoryFetched?.data?.map((type: IAnimalType) => {
+      const payload = animalCategoryFetched?.data?.map((type: IAnimalCategories) => {
         return {
-          label: type.animal_name,
+          label: type.category_name,
           value: type.id,
         };
       });
@@ -147,14 +152,16 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       animal_category: undefined,
       animal_type: undefined,
       is_vaccination_applied: false,
-      latitude: "",
-      longitude: "",
+      latitude: undefined,
+      longitude: undefined,
       owners_contact: undefined,
       production_capacity: undefined,
     },
     resolver: zodResolver(CreateAnimalSchema),
+    reValidateMode: "onChange",
   });
   console.log({ formData: form.watch() });
+  console.log({ errors: form.formState.errors });
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
@@ -175,7 +182,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   });
   const updateAnimalMutation = useMutation({
     mutationFn: (payload: UpdateAnimalDTO) =>
-      updateProtectedHandler(endpoints.animal_info, payload),
+      updateProtectedHandler(
+        endpoints.animal_info.byId(animalId ?? -1),
+        payload,
+      ),
     onSuccess: (res) => {
       console.log("error...", { res });
       queryClient.invalidateQueries({
@@ -238,7 +248,29 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                   </FormItem>
                 )}
               />
-
+              <FormField
+                control={form.control}
+                name="num_of_animals"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of Animals</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="e.g., 1"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
+                        value={String(field.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name={"is_vaccination_applied"}
@@ -248,7 +280,15 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                       <FormControl>
                         <Checkbox
                           checked={field.value}
-                          onCheckedChange={field.onChange}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            if (checked) {
+                              form.setValue(
+                                "vaccinated_date",
+                                formatDateWithHyphen(new Date().toString()),
+                              );
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormLabel className="mt-0! cursor-pointer">
@@ -258,6 +298,27 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                   </FormItem>
                 )}
               />
+              {form.watch("is_vaccination_applied") === true && (
+                <FormField
+                  control={form.control}
+                  name={"vaccinated_date"}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="mt-0! cursor-pointer">
+                        Vaccination applied date
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="data"
+                          {...field}
+                          value={field.value}
+                          disabled
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
