@@ -1,5 +1,10 @@
-"use client"
+"use client";
 import { endpoints } from "@/core/contants/endpoints";
+import { getMonthLabel } from "@/core/enums/month.enum";
+import {
+  getVerficationStatusLabel,
+  VerificationStatus,
+} from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
@@ -9,11 +14,11 @@ import { Plus } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
-import { getMonthLabel } from "@/core/enums/month.enum";
 
 type Props = {
   currentConfig: Config;
@@ -51,12 +56,44 @@ export const animalColumns: ColumnDef<IAnimal>[] = [
     accessorKey: "production_capacity",
     header: "Production Capacity",
   },
+  {
+    accessorKey: "verification_status",
+    header: "Verification Status",
+    cell: ({ row }) => {
+      const status = row.original.verification_status;
+      return (
+        <div>
+          {status == VerificationStatus.Validated ? (
+            <div className="w-full flex items-center flex-wrap gap-2">
+              <Badge variant={"default"}>
+                {getVerficationStatusLabel(status)}
+              </Badge>
+              <Badge variant={"default"}>
+                {getVerficationStatusLabel(status)}
+              </Badge>
+            </div>
+          ) : (
+            <Badge
+              variant={
+                status === VerificationStatus.Pending
+                  ? "outline"
+                  : status === VerificationStatus.Rejected
+                    ? "destructive"
+                    : "default"
+              }
+            >
+              {getVerficationStatusLabel(status)}
+            </Badge>
+          )}
+        </div>
+      );
+    },
+  },
 ];
 
 const AnimalLists = ({ currentConfig, setShowForm }: Props) => {
   const [animalLists, setAnimalLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_info),

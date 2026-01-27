@@ -19,34 +19,108 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { endpoints } from "@/core/contants/endpoints";
-import { CreateAnimalDTO, CreateAnimalSchema } from "@/core/dtos/animal.dto";
+import {
+  CreateAnimalDTO,
+  CreateAnimalSchema,
+  UpdateAnimalDTO,
+} from "@/core/dtos/animal.dto";
 import { monthOptions } from "@/core/enums/month.enum";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateProtectedHandler,
+  updateProtectedHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Checkbox } from "../ui/checkbox";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { formatDateWithHyphen } from "@/core/services/dateTime/formatDate";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 
 interface AnimalFormProps {
   onClose: () => void;
+  animalId?: number;
 }
 
-export default function AnimalForm({ onClose }: AnimalFormProps) {
-  const [animalTypeOptions, setAnimalTypeOptions] = useState([]);
-  const [animalCategoryOptions, setAnimalCategoryOptions] = useState([]);
+export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
+  const [productionCapacityOptions, setProductionCapacityOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [animalTypeOptions, setAnimalTypeOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [animalCategoryOptions, setAnimalCategoryOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
 
+  const { data: fetchedAnimalData } = useQuery({
+    queryKey: ["animal"],
+    queryFn: () =>
+      fetchProtectedHandler(endpoints.animal_info.byId(animalId ?? -1)),
+    enabled: !!animalId,
+  });
+  const { data: productionCapacityFetched } = useQuery({
+    queryKey: ["production-types"],
+    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+  });
   const { data: animalTypesFetched } = useQuery({
     queryKey: ["animal-type"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_types),
   });
   const { data: animalCategoryFetched } = useQuery({
-    queryKey: ["animal-type"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
+    queryKey: ["animal-category"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
   });
+
+  useEffect(() => {
+    const data = fetchedAnimalData?.data;
+    if (data) {
+      const payload: UpdateAnimalDTO = {
+        age_months: data?.age_months,
+        age_years: data?.age_years,
+        animal_type: data?.animal_type?.id,
+        animal_category: data?.animal_category?.id,
+        is_vaccination_applied: data?.is_vaccination_applied,
+        latitude: data?.latitude,
+        longitude: data?.longitude,
+        num_of_animals: data?.num_of_animals,
+        production_capacity: parseInt(data?.production_capacity),
+        tag_number: data?.tag_number,
+        owners_contact: data?.owners_id?.owners_contact,
+        vaccinated_date: data?.vaccinated_date,
+      };
+      console.log({ fetchedData: data });
+
+      form.reset(payload);
+    }
+  }, [fetchedAnimalData]);
+  useEffect(() => {
+    if (productionCapacityFetched?.data) {
+      const payload = productionCapacityFetched?.data?.map(
+        (type: IProductionCapacity) => {
+          return {
+            label: type.capacity_name,
+            value: type.id,
+          };
+        },
+      );
+      setProductionCapacityOptions(payload);
+    }
+  }, [productionCapacityFetched]);
   useEffect(() => {
     if (animalTypesFetched?.data) {
       const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {
@@ -60,9 +134,9 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
   }, [animalTypesFetched]);
   useEffect(() => {
     if (animalCategoryFetched?.data) {
-      const payload = animalCategoryFetched?.data?.map((type: IAnimalType) => {
+      const payload = animalCategoryFetched?.data?.map((type: IAnimalCategories) => {
         return {
-          label: type.animal_name,
+          label: type.category_name,
           value: type.id,
         };
       });
@@ -71,21 +145,23 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
   }, [animalCategoryFetched]);
 
   const queryClient = useQueryClient();
-  const form = useForm<CreateAnimalDTO>({
+  const form = useForm<CreateAnimalDTO | UpdateAnimalDTO>({
     defaultValues: {
       age_months: undefined,
       age_years: undefined,
       animal_category: undefined,
       animal_type: undefined,
-      is_vaccination_applied: "",
-      latitude: "",
-      longitude: "",
+      is_vaccination_applied: false,
+      latitude: undefined,
+      longitude: undefined,
       owners_contact: undefined,
-      production_capacity: "",
+      production_capacity: undefined,
     },
     resolver: zodResolver(CreateAnimalSchema),
+    reValidateMode: "onChange",
   });
   console.log({ formData: form.watch() });
+  console.log({ errors: form.formState.errors });
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
@@ -104,9 +180,33 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
       toast.error("Error creating animal!");
     },
   });
-  const onSubmit = (data: CreateAnimalDTO) => {
+  const updateAnimalMutation = useMutation({
+    mutationFn: (payload: UpdateAnimalDTO) =>
+      updateProtectedHandler(
+        endpoints.animal_info.byId(animalId ?? -1),
+        payload,
+      ),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      queryClient.invalidateQueries({
+        queryKey: ["animals"],
+      });
+      toast.success("Animal updated successfully!");
+      onClose();
+    },
+    onError: (err) => {
+      console.log("error...", { err });
+
+      toast.error("Error updating animal!");
+    },
+  });
+  const onSubmit = (data: CreateAnimalDTO | UpdateAnimalDTO) => {
     console.log({ data });
-    createAnimalMutation.mutateAsync(data);
+    if (animalId) {
+      updateAnimalMutation.mutateAsync(data as UpdateAnimalDTO);
+    } else {
+      createAnimalMutation.mutateAsync(data as CreateAnimalDTO);
+    }
   };
   return (
     <Card className="shadow-xl">
@@ -148,23 +248,77 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="is_vaccination_applied"
+                name="num_of_animals"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Is Vaccination Applied</FormLabel>
+                    <FormLabel>Number of Animals</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Yes/No"
+                        type="number"
+                        placeholder="e.g., 1"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
+                        value={String(field.value)}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name={"is_vaccination_applied"}
+                render={({ field }) => (
+                  <FormItem className="flex items-end space-y-0">
+                    <div className="flex items-center gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            if (checked) {
+                              form.setValue(
+                                "vaccinated_date",
+                                formatDateWithHyphen(new Date().toString()),
+                              );
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="mt-0! cursor-pointer">
+                        FMD Vaccine Applied
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              {form.watch("is_vaccination_applied") === true && (
+                <FormField
+                  control={form.control}
+                  name={"vaccinated_date"}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="mt-0! cursor-pointer">
+                        Vaccination applied date
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="data"
+                          {...field}
+                          value={field.value}
+                          disabled
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -182,16 +336,33 @@ export default function AnimalForm({ onClose }: AnimalFormProps) {
               />
               <FormField
                 control={form.control}
-                name="production_capacity"
+                name={`production_capacity`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Production Capacity</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Total production capacity"
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>
+                      Production Capacity{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(parseInt(val))}
+                      value={String(field.value)}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select capacity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {productionCapacityOptions.map((type) => (
+                          <SelectItem
+                            key={type.value.toString()}
+                            value={type.value.toString()}
+                          >
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -1,7 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,591 +14,707 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import FormSection from "@/components/form/form-section";
 import { useToast } from "@/components/ui/use-toast";
 import { IUser } from "@/core/interfaces/user.interface";
-
-interface CattleEntry {
-  id: string;
-  category: string;
-  animalType: string;
-  numberOfAnimals: number;
-  age: string;
-  ageUnit: string;
-  fmdStatus: boolean;
-  tagNumber: string;
-  productionCapacity: string;
-  tagImage: File | null;
-}
+import { CreateAnimalSchema } from "@/core/dtos/animal.dto";
+import { monthOptions } from "@/core/enums/month.enum";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { endpoints } from "@/core/contants/endpoints";
+import { IAnimalType } from "@/core/interfaces/animalType.interface";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { toast } from "sonner";
 
 interface TaggingFormProps {
   user: IUser;
 }
 
-const ANIMAL_TYPES = ["Cow", "Buffalo", "Goat", "Sheep", "Others"];
-const PRODUCTION_TYPES = ["Milk", "Meat", "Both"];
+const formSchema = z.object({
+  localLevelName: z.string().optional(),
+  province_id: z.string(),
+  district_id: z.string(),
+  ruralMunicipality: z.string().optional(),
+  date: z.string(),
+  serial_number: z.string(),
+  owners_name: z.string().min(1, "Owner name is required"),
+  owners_contact: z.string().min(1, "Contact number is required"),
+  latitude: z.string(),
+  longitude: z.string(),
+  cattleEntries: z
+    .array(CreateAnimalSchema)
+    .min(1, "At least one cattle entry is required"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function TaggingForm({ user }: TaggingFormProps) {
-  const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    localLevelName: "",
-    province: user.office_id.province_id.province_name || "",
-    district: user.office_id.district_id.district_name || "",
-    ruralMunicipality: "",
-    date: new Date().toISOString().split("T")[0],
-    serialNumber: "SN-" + Date.now(),
-    ownerName: "",
-    contactNumber: "",
-    latitude: "27.7172",
-    longitude: "85.3240",
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [animalTypeOptions, setAnimalTypeOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [productionCapacityOptions, setProductionCapacityOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [animalCategoryOptions, setAnimalCategoryOptions] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+
+  const { data: productionCapacityFetched } = useQuery({
+    queryKey: ["production-types"],
+    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+  });
+  const { data: animalTypesFetched } = useQuery({
+    queryKey: ["animal-type"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
+  });
+  const { data: animalCategoryFetched } = useQuery({
+    queryKey: ["animal-category"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+  });
+  
+  useEffect(() => {
+    if (productionCapacityFetched?.data) {
+      const payload = productionCapacityFetched?.data?.map(
+        (type: IProductionCapacity) => {
+          return {
+            label: type.capacity_name,
+            value: type.id,
+          };
+        },
+      );
+      setProductionCapacityOptions(payload);
+    }
+  }, [productionCapacityFetched]);
+
+  useEffect(() => {
+    if (animalTypesFetched?.data) {
+      const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {
+        return {
+          label: type.animal_name,
+          value: type.id,
+        };
+      });
+      setAnimalTypeOptions(payload);
+    }
+  }, [animalTypesFetched]);
+  useEffect(() => {
+    if (animalCategoryFetched?.data) {
+      const payload = animalCategoryFetched?.data?.map(
+        (type: IAnimalCategories) => {
+          return {
+            label: type.category_name,
+            value: type.id,
+          };
+        },
+      );
+      setAnimalCategoryOptions(payload);
+    }
+  }, [animalCategoryFetched]);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      localLevelName: "",
+      province_id: user.office_id.district_id.province_id.province_name || "",
+      district_id: user.office_id.district_id.district_name || "",
+      ruralMunicipality: "",
+      date: new Date().toISOString().split("T")[0],
+      serial_number: "SN-" + Date.now(),
+      owners_name: "",
+      owners_contact: "",
+      latitude: "27.7172",
+      longitude: "85.3240",
+      cattleEntries: [
+        {
+          animal_category: undefined,
+          animal_type: undefined,
+          age_months: undefined,
+          age_years: undefined,
+          is_vaccination_applied: false,
+          latitude: undefined,
+          longitude: undefined,
+          owners_contact: undefined,
+          production_capacity: undefined,
+          tag_number: undefined,
+        },
+      ],
+    },
   });
 
-  const [cattleEntries, setCattleEntries] = useState<CattleEntry[]>([
-    {
-      id: "cattle-1",
-      category: "",
-      animalType: "",
-      numberOfAnimals: 1,
-      age: "",
-      ageUnit: "year",
-      fmdStatus: false,
-      tagNumber: "",
-      productionCapacity: "",
-      tagImage: null,
-    },
-  ]);
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.ownerName.trim())
-      newErrors.ownerName = "Owner name is required";
-    if (!formData.contactNumber.trim())
-      newErrors.contactNumber = "Contact number is required";
-
-    cattleEntries.forEach((cattle, idx) => {
-      if (!cattle.animalType)
-        newErrors[`cattle-${idx}-animalType`] = "Animal type is required";
-      if (cattle.numberOfAnimals < 1)
-        newErrors[`cattle-${idx}-numberOfAnimals`] =
-          "Must have at least 1 animal";
-      if (!cattle.tagNumber.trim())
-        newErrors[`cattle-${idx}-tagNumber`] = "Tag number is required";
-      if (!cattle.productionCapacity)
-        newErrors[`cattle-${idx}-productionCapacity`] =
-          "Production capacity is required";
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "cattleEntries",
+  });
 
   const handleAddCattle = () => {
-    const newCattleId = "cattle-" + Date.now();
-    setCattleEntries([
-      ...cattleEntries,
-      {
-        id: newCattleId,
-        category: "",
-        animalType: "",
-        numberOfAnimals: 1,
-        age: "",
-        ageUnit: "year",
-        fmdStatus: false,
-        tagNumber: "",
-        productionCapacity: "",
-        tagImage: null,
-      },
-    ]);
+    append({
+      animal_category: undefined,
+      animal_type: undefined,
+      age_months: undefined,
+      age_years: undefined,
+      is_vaccination_applied: false,
+      latitude: undefined,
+      longitude: undefined,
+      owners_contact: undefined,
+      production_capacity: undefined,
+      tag_number: undefined,
+    });
   };
 
-  const handleRemoveCattle = (id: string) => {
-    if (cattleEntries.length > 1) {
-      setCattleEntries(cattleEntries.filter((c) => c.id !== id));
+  const handleRemoveCattle = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
     }
   };
-
-  const updateCattleEntry = (id: string, updates: Partial<CattleEntry>) => {
-    setCattleEntries(
-      cattleEntries.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Success!",
-        description: `Entry with ${cattleEntries.length} cattle record(s) has been submitted successfully.`,
+  const createAnimalMutation = useMutation({
+    mutationFn: (payload: FormValues) =>
+      mutateProtectedHandler(endpoints.animal_info["create-multiple"], payload),
+    onSuccess: (res) => {
+      console.log("error...", { res });
+      queryClient.invalidateQueries({
+        queryKey: ["animals"],
       });
+      toast.success("Animal created successfully!");
+      // onClose();
+    },
+    onError: (err) => {
+      console.log("error...", { err });
 
-      // Reset form
-      if (formRef.current) {
-        formRef.current.reset();
-      }
-      setFormData({
-        localLevelName: "",
-        ruralMunicipality: "",
-        district: "",
-        province: "",
-
-        date: new Date().toISOString().split("T")[0],
-        serialNumber: "SN-" + Date.now(),
-        ownerName: "",
-        contactNumber: "",
-        latitude: "27.7172",
-        longitude: "85.3240",
-      });
-      setCattleEntries([
-        {
-          id: "cattle-1",
-          category: "",
-          animalType: "",
-          numberOfAnimals: 1,
-          age: "",
-          ageUnit: "year",
-          fmdStatus: false,
-          tagNumber: "",
-          productionCapacity: "",
-          tagImage: null,
-        },
-      ]);
-    } finally {
+      toast.error("Error creating animal!");
+    },
+    onSettled: () => {
       setIsSubmitting(false);
-    }
+    },
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    await createAnimalMutation.mutateAsync(data);
   };
+  console.log({
+    formData: form.watch("cattleEntries"),
+    error: form.formState.errors,
+  });
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-      {/* Section A: Location & Meta Info */}
-      <FormSection title="Location & Meta Information" icon="📍">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Local Level Name
-            </label>
-            <Input
-              placeholder="Enter local level name"
-              value={formData.localLevelName}
-              onChange={(e) =>
-                setFormData({ ...formData, localLevelName: e.target.value })
-              }
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Section A: Location & Meta Info */}
+        <FormSection title="Location & Meta Information" icon="📍">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="localLevelName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Local Level Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter local level name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="province_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Province</FormLabel>
+                  <FormControl>
+                    <Input disabled className="bg-muted" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="district_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>District</FormLabel>
+                  <FormControl>
+                    <Input disabled className="bg-muted" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ruralMunicipality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rural/Municipality</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter rural/municipality name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      disabled
+                      className="bg-muted"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="serial_number"
+              render={({ field }) => (
+                <FormItem className="sm:col-span-2">
+                  <FormLabel>Serial Number</FormLabel>
+                  <FormControl>
+                    <Input disabled className="bg-muted" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
+        </FormSection>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Province
-            </label>
-            <Input disabled value={formData.province} className="bg-muted" />
-          </div>
+        {/* Section B: Owner Details */}
+        <FormSection title="Owner Details" icon="👤">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="owners_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Owner's Name <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter owner's name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              District
-            </label>
-            <Input disabled value={formData.district} className="bg-muted" />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Rural/Municipality
-            </label>
-            <Input
-              placeholder="Enter rural/municipality name"
-              value={formData.ruralMunicipality}
-              onChange={(e) =>
-                setFormData({ ...formData, ruralMunicipality: e.target.value })
-              }
+            <FormField
+              control={form.control}
+              name="owners_contact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Contact Number <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="9800000000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
+        </FormSection>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Date
-            </label>
-            <Input
-              type="date"
-              disabled
-              value={formData.date}
-              className="bg-muted"
-            />
+        {/* Cattle Details Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-foreground">
+              Cattle Details & Vaccination
+            </h3>
+            <Button
+              type="button"
+              onClick={handleAddCattle}
+              variant="outline"
+              className="text-sm bg-transparent"
+            >
+              + Add Another Cattle
+            </Button>
           </div>
 
-          <div className="sm:col-span-2">
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Serial Number
-            </label>
-            <Input
-              disabled
-              value={formData.serialNumber}
-              className="bg-muted"
-            />
-          </div>
+          {fields.map((field, idx) => (
+            <div
+              key={field.id}
+              className="border border-border rounded-lg p-4 sm:p-6 space-y-4 bg-card"
+            >
+              {/* Cattle Card Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-base font-semibold text-foreground">
+                  Cattle #{idx + 1}
+                </h4>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    onClick={() => handleRemoveCattle(idx)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.animal_category`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Animal Category{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        {...field}
+                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        value={field.value?.toString() ?? ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select animal type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {animalCategoryOptions.map((type) => (
+                            <SelectItem
+                              key={type.value.toString()}
+                              value={type.value.toString()}
+                            >
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.animal_type`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Animal Type <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        {...field}
+                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        value={field.value?.toString() ?? ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select animal type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {animalTypeOptions.map((type) => (
+                            <SelectItem
+                              key={type.value.toString()}
+                              value={type.value.toString()}
+                            >
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.num_of_animals`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Number of Animals{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="1"
+                          placeholder="Enter number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 1)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.age_years`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age (Years)</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Age in Years"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseInt(e.target.value))
+                            }
+                            className="flex-1"
+                          />
+                        </FormControl>
+                        <FormField
+                          control={form.control}
+                          name={`cattleEntries.${idx}.age_months`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Birth Months</FormLabel>
+                              <FormControl>
+                                <Select
+                                  {...field}
+                                  value={field.value?.toString() ?? ""}
+                                  onValueChange={(val) => field.onChange(val)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select Type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {monthOptions.map((type: any) => (
+                                      <SelectItem
+                                        key={type.value.toString()}
+                                        value={type.value.toString()}
+                                      >
+                                        {type?.label ?? ""}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.is_vaccination_applied`}
+                  render={({ field }) => (
+                    <FormItem className="flex items-end space-y-0">
+                      <div className="flex items-center gap-3">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="mt-0! cursor-pointer">
+                          FMD Vaccine Applied
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.tag_number`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Tag Number <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., TAG-001-2024" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.production_capacity`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Production Capacity{" "}
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        value={String(field.value)}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select capacity" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {productionCapacityOptions.map((type) => (
+                            <SelectItem
+                              key={type.value.toString()}
+                              value={type.value.toString()}
+                            >
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.tag_image`}
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Tag Image</FormLabel>
+                      <FormControl>
+                        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-secondary/50 transition">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              onChange(file);
+                            }}
+                            className="hidden"
+                            id={`tag-image-${field.name}`}
+                            {...field}
+                          />
+                          <label
+                            htmlFor={`tag-image-${field.name}`}
+                            className="cursor-pointer block"
+                          >
+                            {value ? (
+                              <div className="text-sm text-foreground">
+                                <p className="font-medium">
+                                  File selected:
+                                  {/* {value.name} */}
+                                </p>
+                              </div>
+                            ) : (
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  Click to upload tag image
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  PNG, JPG up to 5MB
+                                </p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          ))}
         </div>
-      </FormSection>
 
-      {/* Section B: Owner Details */}
-      <FormSection title="Owner Details" icon="👤">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Owner's Name <span className="text-destructive">*</span>
-            </label>
-            <Input
-              placeholder="Enter owner's name"
-              value={formData.ownerName}
-              onChange={(e) =>
-                setFormData({ ...formData, ownerName: e.target.value })
-              }
-              className={errors.ownerName ? "border-destructive" : ""}
+        {/* Section G: GPS Auto Capture */}
+        <FormSection title="Location Coordinates" icon="🗺️">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Latitude</FormLabel>
+                  <FormControl>
+                    <Input disabled className="bg-muted" {...field} />
+                  </FormControl>
+                  <FormDescription>Auto-captured</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.ownerName && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.ownerName}
-              </p>
-            )}
-          </div>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Contact Number <span className="text-destructive">*</span>
-            </label>
-            <Input
-              type="tel"
-              placeholder="+977-9800000000"
-              value={formData.contactNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, contactNumber: e.target.value })
-              }
-              className={errors.contactNumber ? "border-destructive" : ""}
+            <FormField
+              control={form.control}
+              name="longitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Longitude</FormLabel>
+                  <FormControl>
+                    <Input disabled className="bg-muted" {...field} />
+                  </FormControl>
+                  <FormDescription>Auto-captured</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.contactNumber && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.contactNumber}
-              </p>
-            )}
           </div>
-        </div>
-      </FormSection>
+        </FormSection>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">
-            Cattle Details & Vaccination
-          </h3>
+        {/* Submit Button */}
+        <div className="flex gap-3 sticky bottom-0 bg-background border-t border-border p-4 -m-6 mt-0 rounded-lg">
           <Button
-            type="button"
-            onClick={handleAddCattle}
-            variant="outline"
-            className="text-sm bg-transparent"
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           >
-            + Add Another Cattle
+            {isSubmitting
+              ? "Submitting..."
+              : `Submit Entry (${fields.length} cattle)`}
           </Button>
         </div>
-
-        {cattleEntries.map((cattle, idx) => (
-          <div
-            key={cattle.id}
-            className="border border-border rounded-lg p-4 sm:p-6 space-y-4 bg-card"
-          >
-            {/* Cattle Card Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-semibold text-foreground">
-                Cattle #{idx + 1}
-              </h4>
-              {cattleEntries.length > 1 && (
-                <Button
-                  type="button"
-                  onClick={() => handleRemoveCattle(cattle.id)}
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:bg-destructive/10"
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Cattle Category */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Cattle Category
-                </label>
-                <Input
-                  placeholder="e.g., Indigenous, Crossbred"
-                  value={cattle.category}
-                  onChange={(e) =>
-                    updateCattleEntry(cattle.id, { category: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Animal Type */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Animal Type <span className="text-destructive">*</span>
-                </label>
-                <Select
-                  value={cattle.animalType}
-                  onValueChange={(value) =>
-                    updateCattleEntry(cattle.id, { animalType: value })
-                  }
-                >
-                  <SelectTrigger
-                    className={
-                      errors[`cattle-${idx}-animalType`]
-                        ? "border-destructive"
-                        : ""
-                    }
-                  >
-                    <SelectValue placeholder="Select animal type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ANIMAL_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors[`cattle-${idx}-animalType`] && (
-                  <p className="text-xs text-destructive mt-1">
-                    {errors[`cattle-${idx}-animalType`]}
-                  </p>
-                )}
-              </div>
-
-              {/* Number of Animals */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Number of Animals <span className="text-destructive">*</span>
-                </label>
-                <Input
-                  type="number"
-                  min="1"
-                  placeholder="Enter number"
-                  value={cattle.numberOfAnimals}
-                  onChange={(e) =>
-                    updateCattleEntry(cattle.id, {
-                      numberOfAnimals: Number.parseInt(e.target.value) || 1,
-                    })
-                  }
-                  className={
-                    errors[`cattle-${idx}-numberOfAnimals`]
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
-                {errors[`cattle-${idx}-numberOfAnimals`] && (
-                  <p className="text-xs text-destructive mt-1">
-                    {errors[`cattle-${idx}-numberOfAnimals`]}
-                  </p>
-                )}
-              </div>
-
-              {/* Animal Age */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Animal Age
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Age"
-                    value={cattle.age}
-                    onChange={(e) =>
-                      updateCattleEntry(cattle.id, { age: e.target.value })
-                    }
-                    className="flex-1"
-                  />
-                  <Select
-                    value={cattle.ageUnit}
-                    onValueChange={(value) =>
-                      updateCattleEntry(cattle.id, { ageUnit: value })
-                    }
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="year">Year</SelectItem>
-                      <SelectItem value="month">Month</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* FMD Vaccine Status */}
-              <div className="flex items-end">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={cattle.fmdStatus}
-                    onChange={(e) =>
-                      updateCattleEntry(cattle.id, {
-                        fmdStatus: e.target.checked,
-                      })
-                    }
-                    className="w-4 h-4 rounded border-border"
-                  />
-                  <span className="text-sm font-medium text-foreground">
-                    FMD Vaccine Applied
-                  </span>
-                </label>
-              </div>
-
-              {/* Tag Number */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Tag Number <span className="text-destructive">*</span>
-                </label>
-                <Input
-                  placeholder="e.g., TAG-001-2024"
-                  value={cattle.tagNumber}
-                  onChange={(e) =>
-                    updateCattleEntry(cattle.id, { tagNumber: e.target.value })
-                  }
-                  className={
-                    errors[`cattle-${idx}-tagNumber`]
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
-                {errors[`cattle-${idx}-tagNumber`] && (
-                  <p className="text-xs text-destructive mt-1">
-                    {errors[`cattle-${idx}-tagNumber`]}
-                  </p>
-                )}
-              </div>
-
-              {/* Production Capacity */}
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Production Capacity{" "}
-                  <span className="text-destructive">*</span>
-                </label>
-                <Select
-                  value={cattle.productionCapacity}
-                  onValueChange={(value) =>
-                    updateCattleEntry(cattle.id, { productionCapacity: value })
-                  }
-                >
-                  <SelectTrigger
-                    className={
-                      errors[`cattle-${idx}-productionCapacity`]
-                        ? "border-destructive"
-                        : ""
-                    }
-                  >
-                    <SelectValue placeholder="Select capacity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PRODUCTION_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors[`cattle-${idx}-productionCapacity`] && (
-                  <p className="text-xs text-destructive mt-1">
-                    {errors[`cattle-${idx}-productionCapacity`]}
-                  </p>
-                )}
-              </div>
-
-              {/* Tag Image Upload */}
-              <div className="sm:col-span-2">
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Tag Image
-                </label>
-                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-secondary/50 transition">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        updateCattleEntry(cattle.id, { tagImage: file });
-                      }
-                    }}
-                    className="hidden"
-                    id={`tag-image-${cattle.id}`}
-                  />
-                  <label
-                    htmlFor={`tag-image-${cattle.id}`}
-                    className="cursor-pointer block"
-                  >
-                    {cattle.tagImage ? (
-                      <div className="text-sm text-foreground">
-                        <p className="font-medium">
-                          File selected: {cattle.tagImage.name}
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          Click to upload tag image
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          PNG, JPG up to 5MB
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Section G: GPS Auto Capture */}
-      <FormSection title="Location Coordinates" icon="🗺️">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Latitude
-            </label>
-            <Input disabled value={formData.latitude} className="bg-muted" />
-            <p className="text-xs text-muted-foreground mt-1">Auto-captured</p>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Longitude
-            </label>
-            <Input disabled value={formData.longitude} className="bg-muted" />
-            <p className="text-xs text-muted-foreground mt-1">Auto-captured</p>
-          </div>
-        </div>
-      </FormSection>
-
-      {/* Submit Button */}
-      <div className="flex gap-3 sticky bottom-0 bg-background border-t border-border p-4 -m-6 mt-0 rounded-lg">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-        >
-          {isSubmitting
-            ? "Submitting..."
-            : `Submit Entry (${cattleEntries.length} cattle)`}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

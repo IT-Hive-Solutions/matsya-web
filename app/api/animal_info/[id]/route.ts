@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const animal = await directus.request(
-            readItem('animal_info', parseInt(id))
+            readItem('animal_info', parseInt(id), { fields: ["*", "owners_id.*", "animal_type.*", "animal_category.*"] })
         );
 
         return NextResponse.json({
@@ -38,7 +38,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         const updatedAnimal = await directus.request(
             updateItem('animal_info', parseInt(id), {
-                onths: body.age_months,
+                ...body,
+                age_months: body.age_months,
                 age_years: body.age_years,
                 animal_category: body.animal_category,
                 animal_type: body.animal_type,
@@ -47,6 +48,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
                 longitude: body.longitude,
                 owners_id: body.owners_id,
                 production_capacity: body.production_capacity,
+                num_of_animals: body.num_of_animals,
+                verification_status: body.verification_status,
             })
         );
 

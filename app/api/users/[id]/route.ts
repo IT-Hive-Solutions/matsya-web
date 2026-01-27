@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { directus } from '@/core/lib/directus';
-import { readItem, updateItem, deleteItem } from '@directus/sdk';
+import { readItem, updateItem, deleteItem, deleteUser } from '@directus/sdk';
 
 type Params = {
     params: Promise<{
@@ -62,7 +62,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         await directus.request(
-            deleteItem('users', parseInt(id))
+            deleteUser(id)
         );
 
         return NextResponse.json({

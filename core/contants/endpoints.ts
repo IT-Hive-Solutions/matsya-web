@@ -28,7 +28,11 @@ export const endpoints = {
     ),
     animal_info: Object.assign(
         `${baseUrl}/animal_info`,
-        { byId: (id: number) => `${baseUrl}/animal_info/${id}`, }
+        {
+            byId: (id: number) => `${baseUrl}/animal_info/${id}`,
+            "create-multiple": `${baseUrl}/animal_info/create-multiple`,
+            "update_animal_status": (id: number) => `${baseUrl}/animal_info/${id}/update_animal_status`,
+        }
     ),
     office: Object.assign(
         `${baseUrl}/office`,

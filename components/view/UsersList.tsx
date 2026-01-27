@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
@@ -31,6 +31,10 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
     {
       accessorKey: "full_name",
       header: "Name",
+      cell: ({ row }) => {
+        const name = `${row.original.first_name} ${row.original.last_name}`;
+        return <p>{name}</p>;
+      },
     },
     {
       accessorKey: "email",
@@ -72,12 +76,15 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
               console.log("Password reset for : ", row.original.full_name);
               await resetPasswordMutation.mutateAsync({
                 email: row.original.email,
-                needs_password_change:true,
+                needs_password_change: true,
               });
               setOpen(false);
             }}
           >
-            <Button isLoading={loadingId === row.original.id} className="w-full">
+            <Button
+              isLoading={loadingId === row.original.id}
+              className="w-full"
+            >
               Reset Password
             </Button>
           </ConfirmationDialog>
