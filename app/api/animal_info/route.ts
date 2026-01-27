@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readItems, createItem } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
+import { VerificationStatus } from '@/core/enums/verification-status.enum';
 
 // GET - Fetch all animal_info
 export async function GET(request: NextRequest) {
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
                 owners_id: body.owners_id,
                 tag_number: body.tag_number,
                 production_capacity: body.production_capacity,
+                verification_status: VerificationStatus.Pending
             })
         );
 

@@ -1,3 +1,4 @@
+import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { directus } from "@/core/lib/directus";
 import { createItems, readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
                 age_months: animal.age_months,
                 age_years: animal.age_years,
                 tag_number: animal.tag_number,
+                verification_status: VerificationStatus.Pending,
                 is_vaccination_applied: animal.is_vaccination_applied,
                 production_capacity: animal.production_capacity,
                 latitude: body.latitude,
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
         }
 
         console.log("payloadddd: ", payload);
-        
+
 
 
         const newAnimals = await directus.request(
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
         );
     } catch (error: any) {
         console.log("errorrrr: ", error);
-        
+
         return NextResponse.json(
             { success: false, error: error.message || 'Failed to create animal' },
             { status: 500 }
