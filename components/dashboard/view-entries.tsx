@@ -27,6 +27,7 @@ import {
   Layers,
   LucideOctagonMinus,
   MapPin,
+  MapPinnedIcon,
   MoreHorizontal,
   Phone,
   Search,
@@ -40,6 +41,7 @@ import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
 import { useEscapeKey } from "@/hooks/useEscapePress";
+import Link from "next/link";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -193,7 +195,7 @@ export default function OwnerAnimalView({
               {/* Search Bar */}
               <div className="mb-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by owner name, contact, or tag number..."
                     value={searchTerm}
@@ -258,24 +260,36 @@ export default function OwnerAnimalView({
                               </div>
                             </div>
                             {selectedOwner?.owner.id !== group.owner.id && (
-                              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all shrink-0" />
+                              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-slate-700 group-hover:translate-x-1 transition-all shrink-0" />
                             )}
                           </div>
 
                           {/* Contact Information */}
                           <div className="space-y-2 mb-3">
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <Phone className="h-3 w-3 text-slate-400 shrink-0" />
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
                               <span className="font-medium truncate">
                                 {group.owner.contact}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
                               <span className="truncate">
                                 {group.owner.localLevel}, Ward{" "}
                                 {group.owner.ward}
                               </span>
+                            </div>
+                            <div>
+                              <Link
+                                target="_blank"
+                                href={`https://www.google.com/maps/search/${group.animals[0].latitude},+${group.animals[0].longitude}`}
+                                className="flex gap-2"
+                              >
+                                <MapPinnedIcon className="text-muted-foreground w-4 h-4" />
+                                <span className="truncate text-xs text-muted-foreground underline">
+                                  Locate in Map
+                                </span>
+                              </Link>
                             </div>
                           </div>
 
@@ -333,13 +347,13 @@ export default function OwnerAnimalView({
                   <Card className="p-12 text-center border-slate-200 bg-white">
                     <div className="flex flex-col items-center gap-4">
                       <div className="p-4 bg-slate-100 rounded-full">
-                        <User className="h-8 w-8 text-slate-400" />
+                        <User className="h-8 w-8 text-muted-foreground" />
                       </div>
                       <div>
                         <p className="text-lg font-medium text-slate-900 mb-1">
                           No owners found
                         </p>
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-muted-foreground">
                           {searchTerm
                             ? "Try adjusting your search terms"
                             : "Start by creating your first entry"}
@@ -355,37 +369,6 @@ export default function OwnerAnimalView({
           {/* Animal Details - Right Side */}
           {selectedOwner && (
             <div className="h-full hidden md:flex flex-1 flex-col min-w-0 animate-in slide-in-from-right duration-500">
-              {/* Owner Info Header */}
-              <Card className="p-5 border-slate-200 bg-white mb-4 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-slate-100 rounded-xl shrink-0">
-                    <User className="h-5 w-5 text-slate-700" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-bold text-slate-900 truncate">
-                      {selectedOwner.owner.name}'s Animals
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-3 mt-1">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <Phone className="h-3 w-3" />
-                        {selectedOwner.owner.contact}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <MapPin className="h-3 w-3" />
-                        {selectedOwner.owner.localLevel}, Ward{" "}
-                        {selectedOwner.owner.ward}
-                      </div>
-                    </div>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-slate-100 text-slate-700 border-0 shrink-0"
-                  >
-                    {selectedOwner.animals.length} Animals
-                  </Badge>
-                </div>
-              </Card>
-
               {/* Animal Cards Grid */}
               <div className=" flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -425,7 +408,7 @@ export default function OwnerAnimalView({
                                 {animal.animal_category.category_name}
                               </Badge>
                             </div>
-                            <p className="text-xs text-slate-600 font-mono">
+                            <p className="text-xs text-muted-foreground font-mono">
                               Tag: {animal.tag_number}
                             </p>
                           </div>
@@ -532,7 +515,7 @@ export default function OwnerAnimalView({
                               Age
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <Calendar className="h-3 w-3 text-slate-400" />
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
                                 {animal.age_months}, {animal.age_years}
                               </p>
@@ -544,7 +527,7 @@ export default function OwnerAnimalView({
                               Production
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <Activity className="h-3 w-3 text-slate-400" />
+                              <Activity className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
                                 {animal.production_capacity || "N/A"}
                               </p>
@@ -560,7 +543,7 @@ export default function OwnerAnimalView({
                               className={`${
                                 !(animal.is_vaccination_applied == "no")
                                   ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-slate-100 text-slate-600"
+                                  : "bg-slate-100 text-muted-foreground"
                               } border-0 text-xs px-2 py-0.5`}
                             >
                               {!(animal.is_vaccination_applied == "no")
@@ -580,8 +563,8 @@ export default function OwnerAnimalView({
                         {/* Location */}
                         {animal.latitude && animal.longitude && (
                           <div className="pt-3 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <MapPin className="h-3 w-3 text-slate-400" />
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
                               <span className="font-mono">
                                 {animal.latitude}, {animal.longitude}
                               </span>
