@@ -33,12 +33,13 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
+import { useEscapeKey } from "@/hooks/useEscapePress";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -105,6 +106,10 @@ export default function OwnerAnimalView({
     null,
   );
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEscapeKey(() => {
+    setSelectedOwner(null);
+  });
 
   const handleUpdateVerificationStatusMutation = useMutation({
     mutationFn: (payload: {
@@ -176,115 +181,12 @@ export default function OwnerAnimalView({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50/50">
-      {/* Header Section */}
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-        <div className="max-w-480 mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                  Livestock Registry
-                </h1>
-                <p className="mt-2 text-sm text-slate-600">
-                  Manage and verify animal ownership records
-                </p>
-              </div>
-              {selectedOwner && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedOwner(null)}
-                  className="gap-2 hover:bg-slate-100"
-                >
-                  <X className="h-4 w-4" />
-                  Clear Selection
-                </Button>
-              )}
-            </div>
-
-            {/* Stats Overview */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <User className="h-4 w-4 text-slate-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.length}
-                    </p>
-                    <p className="text-xs text-slate-600">Total Owners</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <Activity className="h-4 w-4 text-emerald-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) => sum + group.animals.length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Total Animals</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <CheckCircleIcon className="h-4 w-4 text-blue-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) =>
-                          sum +
-                          group.animals.filter(
-                            (a) => a.verification_status === "verified",
-                          ).length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Verified</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-amber-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) =>
-                          sum +
-                          group.animals.filter(
-                            (a) => a.verification_status === "pending",
-                          ).length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Pending</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Side by Side Layout */}
-      <div className="max-w-480 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-6 h-[calc(100vh-280px)]">
+      <div className="   ">
+        <div className="flex gap-6 h-[calc(100vh-20vh)]">
           {/* Owner List - Left Side */}
           <div
             className={`transition-all duration-500 ease-in-out ${
-              selectedOwner ? "w-full md:w-96 lg:w-105 shrink-0" : "w-full"
+              selectedOwner ? " md:w-48 lg:w-72 shrink-0" : "w-full"
             }`}
           >
             <div className="h-full flex flex-col">
@@ -302,7 +204,9 @@ export default function OwnerAnimalView({
               </div>
 
               {/* Owner Cards List */}
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              <div
+                className={" overflow-y-auto pr-2 space-y-3 custom-scrollbar"}
+              >
                 {filteredData.length > 0 ? (
                   <div
                     className={`grid gap-4 ${selectedOwner ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}
@@ -450,7 +354,7 @@ export default function OwnerAnimalView({
 
           {/* Animal Details - Right Side */}
           {selectedOwner && (
-            <div className="hidden md:flex flex-1 flex-col min-w-0 animate-in slide-in-from-right duration-500">
+            <div className="h-full hidden md:flex flex-1 flex-col min-w-0 animate-in slide-in-from-right duration-500">
               {/* Owner Info Header */}
               <Card className="p-5 border-slate-200 bg-white mb-4 shrink-0">
                 <div className="flex items-center gap-3">
@@ -483,7 +387,7 @@ export default function OwnerAnimalView({
               </Card>
 
               {/* Animal Cards Grid */}
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className=" flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   {selectedOwner.animals.map((animal, index) => (
                     <Card

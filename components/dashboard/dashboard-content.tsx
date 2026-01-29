@@ -24,7 +24,7 @@ export default function DashboardContent({
   return (
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        {/* <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger
             value="overview"
             className="text-xs sm:text-sm hover:cursor-pointer hover:bg-primary/20 transition-all"
@@ -43,7 +43,7 @@ export default function DashboardContent({
           >
             View Entries
           </TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="overview" className="mt-6">
           <DashboardOverview user={user} />
