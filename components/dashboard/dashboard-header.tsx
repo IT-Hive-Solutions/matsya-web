@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Months } from "@/core/enums/month.enum";
 import { IUser } from "@/core/interfaces/user.interface";
 
 interface HeaderProps {
-  user: IUser;
-  onLogout: () => void;
+  user?: IUser;
 }
 
-export default function DashboardHeader({ user, onLogout }: HeaderProps) {
+export default function DashboardHeader({ user }: HeaderProps) {
   const getUserTypeLabel = (type: string) => {
     const labels: { [key: string]: string } = {
       vaccinator: "Vaccinator",
@@ -42,20 +42,22 @@ export default function DashboardHeader({ user, onLogout }: HeaderProps) {
           <div className="flex items-center gap-2 sm:gap-6">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">
-                {user.full_name}
+                {user?.first_name ?? ""} {user?.last_name ?? ""}
               </p>
               <p className="text-xs text-muted-foreground">
-                {getUserTypeLabel(user.user_type)}
+                {user?.user_type && getUserTypeLabel(user?.user_type as Months)}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onLogout}
-              className="text-xs sm:text-sm bg-transparent"
-            >
-              Logout
-            </Button>
+            <form action="/api/auth/logout" method="POST">
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm bg-transparent"
+              >
+                Logout
+              </Button>
+            </form>
           </div>
         </div>
       </div>

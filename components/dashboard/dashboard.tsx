@@ -10,10 +10,9 @@ import { IUser } from "@/core/interfaces/user.interface";
 
 interface DashboardProps {
   user: IUser;
-  onLogout: () => void;
 }
 
-export default function Dashboard({ user, onLogout }: DashboardProps) {
+export default function Dashboard({ user }: DashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
   const renderContent = () => {
@@ -65,7 +64,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader user={user} onLogout={onLogout} />
+      <DashboardHeader user={user} />
       <div className="flex flex-1 overflow-hidden">
         <NavigationDrawer
           onNavigate={setActiveTab}

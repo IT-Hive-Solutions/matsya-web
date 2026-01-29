@@ -26,7 +26,7 @@ type Props = {
 const UserLists = ({ currentConfig, setShowForm }: Props) => {
   const [userLists, setUserLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const userColumns: ColumnDef<IUser>[] = [
     {
       accessorKey: "full_name",
@@ -73,7 +73,7 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
             }}
             onConfirm={async (setOpen) => {
               setLoadingId(row.original.id);
-              console.log("Password reset for : ", row.original.full_name);
+              console.log("Password reset for : ", row.original.first_name);
               await resetPasswordMutation.mutateAsync({
                 email: row.original.email,
                 needs_password_change: true,

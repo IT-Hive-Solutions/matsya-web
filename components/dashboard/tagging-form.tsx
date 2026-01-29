@@ -139,8 +139,8 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       localLevelName: "",
-      province_id: user.office_id.district_id.province_id.province_name || "",
-      district_id: user.office_id.district_id.district_name || "",
+      province_id: user.office_id?.district_id?.province_id?.province_name || "",
+      district_id: user.office_id?.district_id?.district_name || "",
       ruralMunicipality: "",
       date: new Date().toISOString().split("T")[0],
       serial_number: "SN-" + Date.now(),
