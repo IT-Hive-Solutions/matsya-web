@@ -1,7 +1,11 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 interface OverviewProps {
   user: IUser;
@@ -11,29 +15,44 @@ export default function DashboardOverview({ user }: OverviewProps) {
   const stats = [
     {
       label: "Total Animals Tagged",
-      value: "1,247",
-      change: "+12% this month",
+      key: "total_animals",
+      // change: "+12% this month",
       icon: "🐄",
     },
     {
       label: "Total Vaccinated",
-      value: "856",
-      change: "+8% this month",
+      key: "total_vaccinated",
+      // change: "+8% this month",
       icon: "💉",
     },
     {
       label: "Pending Entries",
-      value: "23",
-      change: "Needs review",
+      key: "pending_entries",
+      // change: "Needs review",
       icon: "⏳",
     },
     {
       label: "Recent Entries",
-      value: "142",
-      change: "Last 7 days",
+      key: "total_animals",
+      // change: "Last 7 days",
       icon: "📋",
     },
   ];
+  const [statValues, setStatValues] =
+    useState<Record<string, string | number>>();
+  const { data: fetchedReport } = useQuery({
+    queryKey: ["animals", "report"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_info.report),
+  });
+
+  useEffect(() => {
+    const data = fetchedReport?.data;
+    if (data) {
+      console.log({ data });
+
+      setStatValues(data);
+    }
+  }, [fetchedReport]);
 
   return (
     <div className="space-y-6">
@@ -57,15 +76,15 @@ export default function DashboardOverview({ user }: OverviewProps) {
           <Card key={index} className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-2xl sm:text-3xl">{stat.icon}</span>
-              <span className="text-xs font-semibold px-2 py-1 rounded bg-accent/10 text-accent">
+              {/* <span className="text-xs font-semibold px-2 py-1 rounded bg-accent/10 text-accent">
                 {stat.change}
-              </span>
+              </span> */}
             </div>
             <p className="text-muted-foreground text-xs sm:text-sm mb-1">
               {stat.label}
             </p>
             <p className="text-2xl sm:text-3xl font-bold text-foreground">
-              {stat.value}
+              {statValues ? statValues[stat.key] : 0}
             </p>
           </Card>
         ))}
