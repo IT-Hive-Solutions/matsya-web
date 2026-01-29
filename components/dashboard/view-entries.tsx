@@ -42,6 +42,7 @@ import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
 import { useEscapeKey } from "@/hooks/useEscapePress";
 import Link from "next/link";
+import { getMonthLabel } from "@/core/enums/month.enum";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -188,7 +189,7 @@ export default function OwnerAnimalView({
           {/* Owner List - Left Side */}
           <div
             className={`transition-all duration-500 ease-in-out ${
-              selectedOwner ? " md:w-48 lg:w-72 shrink-0" : "w-full"
+              selectedOwner ? "sm:w-24 md:w-48 lg:w-72 shrink-0" : "w-full"
             }`}
           >
             <div className="h-full flex flex-col">
@@ -231,7 +232,7 @@ export default function OwnerAnimalView({
                         {/* Decorative gradient background */}
                         <div className="absolute inset-0 bg-linear-to-br from-slate-50 via-transparent to-transparent opacity-60" />
 
-                        <div className="relative p-5">
+                        <div className="relative px-5">
                           {/* Owner Header */}
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -375,9 +376,9 @@ export default function OwnerAnimalView({
                   {selectedOwner.animals.map((animal, index) => (
                     <Card
                       key={animal.id}
-                      className="group relative overflow-hidden border-slate-200 bg-white hover:shadow-lg transition-all duration-300"
+                      className="group relative overflow-hidden border-slate-200 bg-white hover:shadow-lg transition-all duration-300 pb-2"
                       style={{
-                        animationDelay: `${index * 50}ms`,
+                        animationDelay: `${index * 30}ms`,
                       }}
                     >
                       {/* Status indicator stripe */}
@@ -393,7 +394,7 @@ export default function OwnerAnimalView({
                         }`}
                       />
 
-                      <div className="p-5">
+                      <div className="px-5 pt-2">
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1 min-w-0">
@@ -412,100 +413,16 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-
-                          {/* Actions Menu */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 hover:bg-slate-100 shrink-0"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setEditDialogOpen(true);
-                                  setSelectedAnimal(animal.id);
-                                }}
-                                className="gap-2 cursor-pointer"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                                Edit Details
-                              </DropdownMenuItem>
-
-                              <AlertDialogWrapper
-                                title="Verify Animal"
-                                description="This animal record will be marked as verified. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Verified,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
-                                  <CheckCircleIcon className="h-4 w-4 text-blue-600" />
-                                  <span>Mark as Verified</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-
-                              <AlertDialogWrapper
-                                title="Validate Animal"
-                                description="This animal record will be marked as validated. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Validated,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
-                                  <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
-                                  <span>Mark as Validated</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-
-                              <AlertDialogWrapper
-                                title="Reject Animal"
-                                description="This animal record will be marked as rejected. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Rejected,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
-                                >
-                                  <LucideOctagonMinus className="h-4 w-4" />
-                                  <span>Reject Record</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button
+                            variant={"ghost"}
+                            onClick={() => {
+                              setEditDialogOpen(true);
+                              setSelectedAnimal(animal.id);
+                            }}
+                            className="gap-2 cursor-pointer"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
                         </div>
 
                         {/* Details Grid */}
@@ -517,7 +434,8 @@ export default function OwnerAnimalView({
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {animal.age_months}, {animal.age_years}
+                                {getMonthLabel(animal.age_months)},{" "}
+                                {animal.age_years}
                               </p>
                             </div>
                           </div>
@@ -559,31 +477,90 @@ export default function OwnerAnimalView({
                             <StatusBadge status={animal.verification_status} />
                           </div>
                         </div>
-
-                        {/* Location */}
-                        {animal.latitude && animal.longitude && (
-                          <div className="pt-3 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              <span className="font-mono">
-                                {animal.latitude}, {animal.longitude}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Timestamps */}
-                        <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-500">
-                          <span>
-                            Created:{" "}
-                            {new Date(animal.date_created).toLocaleDateString()}
-                          </span>
-                          <span>
-                            Updated:{" "}
-                            {new Date(
-                              String(animal.date_updated),
-                            ).toLocaleDateString()}
-                          </span>
+                        <div className="w-full flex items-start justify-between  py-2 border-t border-slate-200">
+                          {animal.verification_status ===
+                            VerificationStatus.Verified && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Validate Animal"
+                              description="This animal record will be marked as validated. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Validated,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant="outline"
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
+                                <span>Validate</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
+                          {animal.verification_status ===
+                            VerificationStatus.Pending && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Verify Animal"
+                              description="This animal record will be marked as verified. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Verified,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant={"outline"}
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <CheckCircleIcon className="h-4 w-4 text-blue-600" />
+                                <span>Verify</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
+                          {!(
+                            animal.verification_status ===
+                            VerificationStatus.Validated
+                          ) && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Reject Animal"
+                              description="This animal record will be marked as rejected. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Rejected,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant={"outline"}
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
+                              >
+                                <LucideOctagonMinus className="h-4 w-4" />
+                                <span>Reject</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
                         </div>
                       </div>
                     </Card>
