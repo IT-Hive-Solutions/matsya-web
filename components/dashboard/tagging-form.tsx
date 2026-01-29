@@ -667,7 +667,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
           ))}
         </div>
 
-        {/* Section G: GPS Auto Capture */}
+        Section G: GPS Auto Capture
         <FormSection title="Location Coordinates" icon="🗺️">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField

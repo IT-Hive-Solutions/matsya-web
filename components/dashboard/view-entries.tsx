@@ -27,18 +27,22 @@ import {
   Layers,
   LucideOctagonMinus,
   MapPin,
+  MapPinnedIcon,
   MoreHorizontal,
   Phone,
   Search,
   User,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
+import { useEscapeKey } from "@/hooks/useEscapePress";
+import Link from "next/link";
+import { getMonthLabel } from "@/core/enums/month.enum";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -105,6 +109,10 @@ export default function OwnerAnimalView({
     null,
   );
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEscapeKey(() => {
+    setSelectedOwner(null);
+  });
 
   const handleUpdateVerificationStatusMutation = useMutation({
     mutationFn: (payload: {
@@ -176,122 +184,19 @@ export default function OwnerAnimalView({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50/50">
-      {/* Header Section */}
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-        <div className="max-w-480 mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                  Livestock Registry
-                </h1>
-                <p className="mt-2 text-sm text-slate-600">
-                  Manage and verify animal ownership records
-                </p>
-              </div>
-              {selectedOwner && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedOwner(null)}
-                  className="gap-2 hover:bg-slate-100"
-                >
-                  <X className="h-4 w-4" />
-                  Clear Selection
-                </Button>
-              )}
-            </div>
-
-            {/* Stats Overview */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <User className="h-4 w-4 text-slate-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.length}
-                    </p>
-                    <p className="text-xs text-slate-600">Total Owners</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <Activity className="h-4 w-4 text-emerald-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) => sum + group.animals.length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Total Animals</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <CheckCircleIcon className="h-4 w-4 text-blue-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) =>
-                          sum +
-                          group.animals.filter(
-                            (a) => a.verification_status === "verified",
-                          ).length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Verified</p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 border-slate-200 bg-white">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-amber-700" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {filteredData.reduce(
-                        (sum, group) =>
-                          sum +
-                          group.animals.filter(
-                            (a) => a.verification_status === "pending",
-                          ).length,
-                        0,
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-600">Pending</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Side by Side Layout */}
-      <div className="max-w-480 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-6 h-[calc(100vh-280px)]">
+      <div className="   ">
+        <div className="flex gap-6 h-[calc(100vh-20vh)]">
           {/* Owner List - Left Side */}
           <div
             className={`transition-all duration-500 ease-in-out ${
-              selectedOwner ? "w-full md:w-96 lg:w-105 shrink-0" : "w-full"
+              selectedOwner ? "sm:w-24 md:w-48 lg:w-72 shrink-0" : "w-full"
             }`}
           >
             <div className="h-full flex flex-col">
               {/* Search Bar */}
               <div className="mb-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by owner name, contact, or tag number..."
                     value={searchTerm}
@@ -302,7 +207,9 @@ export default function OwnerAnimalView({
               </div>
 
               {/* Owner Cards List */}
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              <div
+                className={" overflow-y-auto pr-2 space-y-3 custom-scrollbar"}
+              >
                 {filteredData.length > 0 ? (
                   <div
                     className={`grid gap-4 ${selectedOwner ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}
@@ -325,7 +232,7 @@ export default function OwnerAnimalView({
                         {/* Decorative gradient background */}
                         <div className="absolute inset-0 bg-linear-to-br from-slate-50 via-transparent to-transparent opacity-60" />
 
-                        <div className="relative p-5">
+                        <div className="relative px-5">
                           {/* Owner Header */}
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -354,24 +261,36 @@ export default function OwnerAnimalView({
                               </div>
                             </div>
                             {selectedOwner?.owner.id !== group.owner.id && (
-                              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all shrink-0" />
+                              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-slate-700 group-hover:translate-x-1 transition-all shrink-0" />
                             )}
                           </div>
 
                           {/* Contact Information */}
                           <div className="space-y-2 mb-3">
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <Phone className="h-3 w-3 text-slate-400 shrink-0" />
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
                               <span className="font-medium truncate">
                                 {group.owner.contact}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
                               <span className="truncate">
                                 {group.owner.localLevel}, Ward{" "}
                                 {group.owner.ward}
                               </span>
+                            </div>
+                            <div>
+                              <Link
+                                target="_blank"
+                                href={`https://www.google.com/maps/search/${group.animals[0].latitude},+${group.animals[0].longitude}`}
+                                className="flex gap-2"
+                              >
+                                <MapPinnedIcon className="text-muted-foreground w-4 h-4" />
+                                <span className="truncate text-xs text-muted-foreground underline">
+                                  Locate in Map
+                                </span>
+                              </Link>
                             </div>
                           </div>
 
@@ -429,13 +348,13 @@ export default function OwnerAnimalView({
                   <Card className="p-12 text-center border-slate-200 bg-white">
                     <div className="flex flex-col items-center gap-4">
                       <div className="p-4 bg-slate-100 rounded-full">
-                        <User className="h-8 w-8 text-slate-400" />
+                        <User className="h-8 w-8 text-muted-foreground" />
                       </div>
                       <div>
                         <p className="text-lg font-medium text-slate-900 mb-1">
                           No owners found
                         </p>
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-muted-foreground">
                           {searchTerm
                             ? "Try adjusting your search terms"
                             : "Start by creating your first entry"}
@@ -450,47 +369,16 @@ export default function OwnerAnimalView({
 
           {/* Animal Details - Right Side */}
           {selectedOwner && (
-            <div className="hidden md:flex flex-1 flex-col min-w-0 animate-in slide-in-from-right duration-500">
-              {/* Owner Info Header */}
-              <Card className="p-5 border-slate-200 bg-white mb-4 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-slate-100 rounded-xl shrink-0">
-                    <User className="h-5 w-5 text-slate-700" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-bold text-slate-900 truncate">
-                      {selectedOwner.owner.name}'s Animals
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-3 mt-1">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <Phone className="h-3 w-3" />
-                        {selectedOwner.owner.contact}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <MapPin className="h-3 w-3" />
-                        {selectedOwner.owner.localLevel}, Ward{" "}
-                        {selectedOwner.owner.ward}
-                      </div>
-                    </div>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-slate-100 text-slate-700 border-0 shrink-0"
-                  >
-                    {selectedOwner.animals.length} Animals
-                  </Badge>
-                </div>
-              </Card>
-
+            <div className="h-full hidden md:flex flex-1 flex-col min-w-0 animate-in slide-in-from-right duration-500">
               {/* Animal Cards Grid */}
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className=" flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   {selectedOwner.animals.map((animal, index) => (
                     <Card
                       key={animal.id}
-                      className="group relative overflow-hidden border-slate-200 bg-white hover:shadow-lg transition-all duration-300"
+                      className="group relative overflow-hidden border-slate-200 bg-white hover:shadow-lg transition-all duration-300 pb-2"
                       style={{
-                        animationDelay: `${index * 50}ms`,
+                        animationDelay: `${index * 30}ms`,
                       }}
                     >
                       {/* Status indicator stripe */}
@@ -506,7 +394,7 @@ export default function OwnerAnimalView({
                         }`}
                       />
 
-                      <div className="p-5">
+                      <div className="px-5 pt-2">
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1 min-w-0">
@@ -521,104 +409,20 @@ export default function OwnerAnimalView({
                                 {animal.animal_category.category_name}
                               </Badge>
                             </div>
-                            <p className="text-xs text-slate-600 font-mono">
+                            <p className="text-xs text-muted-foreground font-mono">
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-
-                          {/* Actions Menu */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 hover:bg-slate-100 shrink-0"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setEditDialogOpen(true);
-                                  setSelectedAnimal(animal.id);
-                                }}
-                                className="gap-2 cursor-pointer"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                                Edit Details
-                              </DropdownMenuItem>
-
-                              <AlertDialogWrapper
-                                title="Verify Animal"
-                                description="This animal record will be marked as verified. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Verified,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
-                                  <CheckCircleIcon className="h-4 w-4 text-blue-600" />
-                                  <span>Mark as Verified</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-
-                              <AlertDialogWrapper
-                                title="Validate Animal"
-                                description="This animal record will be marked as validated. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Validated,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
-                                  <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
-                                  <span>Mark as Validated</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-
-                              <AlertDialogWrapper
-                                title="Reject Animal"
-                                description="This animal record will be marked as rejected. Continue?"
-                                onConfirm={async (setOpen) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Rejected,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                              >
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
-                                >
-                                  <LucideOctagonMinus className="h-4 w-4" />
-                                  <span>Reject Record</span>
-                                </DropdownMenuItem>
-                              </AlertDialogWrapper>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button
+                            variant={"ghost"}
+                            onClick={() => {
+                              setEditDialogOpen(true);
+                              setSelectedAnimal(animal.id);
+                            }}
+                            className="gap-2 cursor-pointer"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
                         </div>
 
                         {/* Details Grid */}
@@ -628,9 +432,10 @@ export default function OwnerAnimalView({
                               Age
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <Calendar className="h-3 w-3 text-slate-400" />
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {animal.age_months}, {animal.age_years}
+                                {getMonthLabel(animal.age_months)},{" "}
+                                {animal.age_years}
                               </p>
                             </div>
                           </div>
@@ -640,7 +445,7 @@ export default function OwnerAnimalView({
                               Production
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <Activity className="h-3 w-3 text-slate-400" />
+                              <Activity className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
                                 {animal.production_capacity || "N/A"}
                               </p>
@@ -656,7 +461,7 @@ export default function OwnerAnimalView({
                               className={`${
                                 !(animal.is_vaccination_applied == "no")
                                   ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-slate-100 text-slate-600"
+                                  : "bg-slate-100 text-muted-foreground"
                               } border-0 text-xs px-2 py-0.5`}
                             >
                               {!(animal.is_vaccination_applied == "no")
@@ -672,31 +477,90 @@ export default function OwnerAnimalView({
                             <StatusBadge status={animal.verification_status} />
                           </div>
                         </div>
-
-                        {/* Location */}
-                        {animal.latitude && animal.longitude && (
-                          <div className="pt-3 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <MapPin className="h-3 w-3 text-slate-400" />
-                              <span className="font-mono">
-                                {animal.latitude}, {animal.longitude}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Timestamps */}
-                        <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-500">
-                          <span>
-                            Created:{" "}
-                            {new Date(animal.date_created).toLocaleDateString()}
-                          </span>
-                          <span>
-                            Updated:{" "}
-                            {new Date(
-                              String(animal.date_updated),
-                            ).toLocaleDateString()}
-                          </span>
+                        <div className="w-full flex items-start justify-between  py-2 border-t border-slate-200">
+                          {animal.verification_status ===
+                            VerificationStatus.Verified && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Validate Animal"
+                              description="This animal record will be marked as validated. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Validated,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant="outline"
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
+                                <span>Validate</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
+                          {animal.verification_status ===
+                            VerificationStatus.Pending && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Verify Animal"
+                              description="This animal record will be marked as verified. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Verified,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant={"outline"}
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <CheckCircleIcon className="h-4 w-4 text-blue-600" />
+                                <span>Verify</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
+                          {!(
+                            animal.verification_status ===
+                            VerificationStatus.Validated
+                          ) && (
+                            <AlertDialogWrapper
+                              className="w-full"
+                              title="Reject Animal"
+                              description="This animal record will be marked as rejected. Continue?"
+                              onConfirm={async (setOpen) => {
+                                await handleUpdateVerificationStatusMutation.mutateAsync(
+                                  {
+                                    id: animal.id,
+                                    verification_status:
+                                      VerificationStatus.Rejected,
+                                  },
+                                );
+                                setOpen && setOpen(false);
+                              }}
+                            >
+                              <Button
+                                variant={"outline"}
+                                onSelect={(e) => e.preventDefault()}
+                                className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
+                              >
+                                <LucideOctagonMinus className="h-4 w-4" />
+                                <span>Reject</span>
+                              </Button>
+                            </AlertDialogWrapper>
+                          )}
                         </div>
                       </div>
                     </Card>
