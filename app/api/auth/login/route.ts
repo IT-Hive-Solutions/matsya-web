@@ -32,16 +32,16 @@ export async function POST(req: NextRequest) {
         const cookieStore = await cookies();
 
         cookieStore.set('directus_session_token', authUser.access_token, {
-            sameSite: 'strict',
+            sameSite: 'lax',
             path: '/',
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true, // Important for security
-            maxAge: 60 * 15 // 15 minutes (matches your token expiry)
+            maxAge: 60 * 1440 // 15 minutes (matches your token expiry)
         });
 
         if (authUser.refresh_token) {
             cookieStore.set('directus_refresh_token', authUser.refresh_token, {
-                sameSite: 'strict',
+                sameSite: 'lax',
                 path: '/',
                 secure: process.env.NODE_ENV === 'production',
                 httpOnly: true,
@@ -50,14 +50,13 @@ export async function POST(req: NextRequest) {
         }
         if (authUser.expires_at) {
             cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
-                sameSite: 'strict',
+                sameSite: 'lax',
                 path: '/',
                 secure: process.env.NODE_ENV === 'production',
                 httpOnly: true,
                 maxAge: 60 * 60 * 24 * 7 // 7 days
             });
         }
-
         const response = NextResponse.json(
             {
                 data: { message: 'Login successful', success: true }

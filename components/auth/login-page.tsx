@@ -40,7 +40,7 @@ export default function LoginPage() {
     onSuccess: (res) => {
       console.log("error...", { res });
       toast.success("Login Successful!");
-      router.push("/");
+      window.location.href = "/";
     },
     onError: (err) => {
       console.log("error...", { err });
