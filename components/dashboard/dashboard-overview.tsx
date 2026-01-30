@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 interface OverviewProps {
-  user: IUser;
+  user?: IUser;
 }
 
 export default function DashboardOverview({ user }: OverviewProps) {
@@ -64,9 +64,9 @@ export default function DashboardOverview({ user }: OverviewProps) {
         <p className="text-muted-foreground">
           You're logged in as a{" "}
           <span className="font-semibold text-foreground">
-            {user.user_type}
+            {user?.user_type}
           </span>{" "}
-          in {user.office_id.province_id.province_name ?? ""} province
+          in {user?.office_id?.province_id?.province_name ?? ""} province
         </p>
       </div>
 

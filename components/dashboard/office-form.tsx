@@ -74,7 +74,7 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
   useEffect(() => {
     if (provinceFetched) {
       const data = provinceFetched?.data?.map((p: any) => ({
-        label: p.province_name,
+        label: p?.province_name ?? "",
         value: p.id,
       }));
       setProvinceData(data);
