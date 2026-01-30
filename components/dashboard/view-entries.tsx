@@ -2,19 +2,15 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
+import { getMonthLabel } from "@/core/enums/month.enum";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { useEscapeKey } from "@/hooks/useEscapePress";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -28,21 +24,17 @@ import {
   LucideOctagonMinus,
   MapPin,
   MapPinnedIcon,
-  MoreHorizontal,
   Phone,
   Search,
   User,
-  X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
-import { useEscapeKey } from "@/hooks/useEscapePress";
-import Link from "next/link";
-import { getMonthLabel } from "@/core/enums/month.enum";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -69,10 +61,10 @@ const StatusBadge = ({ status }: { status: string }) => {
         text: "text-amber-700",
         label: "Pending",
       },
-      submitted: {
+      draft: {
         bg: "bg-purple-500/10",
         text: "text-purple-700",
-        label: "Submitted",
+        label: "Draft",
       },
       verified: {
         bg: "bg-blue-500/10",
@@ -420,16 +412,22 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          <Button
-                            variant={"ghost"}
-                            onClick={() => {
-                              setEditDialogOpen(true);
-                              setSelectedAnimal(animal.id);
-                            }}
-                            className="gap-2 cursor-pointer"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                          {(animal.verification_status ===
+                            VerificationStatus.Rejected ||
+                            animal.verification_status ===
+                              VerificationStatus.Draft) &&
+                            user.role.name === "vaccinator" && (
+                              <Button
+                                variant={"ghost"}
+                                onClick={() => {
+                                  setEditDialogOpen(true);
+                                  setSelectedAnimal(animal.id);
+                                }}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            )}
                         </div>
 
                         {/* Details Grid */}
