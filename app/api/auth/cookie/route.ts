@@ -15,7 +15,9 @@ export async function DELETE() {
     const cookieStore = await cookies();
 
     // Delete the cookie
-    cookieStore.delete('user_session');
+    cookieStore.delete('directus_session_token');
+    cookieStore.delete('directus_referesh_token');
+    cookieStore.delete('directus_expires_at');
 
     return NextResponse.json({ message: 'Cookie deleted successfully' });
 }
