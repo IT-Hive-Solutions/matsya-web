@@ -1,7 +1,7 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -10,22 +10,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { endpoints } from "@/core/contants/endpoints";
 import { LoginDTO, LoginSchema } from "@/core/dtos/login.dto";
+import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { endpoints } from "@/core/contants/endpoints";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const form = useForm<LoginDTO>({
     defaultValues: {
       password: "",
