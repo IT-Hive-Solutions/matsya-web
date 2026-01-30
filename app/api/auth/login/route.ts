@@ -1,6 +1,4 @@
-import { getUserData } from "@/core/lib/dal";
 import { directus } from "@/core/lib/directus";
-import { login, readMe } from "@directus/sdk";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,12 +17,7 @@ export async function POST(req: NextRequest) {
         console.log({ email, password });
 
 
-        const authUser = await directus.request(
-            login({
-                email: email,
-                password: password
-            })
-        )
+        const authUser = await directus.login({ email, password })
         console.log({ authUser });
 
 
@@ -35,35 +28,42 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (authUser.access_token) {
-            (await cookies()).set('directus_session_token', authUser.access_token, { sameSite: 'strict', path: '/', secure: true, expires: 8640000 });
+        // Set cookies
+        const cookieStore = await cookies();
+
+        cookieStore.set('directus_session_token', authUser.access_token, {
+            sameSite: 'strict',
+            path: '/',
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true, // Important for security
+            maxAge: 60 * 15 // 15 minutes (matches your token expiry)
+        });
+
+        if (authUser.refresh_token) {
+            cookieStore.set('directus_refresh_token', authUser.refresh_token, {
+                sameSite: 'strict',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 60 * 60 * 24 * 7 // 7 days
+            });
         }
-        // if (authUser.refresh_token) {
-        //     (await cookies()).set('directus_refresh_token', authUser.refresh_token, { sameSite: 'strict', path: '/', secure: true, expires: 8640000 });
-        // }
-
-        // Fetch user details
-        const { user } = await getUserData(true)
-
-        console.log({ user });
-
+        if (authUser.expires_at) {
+            cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
+                sameSite: 'strict',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 60 * 60 * 24 * 7 // 7 days
+            });
+        }
 
         const response = NextResponse.json(
             {
-                message: 'Login successful',
-                data: user
+                data: { message: 'Login successful', success: true }
             },
             { status: 200 }
         );
-
-
-        response.cookies.set('directus_session_token', JSON.stringify(authUser.access_token), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 86400, // 24 hours
-            path: '/'
-        });
 
         return response;
 
@@ -77,27 +77,3 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// export async function POST(request: NextRequest) {
-//     const formData = await request.formData();
-
-//     const email = formData.get("email") as string;
-//     const password = formData.get("password") as string;
-
-//     if (!email || !password) {
-//         return NextResponse.json({ error: "All fields are required" }, { status: 400 });
-//     }
-
-//     try {
-//         const response = await directus.login({ email, password });
-//         console.log(response);
-//         if (response.access_token) {
-//             (await cookies()).set('directus_session_token', response.access_token, { sameSite: 'strict', path: '/', secure: true })
-//         }
-//         const url = request.nextUrl.clone();
-//         url.pathname = "/"
-//         return NextResponse.redirect(url);
-//     } catch (error) {
-//         console.log(error);
-//         return NextResponse.json({ error: "Login failed" }, { status: 500 });
-//     }
-// }
