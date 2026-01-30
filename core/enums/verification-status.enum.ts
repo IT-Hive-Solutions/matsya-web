@@ -3,6 +3,7 @@ export enum VerificationStatus {
     Verified = "verified",
     Validated = "validated",
     Rejected = "rejected",
+    Draft = "draft",
 }
 
 export const verificationStatusOptions = Object.entries(VerificationStatus).map(([label, value]) => ({
