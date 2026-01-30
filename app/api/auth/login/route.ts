@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         cookieStore.set('directus_session_token', authUser.access_token, {
             sameSite: 'none',
             path: '/',
-            secure: true,
+            secure: false,
             httpOnly: true, // Important for security
             maxAge: 60 * 1440 // 15 minutes (matches your token expiry)
         });
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             cookieStore.set('directus_refresh_token', authUser.refresh_token, {
                 sameSite: 'none',
                 path: '/',
-                secure: true,
+                secure: false,
                 httpOnly: true,
                 maxAge: 60 * 60 * 24 * 7 // 7 days
             });
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
             cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
                 sameSite: 'none',
                 path: '/',
-                secure: true,
+                secure: false,
                 httpOnly: true,
                 maxAge: 60 * 60 * 24 * 7 // 7 days
             });
