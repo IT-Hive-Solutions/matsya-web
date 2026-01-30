@@ -1,13 +1,15 @@
 
 // Handles GET (all animal_info) and POST (create item)
-import { NextRequest, NextResponse } from 'next/server';
-import { readItems, createItem } from '@directus/sdk';
-import { directus } from '@/core/lib/directus'
 import { VerificationStatus } from '@/core/enums/verification-status.enum';
+import { withMiddleware } from '@/core/lib/api.middleware';
+import { directus } from '@/core/lib/directus';
+import { createItem, readItems } from '@directus/sdk';
+import { NextRequest, NextResponse } from 'next/server';
 
 // GET - Fetch all animal_info
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
+
         const animal_info = await directus.request(
             readItems('animal_info', {
                 fields: [
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create new item
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
 
@@ -111,3 +113,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
+
+export const GET = withMiddleware(getHandler)
+export const POST = withMiddleware(postHandler)

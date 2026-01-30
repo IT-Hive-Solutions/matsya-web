@@ -69,6 +69,11 @@ const StatusBadge = ({ status }: { status: string }) => {
         text: "text-amber-700",
         label: "Pending",
       },
+      submitted: {
+        bg: "bg-purple-500/10",
+        text: "text-purple-700",
+        label: "Submitted",
+      },
       verified: {
         bg: "bg-blue-500/10",
         text: "text-blue-700",
@@ -390,7 +395,9 @@ export default function OwnerAnimalView({
                               ? "bg-blue-500"
                               : animal.verification_status === "rejected"
                                 ? "bg-red-500"
-                                : "bg-amber-500"
+                                : animal.verification_status === "pending"
+                                  ? "bg-amber-900"
+                                  : "bg-amber-500"
                         }`}
                       />
 
@@ -479,88 +486,122 @@ export default function OwnerAnimalView({
                         </div>
                         <div className="w-full flex items-start justify-between  py-2 border-t border-slate-200">
                           {animal.verification_status ===
-                            VerificationStatus.Verified && (
-                            <AlertDialogWrapper
-                              className="w-full"
-                              title="Validate Animal"
-                              description="This animal record will be marked as validated. Continue?"
-                              onConfirm={async (setOpen) => {
-                                await handleUpdateVerificationStatusMutation.mutateAsync(
-                                  {
-                                    id: animal.id,
-                                    verification_status:
-                                      VerificationStatus.Validated,
-                                  },
-                                );
-                                setOpen && setOpen(false);
-                              }}
-                            >
-                              <Button
-                                variant="outline"
-                                onSelect={(e) => e.preventDefault()}
-                                className="gap-2 cursor-pointer"
+                            VerificationStatus.Verified &&
+                            (user.role.name === "admin" ||
+                              user.role.name === "province-level") && (
+                              <AlertDialogWrapper
+                                className="w-max"
+                                title="Validate Animal"
+                                description="This animal record will be marked as validated. Continue?"
+                                onConfirm={async (setOpen) => {
+                                  await handleUpdateVerificationStatusMutation.mutateAsync(
+                                    {
+                                      id: animal.id,
+                                      verification_status:
+                                        VerificationStatus.Validated,
+                                    },
+                                  );
+                                  setOpen && setOpen(false);
+                                }}
                               >
-                                <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
-                                <span>Validate</span>
-                              </Button>
-                            </AlertDialogWrapper>
-                          )}
+                                <Button
+                                  variant="outline"
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="gap-2 cursor-pointer"
+                                >
+                                  <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
+                                  <span>Validate</span>
+                                </Button>
+                              </AlertDialogWrapper>
+                            )}
                           {animal.verification_status ===
-                            VerificationStatus.Pending && (
-                            <AlertDialogWrapper
-                              className="w-full"
-                              title="Verify Animal"
-                              description="This animal record will be marked as verified. Continue?"
-                              onConfirm={async (setOpen) => {
-                                await handleUpdateVerificationStatusMutation.mutateAsync(
-                                  {
-                                    id: animal.id,
-                                    verification_status:
-                                      VerificationStatus.Verified,
-                                  },
-                                );
-                                setOpen && setOpen(false);
-                              }}
-                            >
-                              <Button
-                                variant={"outline"}
-                                onSelect={(e) => e.preventDefault()}
-                                className="gap-2 cursor-pointer"
+                            VerificationStatus.Pending &&
+                            user.role.name === "district-level" && (
+                              <AlertDialogWrapper
+                                className="w-max"
+                                title="Verify Animal"
+                                description="This animal record will be marked as verified. Continue?"
+                                onConfirm={async (setOpen) => {
+                                  await handleUpdateVerificationStatusMutation.mutateAsync(
+                                    {
+                                      id: animal.id,
+                                      verification_status:
+                                        VerificationStatus.Verified,
+                                    },
+                                  );
+                                  setOpen && setOpen(false);
+                                }}
                               >
-                                <CheckCircleIcon className="h-4 w-4 text-blue-600" />
-                                <span>Verify</span>
-                              </Button>
-                            </AlertDialogWrapper>
-                          )}
+                                <Button
+                                  variant={"outline"}
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="gap-2 cursor-pointer"
+                                >
+                                  <CheckCircleIcon className="h-4 w-4 text-blue-600" />
+                                  <span>Verify</span>
+                                </Button>
+                              </AlertDialogWrapper>
+                            )}
                           {!(
                             animal.verification_status ===
                             VerificationStatus.Validated
-                          ) && (
-                            <AlertDialogWrapper
-                              className="w-full"
-                              title="Reject Animal"
-                              description="This animal record will be marked as rejected. Continue?"
-                              onConfirm={async (setOpen) => {
-                                await handleUpdateVerificationStatusMutation.mutateAsync(
-                                  {
-                                    id: animal.id,
-                                    verification_status:
-                                      VerificationStatus.Rejected,
-                                  },
-                                );
-                                setOpen && setOpen(false);
-                              }}
-                            >
-                              <Button
-                                variant={"outline"}
-                                onSelect={(e) => e.preventDefault()}
-                                className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
+                          ) &&
+                            (user.role.name === "admin" ||
+                              user.role.name === "province-level" ||
+                              user.role.name === "local-level") && (
+                              <AlertDialogWrapper
+                                className="w-max"
+                                title="Reject Animal"
+                                description="This animal record will be marked as rejected. Continue?"
+                                onConfirm={async (setOpen) => {
+                                  await handleUpdateVerificationStatusMutation.mutateAsync(
+                                    {
+                                      id: animal.id,
+                                      verification_status:
+                                        VerificationStatus.Rejected,
+                                    },
+                                  );
+                                  setOpen && setOpen(false);
+                                }}
                               >
-                                <LucideOctagonMinus className="h-4 w-4" />
-                                <span>Reject</span>
-                              </Button>
-                            </AlertDialogWrapper>
-                          )}
+                                <Button
+                                  variant={"outline"}
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
+                                >
+                                  <LucideOctagonMinus className="h-4 w-4" />
+                                  <span>Reject</span>
+                                </Button>
+                              </AlertDialogWrapper>
+                            )}
+                          {animal.verification_status ===
+                            VerificationStatus.Draft &&
+                            user.role.name === "local-level" && (
+                              <AlertDialogWrapper
+                                className="w-max"
+                                title="Submit Application"
+                                description="This animal record will be submitted. Continue?"
+                                onConfirm={async (setOpen) => {
+                                  await handleUpdateVerificationStatusMutation.mutateAsync(
+                                    {
+                                      id: animal.id,
+                                      verification_status:
+                                        VerificationStatus.Pending,
+                                    },
+                                  );
+                                  setOpen && setOpen(false);
+                                }}
+                              >
+                                <Button
+                                  variant={"outline"}
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="gap-2 cursor-pointer"
+                                >
+                                  <CheckCircleIcon className="h-4 w-4 text-blue-600" />
+                                  <span>Verify</span>
+                                </Button>
+                              </AlertDialogWrapper>
+                            )}
                         </div>
                       </div>
                     </Card>

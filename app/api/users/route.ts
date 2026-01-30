@@ -1,6 +1,7 @@
 
 // app/api/users/route.ts
 // Handles GET (all users) and POST (create item)
+import { withMiddleware } from '@/core/lib/api.middleware';
 import { directus } from '@/core/lib/directus';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
 import { sendMail } from '@/core/services/mail/sendMail';
@@ -9,7 +10,7 @@ import bcrypt from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET - Fetch all users
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
         const users = await directus.request(
             readUsers({
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create new item
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
 
@@ -117,3 +118,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
+
+export const GET = withMiddleware(getHandler)
+export const POST = withMiddleware(postHandler)
