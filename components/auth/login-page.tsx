@@ -16,11 +16,13 @@ import { LoginDTO, LoginSchema } from "@/core/dtos/login.dto";
 import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  // const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<LoginDTO>({
     defaultValues: {
@@ -36,7 +38,11 @@ export default function LoginPage() {
     onSuccess: (res) => {
       console.log("error...", { res });
       toast.success("Login Successful!");
-      window.location.href = "/";
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
+      // router.push("/");
+      // router.refresh();
     },
     onError: (err) => {
       console.log("error...", { err });

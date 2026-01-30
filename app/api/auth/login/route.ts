@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         const cookieStore = await cookies();
 
         cookieStore.set('directus_session_token', authUser.access_token, {
-            sameSite: 'none',
+            sameSite: 'lax',
             path: '/',
             secure: false,
             httpOnly: true, // Important for security
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
         if (authUser.refresh_token) {
             cookieStore.set('directus_refresh_token', authUser.refresh_token, {
-                sameSite: 'none',
+                sameSite: 'lax',
                 path: '/',
                 secure: false,
                 httpOnly: true,
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         }
         if (authUser.expires_at) {
             cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
-                sameSite: 'none',
+                sameSite: 'lax',
                 path: '/',
                 secure: false,
                 httpOnly: true,
