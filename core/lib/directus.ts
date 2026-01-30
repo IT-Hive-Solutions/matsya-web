@@ -1,13 +1,13 @@
-import { authentication, createDirectus, rest, staticToken } from '@directus/sdk';
-import { UsersDirectus } from '@/core/interfaces/user.interface';
-import { ProvinceDirectus } from '@/core/interfaces/province.interface';
-import { AnimalCategoryDirectus } from '@/core/interfaces/animalCategory.interface';
 import { AnimalInfoDirectus } from '@/core/interfaces/animal.interface';
+import { AnimalCategoryDirectus } from '@/core/interfaces/animalCategory.interface';
 import { AnimalTypeDirectus } from '@/core/interfaces/animalType.interface';
 import { DistrictDirectus } from '@/core/interfaces/district.interface';
-import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity.interface';
-import { OwnersInfoDirectus } from '@/core/interfaces/ownersInfo.interface';
 import { OfficeDirectus } from '@/core/interfaces/office.interface';
+import { OwnersInfoDirectus } from '@/core/interfaces/ownersInfo.interface';
+import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity.interface';
+import { ProvinceDirectus } from '@/core/interfaces/province.interface';
+import { UsersDirectus } from '@/core/interfaces/user.interface';
+import { authentication, createDirectus, rest, staticToken } from '@directus/sdk';
 
 const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
@@ -25,6 +25,10 @@ type Schema = {
 };
 
 export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!).
-    with(rest()).with(staticToken(staticTokenValue));
+    with(rest()).
+    with(authentication("cookie", { credentials: "include" }));
+    // with(staticToken(staticTokenValue))
+
+
 
 

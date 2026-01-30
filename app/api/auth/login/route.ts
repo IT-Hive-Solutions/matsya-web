@@ -1,11 +1,13 @@
+import { getUserData } from "@/core/lib/dal";
 import { directus } from "@/core/lib/directus";
 import { login, readMe } from "@directus/sdk";
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { email, password } = body;
+        const { email, password } = await body;
 
         // Validation
         if (!email || !password) {
@@ -14,6 +16,8 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
+        console.log({ email, password });
+
 
         const authUser = await directus.request(
             login({
@@ -32,66 +36,28 @@ export async function POST(req: NextRequest) {
         }
 
         if (authUser.access_token) {
-            await directus.setToken(authUser.access_token);
+            (await cookies()).set('directus_session_token', authUser.access_token, { sameSite: 'strict', path: '/', secure: true, expires: 8640000 });
         }
+        // if (authUser.refresh_token) {
+        //     (await cookies()).set('directus_refresh_token', authUser.refresh_token, { sameSite: 'strict', path: '/', secure: true, expires: 8640000 });
+        // }
 
         // Fetch user details
-        const user = await directus.request(
-            readMe({
-                fields: [
-                    '*',
-                    'office_id.*' as any,
-                    "office_id.province_id.*",
-                    "office_id.district_id.*",
-                ]  // No 'as any' needed
-            })
-
-        );
+        const { user } = await getUserData(true)
 
         console.log({ user });
 
 
-        // Remove password from user object
-        const { password: _, ...userWithoutPassword } = user;
-
-        // Create session or JWT token (simplified version)
-        const sessionData = {
-            userId: user.id,
-            phone_number: user.phone_number,
-            timestamp: Date.now()
-        };
-
         const response = NextResponse.json(
             {
                 message: 'Login successful',
-                data: userWithoutPassword
+                data: user
             },
             { status: 200 }
         );
 
-        // Store session data in HTTP-only cookie
-        response.cookies.set('user_session', JSON.stringify(sessionData), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 86400, // 24 hours
-            path: '/'
-        });
-        response.cookies.set('access_token', JSON.stringify(authUser.access_token), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 86400, // 24 hours
-            path: '/'
-        });
-        response.cookies.set('access_token', JSON.stringify(authUser.refresh_token), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 86400, // 24 hours
-            path: '/'
-        });
-        response.cookies.set('access_token', JSON.stringify(authUser.expires), {
+
+        response.cookies.set('directus_session_token', JSON.stringify(authUser.access_token), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
@@ -110,3 +76,28 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+// export async function POST(request: NextRequest) {
+//     const formData = await request.formData();
+
+//     const email = formData.get("email") as string;
+//     const password = formData.get("password") as string;
+
+//     if (!email || !password) {
+//         return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+//     }
+
+//     try {
+//         const response = await directus.login({ email, password });
+//         console.log(response);
+//         if (response.access_token) {
+//             (await cookies()).set('directus_session_token', response.access_token, { sameSite: 'strict', path: '/', secure: true })
+//         }
+//         const url = request.nextUrl.clone();
+//         url.pathname = "/"
+//         return NextResponse.redirect(url);
+//     } catch (error) {
+//         console.log(error);
+//         return NextResponse.json({ error: "Login failed" }, { status: 500 });
+//     }
+// }
