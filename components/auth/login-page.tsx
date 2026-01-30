@@ -39,13 +39,7 @@ export default function LoginPage() {
       mutateHandler(endpoints.auth.login, payload),
     onSuccess: (res) => {
       console.log("error...", { res });
-      if (res.needs_password_change) {
-        toast.error("Password reset required. Please reset your password.");
-        router.push(`/auth/reset-password?email=${form.getValues("email")}`);
-        return;
-      }
-      localStorage.setItem("user", JSON.stringify(res));
-      toast.success("User created successfully!");
+      toast.success("Login Successful!");
       router.push("/");
     },
     onError: (err) => {
