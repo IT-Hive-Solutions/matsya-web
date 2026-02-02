@@ -16,7 +16,6 @@ export async function createMailTransporter() {
     });
   } else {
     // Production SMTP settings (configure when ready)
-    console.log("=====================\n", { password_smtp: process.env.SMTP_PASS }, "\n=====================\n",);
 
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,

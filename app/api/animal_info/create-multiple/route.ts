@@ -44,9 +44,6 @@ async function postHandler(request: NextRequest) {
             payload = data
         }
 
-        console.log("payloadddd: ", payload);
-
-
 
         const newAnimals = await directus.request(
             createItems('animal_info', payload)

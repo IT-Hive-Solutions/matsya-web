@@ -11,8 +11,6 @@ async function getHandler(request: NextRequest) {
     try {
         const userDataString = request.headers.get('x-user-data');
         const userData = JSON.parse(userDataString ?? "")
-        console.log({ userData });
-        console.log({ district: userData.office_id.district_id });
 
         // Determine the user's role
         const userRole = userData.role.name; // "vaccinator", "admin", etc.

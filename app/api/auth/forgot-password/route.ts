@@ -1,8 +1,9 @@
+import { withMiddleware } from "@/core/lib/api.middleware";
 import { directus } from "@/core/lib/directus";
 import { login, readUsers, updateUser } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+async function postHandler(req: NextRequest) {
     try {
         const body = await req.json();
         const {
@@ -20,11 +21,11 @@ export async function POST(req: NextRequest) {
         }
 
         // Fetch user from custom users table by email
-        const verification = await directus.request(
-            login({
+        const verification = await directus.login(
+            {
                 email,
                 password: old_password,
-            })
+            }
         );
 
 
@@ -77,3 +78,5 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+export const POST = withMiddleware(postHandler)

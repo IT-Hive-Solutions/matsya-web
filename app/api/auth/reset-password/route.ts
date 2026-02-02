@@ -1,11 +1,11 @@
+import { withMiddleware } from "@/core/lib/api.middleware";
 import { directus } from "@/core/lib/directus";
 import { generateSecurePassword } from "@/core/services/apiHandler/handleGeneratePassword";
 import { sendMail } from "@/core/services/mail/sendMail";
-import { readUsers, updateItem, updateUser } from "@directus/sdk";
-import bcrypt from 'bcrypt';
+import { readUsers, updateUser } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+async function postHandler(req: NextRequest) {
     try {
         const body = await req.json();
         const {
@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        console.log({ user });
 
 
         const newPassword = generateSecurePassword(8);
@@ -85,3 +84,5 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+export const POST = withMiddleware(postHandler)

@@ -2,7 +2,7 @@ export function generateSecurePassword(length: number = 12): string {
   const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
   const digits = "0123456789";
-  const specialChars = "!@#$%^&*";
+  const specialChars = "@$!%*?&";
   const allChars = uppercase + lowercase + digits + specialChars;
 
   // Ensure at least one of each required character

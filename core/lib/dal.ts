@@ -32,6 +32,7 @@ export async function getUserData(formLogin?: boolean): Promise<UserDataResponse
         }));
         console.log("After User read me fetch :", user);
 
+
         const response: UserDataResponse = {
             success: true,
             user: user

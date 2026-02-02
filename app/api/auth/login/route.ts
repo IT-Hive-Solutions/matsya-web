@@ -14,11 +14,9 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
-        console.log({ email, password });
 
 
         const authUser = await directus.login({ email, password })
-        console.log({ authUser });
 
 
         if (!authUser.access_token) {
