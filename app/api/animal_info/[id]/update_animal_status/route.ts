@@ -1,3 +1,4 @@
+import { withMiddleware } from "@/core/lib/api.middleware";
 import { directus } from "@/core/lib/directus";
 import { updateItem } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,7 +9,7 @@ type Params = {
     }>;
 };
 
-export async function PUT(request: NextRequest, { params }: Params) {
+async function putHandler(request: NextRequest, { params }: Params) {
     try {
         const body = await request.json();
 
@@ -31,3 +32,5 @@ export async function PUT(request: NextRequest, { params }: Params) {
         );
     }
 }
+
+export const PUT = withMiddleware(putHandler)

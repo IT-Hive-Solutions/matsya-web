@@ -21,9 +21,17 @@ export async function getUserData(formLogin?: boolean): Promise<UserDataResponse
 
         directus.setToken(token)
         console.log("After  Setting!!");
-        const user: any = await directus.request(readMe());
+        const user: any = await directus.request(readMe({
+            fields: [
+                "*",
+                "office_id.*" as any,
+                "office_id.district_id.*" as any,
+                "office_id.district_id.province_id.*" as any,
+                "role.*"
+            ]
+        }));
         console.log("After User read me fetch :", user);
-        
+
         const response: UserDataResponse = {
             success: true,
             user: user

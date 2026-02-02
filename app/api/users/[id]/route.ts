@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { directus } from '@/core/lib/directus';
 import { readItem, updateItem, deleteItem, deleteUser } from '@directus/sdk';
+import { withMiddleware } from '@/core/lib/api.middleware';
 
 type Params = {
     params: Promise<{
@@ -9,7 +10,7 @@ type Params = {
 };
 
 
-export async function GET(request: NextRequest, { params }: Params) {
+async function getHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 }
 
 
-export async function PUT(request: NextRequest, { params }: Params) {
+async function putHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
         const body = await request.json();
@@ -57,7 +58,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+async function deleteHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
 
@@ -76,3 +77,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         );
     }
 }
+
+export const GET = withMiddleware(getHandler)
+export const PUT = withMiddleware(putHandler)
+export const DELETE = withMiddleware(deleteHandler)

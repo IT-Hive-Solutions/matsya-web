@@ -1,36 +1,12 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
+import { withMiddleware } from "@/core/lib/api.middleware";
 import { directus } from "@/core/lib/directus";
 import { createItems, readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
-
-        // if (!(body.age_months || body.age_years)) {
-        //     return NextResponse.json(
-        //         { success: false, error: 'Age is required' },
-        //         { status: 400 }
-        //     );
-        // }
-        // if (!body.tag_number) {
-        //     return NextResponse.json(
-        //         { success: false, error: 'Tag Number is required' },
-        //         { status: 400 }
-        //     );
-        // }
-        // if (!body.animal_category) {
-        //     return NextResponse.json(
-        //         { success: false, error: 'Category is required' },
-        //         { status: 400 }
-        //     );
-        // }
-        // if (!body.animal_type) {
-        //     return NextResponse.json(
-        //         { success: false, error: 'Type is required' },
-        //         { status: 400 }
-        //     );
-        // }
 
         const owner = await directus.request(
             readItems('owners_info', {
@@ -89,3 +65,5 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
+export const POST = withMiddleware(postHandler)

@@ -56,7 +56,7 @@ export interface IUser {
     language: string | null;
     tfa_secret: string | null;
     status: string;
-    role: string;
+    role: IRole;
     token: string | null;
     last_access: string;
     last_page: string | null;
@@ -75,4 +75,16 @@ export interface IUser {
     policies: any[];
     user_type: UserType;
     office_id: IOffice;
+}
+
+
+interface IRole {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    parent: string | null;
+    children: string[];
+    policies: string[];
+    users: string[];
 }

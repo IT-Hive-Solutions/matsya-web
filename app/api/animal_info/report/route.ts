@@ -1,9 +1,10 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
+import { withMiddleware } from "@/core/lib/api.middleware";
 import { directus } from "@/core/lib/directus";
 import { readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
         const animals = await directus.request(
             readItems('animal_info', {
@@ -29,3 +30,5 @@ export async function GET(request: NextRequest) {
         );
     }
 }
+
+export const GET = withMiddleware(getHandler)

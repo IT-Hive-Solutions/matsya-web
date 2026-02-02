@@ -1,13 +1,82 @@
 
 // Handles GET (all animal_info) and POST (create item)
-import { NextRequest, NextResponse } from 'next/server';
-import { readItems, createItem } from '@directus/sdk';
-import { directus } from '@/core/lib/directus'
 import { VerificationStatus } from '@/core/enums/verification-status.enum';
+import { withMiddleware } from '@/core/lib/api.middleware';
+import { directus } from '@/core/lib/directus';
+import { createItem, readItems } from '@directus/sdk';
+import { NextRequest, NextResponse } from 'next/server';
 
 // GET - Fetch all animal_info
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
+        const userDataString = request.headers.get('x-user-data');
+        const userData = JSON.parse(userDataString ?? "")
+        console.log({ userData });
+        console.log({ district: userData.office_id.district_id });
+
+        // Determine the user's role
+        const userRole = userData.role.name; // "vaccinator", "admin", etc.
+        const userDistrictId = userData.office_id.district_id?.id;
+        const userProvinceId = userData.office_id.province_id;
+
+        // Build the filter based on user role
+        let filter: any = {};
+
+        switch (userRole) {
+            case "admin":
+                // Admin can see all animals - no filter needed
+                break;
+
+            case "province-level":
+                // Province level officer sees animals from their province
+                if (userProvinceId) {
+                    filter = {
+                        owners_id: {
+                            district_id: {
+                                province_id: {
+                                    id: {
+                                        _eq: userProvinceId
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+                break;
+
+            case "district-level":
+            case "local-level":
+            case "vaccinator":
+                // District level, local level, and vaccinator see animals from their district
+                if (userDistrictId) {
+                    filter = {
+                        owners_id: {
+                            district_id: {
+                                id: {
+                                    _eq: userDistrictId
+                                }
+                            }
+                        }
+                    };
+                }
+                break;
+
+            default:
+                // If role is unknown, restrict to district level as a safe default
+                if (userDistrictId) {
+                    filter = {
+                        owners_id: {
+                            district_id: {
+                                id: {
+                                    _eq: userDistrictId
+                                }
+                            }
+                        }
+                    };
+                }
+                break;
+        }
+
         const animal_info = await directus.request(
             readItems('animal_info', {
                 fields: [
@@ -15,10 +84,25 @@ export async function GET(request: NextRequest) {
                     "owners_id.*",
                     "animal_category.*",
                     "animal_type.*",
+                    "owners_id.district_id.*",
+                    "owners_id.district_id.province_id.*",
                 ],
+                filter: filter, // Apply the filter
                 sort: ['-date_created'],
             })
         );
+
+        return NextResponse.json({
+            success: true,
+            data: animal_info,
+            // Optional: include metadata for debugging
+            meta: {
+                userRole,
+                filteredBy: userRole === "admin" ? "none" :
+                    userRole === "province-level" ? `province_id: ${userProvinceId}` :
+                        `district_id: ${userDistrictId}`
+            }
+        });
 
         return NextResponse.json({
             success: true,
@@ -33,7 +117,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create new item
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
 
@@ -111,3 +195,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
+
+export const GET = withMiddleware(getHandler)
+export const POST = withMiddleware(postHandler)
