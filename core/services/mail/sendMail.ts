@@ -15,6 +15,8 @@ export const sendMail = async ({ html, subject, to }: { to: string, subject: str
         console.log(' Email sent!');
         console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
     }
+    console.log({infoFromMail: info});
+    
 
     return info;
 
