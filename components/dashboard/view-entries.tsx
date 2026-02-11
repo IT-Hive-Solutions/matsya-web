@@ -35,6 +35,7 @@ import Loading from "../loading";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import AnimalForm from "./animal-form";
+import EntryRejectionWithReason from "./rejectEntryModal";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -115,10 +116,14 @@ export default function OwnerAnimalView({
     mutationFn: (payload: {
       id: number;
       verification_status: VerificationStatus;
+      reason?: string;
     }) =>
       updateProtectedHandler(
         endpoints.animal_info.update_animal_status(payload.id),
-        { verification_status: payload.verification_status },
+        {
+          verification_status: payload.verification_status,
+          rejection_reason: payload.reason,
+        },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -549,16 +554,17 @@ export default function OwnerAnimalView({
                             (user.role.name === "admin" ||
                               user.role.name === "province-level" ||
                               user.role.name === "local-level") && (
-                              <AlertDialogWrapper
+                              <EntryRejectionWithReason
                                 className="w-max"
-                                title="Reject Animal"
+                                title="Reject Animal?"
                                 description="This animal record will be marked as rejected. Continue?"
-                                onConfirm={async (setOpen) => {
+                                onConfirm={async (setOpen, reason) => {
                                   await handleUpdateVerificationStatusMutation.mutateAsync(
                                     {
                                       id: animal.id,
                                       verification_status:
                                         VerificationStatus.Rejected,
+                                      reason,
                                     },
                                   );
                                   setOpen && setOpen(false);
@@ -572,7 +578,7 @@ export default function OwnerAnimalView({
                                   <LucideOctagonMinus className="h-4 w-4" />
                                   <span>Reject</span>
                                 </Button>
-                              </AlertDialogWrapper>
+                              </EntryRejectionWithReason>
                             )}
                           {animal.verification_status ===
                             VerificationStatus.Draft &&
