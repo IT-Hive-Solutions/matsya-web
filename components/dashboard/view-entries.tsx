@@ -542,7 +542,9 @@ export default function OwnerAnimalView({
                             )}
                           {!(
                             animal.verification_status ===
-                            VerificationStatus.Validated
+                              VerificationStatus.Validated ||
+                            animal.verification_status ===
+                              VerificationStatus.Rejected
                           ) &&
                             (user.role.name === "admin" ||
                               user.role.name === "province-level" ||
