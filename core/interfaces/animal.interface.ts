@@ -22,6 +22,7 @@ export interface AnimalInfoDirectus {
     longitude: number;
     owners_id: number;
     image?: string;
+    rejection_reason?: string;
     date_created?: string;
     date_updated?: string;
 };
