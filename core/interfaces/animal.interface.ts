@@ -41,6 +41,8 @@ export interface IAnimal {
     verification_status: VerificationStatus;
     is_vaccination_applied: string;
     production_capacity: string;
+    rejection_reason: string;
+    vaccinated_date: string;
     latitude: number;
     longitude: number;
     image: string | null;
