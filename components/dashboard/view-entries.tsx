@@ -60,12 +60,12 @@ const StatusBadge = ({ status }: { status: string }) => {
       pending: {
         bg: "bg-amber-500/10",
         text: "text-amber-700",
-        label: "Pending",
+        label: "Accepted",
       },
       draft: {
         bg: "bg-purple-500/10",
         text: "text-purple-700",
-        label: "Draft",
+        label: "Pending",
       },
       verified: {
         bg: "bg-blue-500/10",
@@ -444,8 +444,8 @@ export default function OwnerAnimalView({
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {getMonthLabel(animal.age_months)},{" "}
-                                {animal.age_years}
+                                {animal.age_years} Years and
+                                {animal.age_months} Months
                               </p>
                             </div>
                           </div>
@@ -519,7 +519,8 @@ export default function OwnerAnimalView({
                             )}
                           {animal.verification_status ===
                             VerificationStatus.Pending &&
-                            user.role.name === "district-level" && (
+                            (user.role.name === "district-level" ||
+                              user.role.name === "admin") && (
                               <AlertDialogWrapper
                                 className="w-max"
                                 title="Verify Animal"
@@ -582,7 +583,8 @@ export default function OwnerAnimalView({
                             )}
                           {animal.verification_status ===
                             VerificationStatus.Draft &&
-                            user.role.name === "local-level" && (
+                            (user.role.name === "local-level" ||
+                              user.role.name === "admin") && (
                               <AlertDialogWrapper
                                 className="w-max"
                                 title="Submit Application"
@@ -604,7 +606,7 @@ export default function OwnerAnimalView({
                                   className="gap-2 cursor-pointer"
                                 >
                                   <CheckCircleIcon className="h-4 w-4 text-blue-600" />
-                                  <span>Verify</span>
+                                  <span>Accept</span>
                                 </Button>
                               </AlertDialogWrapper>
                             )}
