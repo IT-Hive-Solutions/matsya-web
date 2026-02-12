@@ -95,7 +95,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     queryKey: ["animal-category"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_category),
   });
-  
+
   useEffect(() => {
     if (productionCapacityFetched?.data) {
       const payload = productionCapacityFetched?.data?.map(
@@ -139,7 +139,8 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       localLevelName: "",
-      province_id: user.office_id?.district_id?.province_id?.province_name || "",
+      province_id:
+        user.office_id?.district_id?.province_id?.province_name || "",
       district_id: user.office_id?.district_id?.district_name || "",
       ruralMunicipality: "",
       date: new Date().toISOString().split("T")[0],
@@ -318,7 +319,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
             />
           </div>
         </FormSection>
-
         {/* Section B: Owner Details */}
         <FormSection title="Owner Details" icon="👤">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -355,7 +355,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
             />
           </div>
         </FormSection>
-
         {/* Cattle Details Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
@@ -483,67 +482,63 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 1)
                           }
+                          value={"1"}
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name={`cattleEntries.${idx}.age_years`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Age (Years)</FormLabel>
-                      <div className="flex gap-2">
+                <div className="flex item-center gap-3">
+                  <FormField
+                    control={form.control}
+                    name={`cattleEntries.${idx}.age_years`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Age (Years)</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Age in Years"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value))
+                              }
+                              className="flex-1"
+                              min={0}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`cattleEntries.${idx}.age_months`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Age (Months)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="Age in Years"
+                            placeholder="Age in Months"
                             {...field}
                             onChange={(e) =>
                               field.onChange(parseInt(e.target.value))
                             }
                             className="flex-1"
+                            min={0}
+                            max={11}
                           />
                         </FormControl>
-                        <FormField
-                          control={form.control}
-                          name={`cattleEntries.${idx}.age_months`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Birth Months</FormLabel>
-                              <FormControl>
-                                <Select
-                                  {...field}
-                                  value={field.value?.toString() ?? ""}
-                                  onValueChange={(val) => field.onChange(val)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select Type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {monthOptions.map((type: any) => (
-                                      <SelectItem
-                                        key={type.value.toString()}
-                                        value={type.value.toString()}
-                                      >
-                                        {type?.label ?? ""}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
@@ -666,7 +661,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
             </div>
           ))}
         </div>
-
         Section G: GPS Auto Capture
         <FormSection title="Location Coordinates" icon="🗺️">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -701,7 +695,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
             />
           </div>
         </FormSection>
-
         {/* Submit Button */}
         <div className="flex gap-3 sticky bottom-0 bg-background border-t border-border p-4 -m-6 mt-0 rounded-lg">
           <Button

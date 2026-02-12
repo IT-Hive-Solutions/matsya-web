@@ -14,7 +14,7 @@ export interface AnimalInfoDirectus {
     verification_status: VerificationStatus;
     animal_type: number;
     age_years: number;
-    age_months: Months;
+    age_months: number;
     tag_number: string;
     is_vaccination_applied: string;
     production_capacity: string;

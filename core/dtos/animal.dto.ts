@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { Months } from "../enums/month.enum";
 
 export const CreateAnimalSchema = z.object({
-    age_months: z.nativeEnum(Months).optional(),
+    age_months: z.number().min(0, { message: "Month must be between 0 to 11" }).max(11, { message: "Month must be between 0 to 11" }).optional(),
     age_years: z.number().optional(),
     num_of_animals: z.number().optional(),
     animal_category: z.number().optional(),
