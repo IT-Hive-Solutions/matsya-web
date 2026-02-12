@@ -141,7 +141,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       localLevelName: "",
       province_id:
         user.office_id?.district_id?.province_id?.province_name || "",
-      district_id: user.office_id?.district_id?.district_name || "",
+      district_id: String(user.office_id?.district_id?.id) || "",
       municipality: "",
       date: new Date().toISOString().split("T")[0],
       serial_number: "SN-" + Date.now(),

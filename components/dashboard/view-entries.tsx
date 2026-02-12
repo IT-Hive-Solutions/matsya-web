@@ -150,17 +150,17 @@ export default function OwnerAnimalView({
 
     const grouped = fetchedAnimalList.data.reduce(
       (acc: Record<number, GroupedAnimal>, animal: IAnimal) => {
-        const ownerId = animal.owners_id.id;
+        const ownerId = animal.owners_id?.id;
 
         if (!acc[ownerId]) {
           acc[ownerId] = {
             owner: {
-              id: animal.owners_id.id,
-              name: animal.owners_id.owners_name,
-              contact: animal.owners_id.owners_contact,
-              localLevel: animal.owners_id.local_level_name,
-              ward: animal.owners_id.ward_number,
-              district: animal.owners_id.district_id,
+              id: animal.owners_id?.id,
+              name: animal.owners_id?.owners_name,
+              contact: animal.owners_id?.owners_contact,
+              localLevel: animal.owners_id?.local_level_name,
+              ward: animal.owners_id?.ward_number,
+              district: animal.owners_id?.district_id,
             },
             animals: [],
           };
@@ -177,9 +177,9 @@ export default function OwnerAnimalView({
 
   const filteredData = groupedData.filter(
     (group) =>
-      group.owner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      group.owner.contact.includes(searchTerm) ||
-      group.animals.some((animal) =>
+      group.owner?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.owner?.contact?.includes(searchTerm) ||
+      group.animals?.some((animal) =>
         animal.tag_number.toLowerCase().includes(searchTerm.toLowerCase()),
       ),
   );

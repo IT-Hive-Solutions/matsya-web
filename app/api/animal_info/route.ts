@@ -154,7 +154,9 @@ async function postHandler(request: NextRequest) {
                     }
                 })
             )
-            if (owner[0].id) {
+            if (!owner[0]) {
+                console.log("CREATE!!!");
+                
                 if (!body.owners_name) {
                     return NextResponse.json(
                         { success: false, error: 'Name is required' },
@@ -201,6 +203,8 @@ async function postHandler(request: NextRequest) {
                 }
                 body.owner_id = newOwner.id;
             } else {
+                console.log("UPDATE!!!");
+
                 const updatePayload: any = {}
                 if (body.province_id) {
                     updatePayload.province_id = body.province_id
@@ -258,6 +262,7 @@ async function postHandler(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: any) {
+        
         return NextResponse.json(
             { success: false, error: error.message || 'Failed to create animal' },
             { status: 500 }
