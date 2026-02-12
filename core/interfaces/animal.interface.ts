@@ -14,7 +14,7 @@ export interface AnimalInfoDirectus {
     verification_status: VerificationStatus;
     animal_type: number;
     age_years: number;
-    age_months: Months;
+    age_months: number;
     tag_number: string;
     is_vaccination_applied: string;
     production_capacity: string;
@@ -22,6 +22,7 @@ export interface AnimalInfoDirectus {
     longitude: number;
     owners_id: number;
     image?: string;
+    rejection_reason?: string;
     date_created?: string;
     date_updated?: string;
 };
@@ -40,6 +41,8 @@ export interface IAnimal {
     verification_status: VerificationStatus;
     is_vaccination_applied: string;
     production_capacity: string;
+    rejection_reason: string;
+    vaccinated_date: string;
     latitude: number;
     longitude: number;
     image: string | null;
