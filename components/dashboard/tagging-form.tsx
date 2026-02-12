@@ -46,7 +46,7 @@ const formSchema = z.object({
   localLevelName: z.string().optional(),
   province_id: z.string(),
   district_id: z.string(),
-  ruralMunicipality: z.string().optional(),
+  municipality: z.string().optional(),
   date: z.string(),
   serial_number: z.string(),
   owners_name: z.string().min(1, "Owner name is required"),
@@ -142,7 +142,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       province_id:
         user.office_id?.district_id?.province_id?.province_name || "",
       district_id: user.office_id?.district_id?.district_name || "",
-      ruralMunicipality: "",
+      municipality: "",
       date: new Date().toISOString().split("T")[0],
       serial_number: "SN-" + Date.now(),
       owners_name: "",
@@ -270,7 +270,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
 
             <FormField
               control={form.control}
-              name="ruralMunicipality"
+              name="municipality"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rural/Municipality</FormLabel>
