@@ -37,6 +37,7 @@ import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interf
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
+import { Loader2, X } from "lucide-react";
 
 interface TaggingFormProps {
   user: IUser;
@@ -62,6 +63,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function TaggingForm({ user }: TaggingFormProps) {
   const queryClient = useQueryClient();
+
+  const [uploadingImages, setUploadingImages] = useState<
+    Record<number, boolean>
+  >({});
+  const [imagePreview, setImagePreview] = useState<Record<number, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [animalTypeOptions, setAnimalTypeOptions] = useState<
@@ -191,6 +197,78 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       remove(index);
     }
   };
+
+  const handleImageUpload = async (file: File, index: number) => {
+    if (!file) return;
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file");
+      return;
+    }
+
+    try {
+      setUploadingImages((prev) => ({ ...prev, [index]: true }));
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Upload image
+      const response = await fetch("/api/image/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      console.log({ response, data });
+
+      // Assuming the API returns { image_id: "some-id" } or { id: "some-id" }
+      const imageId = data.fileId || data?.data?.id;
+
+      if (!imageId) {
+        throw new Error("No image ID returned from server");
+      }
+
+      // Update form with image ID
+      form.setValue(`cattleEntries.${index}.tag_image`, imageId);
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview((prev) => ({ ...prev, [index]: previewUrl }));
+
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      console.error("Image upload error:", error);
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setUploadingImages((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
+  // Remove image handler
+  const handleRemoveImage = (index: number) => {
+    form.setValue(`cattleEntries.${index}.tag_image`, undefined);
+
+    // Clean up preview URL
+    if (imagePreview[index]) {
+      URL.revokeObjectURL(imagePreview[index]);
+      const newPreviews = { ...imagePreview };
+      delete newPreviews[index];
+      setImagePreview(newPreviews);
+    }
+  };
+
   const createAnimalMutation = useMutation({
     mutationFn: (payload: FormValues) =>
       mutateProtectedHandler(endpoints.animal_info["create-multiple"], payload),
@@ -201,6 +279,11 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       });
       toast.success("Animal created successfully!");
       // onClose();
+      form.reset();
+      Object.values(imagePreview).forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+      setImagePreview({});
     },
     onError: (err) => {
       console.log("error...", { err });
@@ -617,40 +700,66 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                     <FormItem className="sm:col-span-2">
                       <FormLabel>Tag Image</FormLabel>
                       <FormControl>
-                        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-secondary/50 transition">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              onChange(file);
-                            }}
-                            className="hidden"
-                            id={`tag-image-${field.name}`}
-                            {...field}
-                          />
-                          <label
-                            htmlFor={`tag-image-${field.name}`}
-                            className="cursor-pointer block"
-                          >
-                            {value ? (
-                              <div className="text-sm text-foreground">
-                                <p className="font-medium">
-                                  File selected:
-                                  {/* {value.name} */}
-                                </p>
-                              </div>
-                            ) : (
-                              <div>
-                                <p className="text-sm font-medium text-foreground">
-                                  Click to upload tag image
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  PNG, JPG up to 5MB
-                                </p>
-                              </div>
-                            )}
-                          </label>
+                        <div>
+                          {/* Image Preview */}
+                          {imagePreview[idx] && (
+                            <div className="mb-3 relative inline-block">
+                              <img
+                                src={imagePreview[idx]}
+                                alt="Tag preview"
+                                className="w-32 h-32 object-cover rounded-lg border-2 border-border"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                                onClick={() => handleRemoveImage(idx)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Upload Area */}
+                          {!imagePreview[idx] && (
+                            <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-secondary/50 transition">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleImageUpload(file, idx);
+                                  }
+                                }}
+                                className="hidden"
+                                id={`tag-image-${idx}`}
+                                disabled={uploadingImages[idx]}
+                                {...field}
+                              />
+                              <label
+                                htmlFor={`tag-image-${idx}`}
+                                className="cursor-pointer block"
+                              >
+                                {uploadingImages[idx] ? (
+                                  <div className="flex items-center justify-center gap-2 text-sm text-foreground">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span>Uploading...</span>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">
+                                      Click to upload tag image
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      PNG, JPG up to 5MB
+                                    </p>
+                                  </div>
+                                )}
+                              </label>
+                            </div>
+                          )}
                         </div>
                       </FormControl>
                       <FormMessage />

@@ -117,6 +117,7 @@ async function postHandler(request: NextRequest) {
                 latitude: body.latitude,
                 longitude: body.longitude,
                 owners_id: body.owners_id,
+                image: animal.tag_image,
             }));
 
             payload = data

@@ -23,12 +23,22 @@ type Schema = {
     owners_info: OwnersInfoDirectus[];
     office: OfficeDirectus[];
 };
-
-export const directus = createDirectus<Schema>(process.env.DIRECTUS_URL!).
+const url = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || ""
+export const directus = createDirectus<Schema>(url).
     with(rest()).
     with(authentication("cookie", { credentials: "include" }));
-    // with(staticToken(staticTokenValue))
+// with(staticToken(staticTokenValue))
 
 
 
 
+console.log({ NEXT_PUBLIC_DIRECTUS_URL: process.env.NEXT_PUBLIC_DIRECTUS_URL });
+console.log({ DIRECTUS_URL: process.env.DIRECTUS_URL });
+export function getAssetURL(fileId: string) {
+
+    return `${process.env.NEXT_PUBLIC_DIRECTUS_URL}assets/${fileId}`;
+}
+
+export function getDownloadUrl(fileId: string) {
+    return `${process.env.NEXT_PUBLIC_DIRECTUS_URL}assets/${fileId}?download`;
+}
