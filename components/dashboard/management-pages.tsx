@@ -15,6 +15,8 @@ import AnimalLists from "../view/AnimalLists";
 import AnimalForm from "./animal-form";
 import AnimalTypesLists from "../view/AnimalTypeList";
 import AnimalTypeForm from "./animal-type-form";
+import ProductionCapacityLists from "../view/ProductionCapacityList";
+import ProductionCapacityForm from "./production-capacity";
 
 interface ManagementPageProps {
   type:
@@ -22,7 +24,8 @@ interface ManagementPageProps {
     | "livestock-category"
     | "livestock-type"
     | "user-accounts"
-    | "offices";
+    | "offices"
+    | "production-capacity";
 }
 export interface Config {
   title: string;
@@ -103,6 +106,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       description: "Register and manage livestock offices",
       fields: [],
     },
+    "production-capacity": {
+      title: "Create Production Capacity",
+      description: "Create and manage production capacity",
+      fields: [],
+    },
   };
 
   const currentConfig = config[type];
@@ -147,6 +155,9 @@ export default function ManagementPage({ type }: ManagementPageProps) {
             {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
             )}
+            {type === "production-capacity" && (
+              <ProductionCapacityForm onClose={() => setShowForm(false)} />
+            )}
           </div>
         </div>
       )}
@@ -168,6 +179,12 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       )}
       {type === "livestock-type" && (
         <AnimalTypesLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+        />
+      )}
+      {type === "production-capacity" && (
+        <ProductionCapacityLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
         />

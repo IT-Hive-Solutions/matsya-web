@@ -53,6 +53,8 @@ export default function Dashboard({ user }: DashboardProps) {
         return <ManagementPage type="user-accounts" />;
       case "offices":
         return <ManagementPage type="offices" />;
+      case "production-capacity":
+        return <ManagementPage type="production-capacity" />;
       default:
         return (
           <DashboardContent

@@ -107,9 +107,16 @@ export default function NavigationDrawer({
     },
     {
       id: "offices",
-      label: "Create Office",
+      label: "Offices",
       icon: <Settings size={20} />,
       section: "offices",
+      requiredRoles: ["admin", "province-level"],
+    },
+    {
+      id: "production-capacity",
+      label: "Production Capacity",
+      icon: <Settings size={20} />,
+      section: "production-capacity",
       requiredRoles: ["admin", "province-level"],
     },
   ];
