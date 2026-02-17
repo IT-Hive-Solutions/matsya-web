@@ -37,13 +37,11 @@ export default function ProductionCapacityForm({
     },
     resolver: zodResolver(CreateProductionCapacitySchema),
   });
-  console.log({ provinceData: form.watch() });
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateProductionCapacityDTO) =>
       mutateProtectedHandler(endpoints.production_capacity, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],
       });
@@ -51,13 +49,11 @@ export default function ProductionCapacityForm({
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
 
       toast.error("Error creating production capacity!");
     },
   });
   const onSubmit = (data: CreateProductionCapacityDTO) => {
-    console.log({ data });
     createAnimalCategoryMutation.mutateAsync(data);
   };
   return (

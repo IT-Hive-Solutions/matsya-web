@@ -48,8 +48,6 @@ export default function DashboardOverview({ user }: OverviewProps) {
   useEffect(() => {
     const data = fetchedReport?.data;
     if (data) {
-      console.log({ data });
-
       setStatValues(data);
     }
   }, [fetchedReport]);

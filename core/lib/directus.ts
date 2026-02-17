@@ -32,8 +32,6 @@ export const directus = createDirectus<Schema>(url).
 
 
 
-console.log({ NEXT_PUBLIC_DIRECTUS_URL: process.env.NEXT_PUBLIC_DIRECTUS_URL });
-console.log({ DIRECTUS_URL: process.env.DIRECTUS_URL });
 export function getAssetURL(fileId: string) {
 
     return `${process.env.NEXT_PUBLIC_DIRECTUS_URL}assets/${fileId}`;

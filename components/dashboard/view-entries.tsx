@@ -195,7 +195,6 @@ export default function OwnerAnimalView({
           animal.tag_number.toLowerCase().includes(searchTerm.toLowerCase()),
         ),
     );
-    console.log({ groupedData, newFilteredData });
     setFilteredData(newFilteredData);
   }, [fetchedAnimalList]);
 

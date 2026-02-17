@@ -15,19 +15,16 @@ export async function createMailTransporter() {
   //     },
   //   });
   // } else {
-    // Production SMTP settings (configure when ready)
-    console.log({ user: process.env.SMTP_USER });
-    console.log({ pass: process.env.SMTP_PASS });
-
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+  // Production SMTP settings (configure when ready)
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
   // }
 }
 

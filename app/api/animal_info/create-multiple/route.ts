@@ -19,7 +19,6 @@ async function postHandler(request: NextRequest) {
                 })
             )
             if (!owner[0]) {
-                console.log("CREATE!!!");
 
                 if (!body.owners_name) {
                     return NextResponse.json(
@@ -68,7 +67,6 @@ async function postHandler(request: NextRequest) {
                 }
                 body.owner_id = newOwner.id;
             } else {
-                console.log("UPDATE!!!");
 
                 const updatePayload: any = {
                     status: "published" as "published"

@@ -1,5 +1,4 @@
 import { createMailTransporter } from "@/core/lib/mail";
-import nodemailer from 'nodemailer';
 
 export const sendMail = async ({ html, subject, to }: { to: string, subject: string, html: string }) => {
     const transporter = await createMailTransporter();
@@ -11,12 +10,6 @@ export const sendMail = async ({ html, subject, to }: { to: string, subject: str
         html,
     });
 
-    if (process.env.NODE_ENV === 'development') {
-        console.log(' Email sent!');
-        console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
-    }
-    console.log({infoFromMail: info});
-    
 
     return info;
 

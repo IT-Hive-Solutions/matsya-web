@@ -231,7 +231,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       }
 
       const data = await response.json();
-      console.log({ response, data });
 
       // Assuming the API returns { image_id: "some-id" } or { id: "some-id" }
       const imageId = data.fileId || data?.data?.id;
@@ -273,7 +272,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     mutationFn: (payload: FormValues) =>
       mutateProtectedHandler(endpoints.animal_info["create-multiple"], payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["animals"],
       });
@@ -286,8 +284,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       setImagePreview({});
     },
     onError: (err) => {
-      console.log("error...", { err });
-
       toast.error("Error creating animal!");
     },
     onSettled: () => {
@@ -298,10 +294,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
   const onSubmit = async (data: FormValues) => {
     await createAnimalMutation.mutateAsync(data);
   };
-  console.log({
-    formData: form.watch("cattleEntries"),
-    error: form.formState.errors,
-  });
 
   return (
     <Form {...form}>

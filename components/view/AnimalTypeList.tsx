@@ -40,7 +40,6 @@ const AnimalTypesLists = ({ currentConfig, setShowForm }: Props) => {
       setAnimalTypesLists(fetchedAnimalTypesList?.data);
     }
   }, [fetchedAnimalTypesList]);
-  console.log({ animalTypesLists });
 
   const animalTypesTable = useCustomReactPaginatedTable<
     IAnimalType,

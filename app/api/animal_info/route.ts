@@ -106,6 +106,7 @@ async function getHandler(request: NextRequest) {
                     "owners_id.*",
                     "animal_category.*",
                     "animal_type.*",
+                    "production_capacity.*",
                     "owners_id.district_id.*",
                     "owners_id.district_id.province_id.*",
                 ],
@@ -180,8 +181,6 @@ async function postHandler(request: NextRequest) {
                 })
             )
             if (!owner[0]) {
-                console.log("CREATE!!!");
-
                 if (!body.owners_name) {
                     return NextResponse.json(
                         { success: false, error: 'Name is required' },
@@ -228,8 +227,6 @@ async function postHandler(request: NextRequest) {
                 }
                 body.owner_id = newOwner.id;
             } else {
-                console.log("UPDATE!!!");
-
                 const updatePayload: any = {}
                 if (body.province_id) {
                     updatePayload.province_id = body.province_id

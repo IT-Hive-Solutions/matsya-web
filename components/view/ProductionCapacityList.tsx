@@ -39,7 +39,6 @@ const ProductionCapacityLists = ({ currentConfig, setShowForm }: Props) => {
       setProductionCapacityLists(fetchedProductionCapacityList?.data);
     }
   }, [fetchedProductionCapacityList]);
-  console.log({ productionCapacityLists });
 
   const productionCapacityTable = useCustomReactPaginatedTable<
     IAnimalType,

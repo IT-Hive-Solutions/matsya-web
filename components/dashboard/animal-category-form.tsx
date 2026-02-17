@@ -37,13 +37,11 @@ export default function AnimalCategoryForm({
     },
     resolver: zodResolver(CreateAnimalCategorySchema),
   });
-  console.log({ provinceData: form.watch() });
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
       mutateProtectedHandler(endpoints.animal_category, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],
       });
@@ -51,13 +49,11 @@ export default function AnimalCategoryForm({
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
 
       toast.error("Error creating animal category!");
     },
   });
   const onSubmit = (data: CreateAnimalCategoryDTO) => {
-    console.log({ data });
     createAnimalCategoryMutation.mutateAsync(data);
   };
   return (

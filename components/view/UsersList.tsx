@@ -73,7 +73,6 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
             }}
             onConfirm={async (setOpen) => {
               setLoadingId(row.original.id);
-              console.log("Password reset for : ", row.original.first_name);
               await resetPasswordMutation.mutateAsync({
                 email: row.original.email,
                 needs_password_change: true,
@@ -97,7 +96,6 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
     mutationFn: (payload: ResetPasswordDTO) =>
       mutateHandler(endpoints.auth["reset-password"], payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       if (res.password_changed) {
         toast.success("Password Changed Successfully!.", {
           description: "Please login with your new password.",
@@ -108,7 +106,6 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
       toast.success("User created successfully!");
     },
     onError: (err) => {
-      console.log("error...", { err });
       toast.error("Error creating user!");
     },
     onSettled: () => {

@@ -125,7 +125,6 @@ export default function NavigationDrawer({
     onNavigate(section);
     setIsOpen(false);
   };
-  console.log({ role: user.role.name });
 
   return (
     <>

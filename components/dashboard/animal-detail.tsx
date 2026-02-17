@@ -46,7 +46,6 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
       setAnimal(fetchedAnimalData?.data);
     }
   }, [fetchedAnimalData]);
-  console.log({ animal });
 
   return (
     <Card className="w-full h-3/4 overflow-y-auto max-w-4xl mx-auto">
@@ -115,7 +114,9 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
               <p className="text-sm text-muted-foreground">
                 Production Capacity
               </p>
-              <p className="font-medium">{animal?.production_capacity}</p>
+              <p className="font-medium">
+                {animal?.production_capacity.capacity_name ?? "N/A"}
+              </p>
             </div>
           </div>
         </div>

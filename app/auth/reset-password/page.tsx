@@ -37,13 +37,11 @@ export default function ResetPassword() {
     },
     resolver: zodResolver(ForgotPasswordSchema),
   });
-  console.log({ formData: form.watch() });
 
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ForgotPasswordDTO) =>
       mutateHandler(endpoints.auth["forgot-password"], payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       if (res.password_changed) {
         toast.success("Password Changed Successfully!.", {
           description: "Please login with your new password.",
@@ -56,7 +54,6 @@ export default function ResetPassword() {
       router.push("/");
     },
     onError: (err) => {
-      console.log("error...", { err });
       toast.error("Error creating user!");
     },
     onSettled: () => {
@@ -66,7 +63,6 @@ export default function ResetPassword() {
   const handleSubmit = async (data: ForgotPasswordDTO) => {
     await resetPasswordMutation.mutateAsync(data);
   };
-  console.log({ error: form.formState.errors });
 
   return (
     <main className="min-h-screen  from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
