@@ -95,7 +95,7 @@ export default function NavigationDrawer({
       id: "livestock-type",
       label: "Livestock Types",
       icon: <Settings size={20} />,
-      section: "livestock-category",
+      section: "livestock-type",
       requiredRoles: ["admin", "province-level"],
     },
     {

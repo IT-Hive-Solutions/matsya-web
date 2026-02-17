@@ -13,6 +13,8 @@ import AnimalCategoriesLists from "../view/AnimalCategoriesList";
 import AnimalCategoryForm from "./animal-category-form";
 import AnimalLists from "../view/AnimalLists";
 import AnimalForm from "./animal-form";
+import AnimalTypesLists from "../view/AnimalTypeList";
+import AnimalTypeForm from "./animal-type-form";
 
 interface ManagementPageProps {
   type:
@@ -38,8 +40,8 @@ export default function ManagementPage({ type }: ManagementPageProps) {
   const config: {
     [key: string]: Config;
   } = {
-    animals: {
-      title: "Manage Animals",
+    livestock: {
+      title: "Manage Livestock",
       description: "Add and manage livestock types in your system",
       fields: [
         {
@@ -59,7 +61,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         },
       ],
     },
-    "animal-category": {
+    "livestock-category": {
       title: "Livestock Categories",
       description: "Create and manage livestock breed categories",
       fields: [
@@ -77,6 +79,17 @@ export default function ManagementPage({ type }: ManagementPageProps) {
           name: "productionType",
           label: "Production Type",
           placeholder: "e.g., High milk yield",
+        },
+      ],
+    },
+    "livestock-type": {
+      title: "Livestock Type",
+      description: "Create and manage livestock types",
+      fields: [
+        {
+          name: "animal_name",
+          label: "Type",
+          placeholder: "e.g., Dairy, Beef, Dual-purpose",
         },
       ],
     },
@@ -100,7 +113,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {currentConfig.title}
+            {currentConfig?.title}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             {currentConfig.description}
@@ -128,6 +141,9 @@ export default function ManagementPage({ type }: ManagementPageProps) {
             {type === "livestock-category" && (
               <AnimalCategoryForm onClose={() => setShowForm(false)} />
             )}
+            {type === "livestock-type" && (
+              <AnimalTypeForm onClose={() => setShowForm(false)} />
+            )}
             {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
             )}
@@ -146,6 +162,12 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       )}
       {type === "livestock-category" && (
         <AnimalCategoriesLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+        />
+      )}
+      {type === "livestock-type" && (
+        <AnimalTypesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
         />
