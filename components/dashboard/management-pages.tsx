@@ -15,7 +15,12 @@ import AnimalLists from "../view/AnimalLists";
 import AnimalForm from "./animal-form";
 
 interface ManagementPageProps {
-  type: "animals" | "animal-category" | "user-accounts" | "offices";
+  type:
+    | "livestock"
+    | "livestock-category"
+    | "livestock-type"
+    | "user-accounts"
+    | "offices";
 }
 export interface Config {
   title: string;
@@ -55,8 +60,8 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       ],
     },
     "animal-category": {
-      title: "Animal Categories",
-      description: "Create and manage animal breed categories",
+      title: "Livestock Categories",
+      description: "Create and manage livestock breed categories",
       fields: [
         {
           name: "name",
@@ -120,10 +125,10 @@ export default function ManagementPage({ type }: ManagementPageProps) {
             {type === "offices" && (
               <OfficeForm onClose={() => setShowForm(false)} />
             )}
-            {type === "animal-category" && (
+            {type === "livestock-category" && (
               <AnimalCategoryForm onClose={() => setShowForm(false)} />
             )}
-            {type === "animals" && (
+            {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
             )}
           </div>
@@ -139,7 +144,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       {type === "user-accounts" && (
         <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
-      {type === "animal-category" && (
+      {type === "livestock-category" && (
         <AnimalCategoriesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}

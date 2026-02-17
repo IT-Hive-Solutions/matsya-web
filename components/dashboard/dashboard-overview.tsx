@@ -103,7 +103,7 @@ export default function DashboardOverview({ user }: OverviewProps) {
             >
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  Cattle tag #{1000 + item} registered
+                  Livestock tag #{1000 + item} registered
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {item * 2} hours ago

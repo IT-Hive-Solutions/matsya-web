@@ -43,10 +43,12 @@ export default function Dashboard({ user }: DashboardProps) {
         );
       case "analytics":
         return <DashboardCharts />;
-      case "animals":
-        return <ManagementPage type="animals" />;
-      case "animal-category":
-        return <ManagementPage type="animal-category" />;
+      case "livestock":
+        return <ManagementPage type="livestock" />;
+      case "livestock-category":
+        return <ManagementPage type="livestock-category" />;
+      case "livestock-type":
+        return <ManagementPage type="livestock-type" />;
       case "user-accounts":
         return <ManagementPage type="user-accounts" />;
       case "offices":

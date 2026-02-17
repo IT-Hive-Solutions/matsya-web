@@ -85,10 +85,17 @@ export default function NavigationDrawer({
     },
     // { id: "animals", label: "Manage Animals", icon: <Home size={20} />, section: "animals" },
     {
-      id: "animal-category",
-      label: "Cattle Categories",
+      id: "livestock-category",
+      label: "Livestock Categories",
       icon: <Settings size={20} />,
-      section: "animal-category",
+      section: "livestock-category",
+      requiredRoles: ["admin", "province-level"],
+    },
+    {
+      id: "livestock-type",
+      label: "Livestock Types",
+      icon: <Settings size={20} />,
+      section: "livestock-category",
       requiredRoles: ["admin", "province-level"],
     },
     {

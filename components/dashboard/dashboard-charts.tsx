@@ -27,7 +27,7 @@ const vaccinationData = [
 ]
 
 const animalTypeData = [
-  { name: "Cattle", value: 45, color: "#10b981" },
+  { name: "Livestock", value: 45, color: "#10b981" },
   { name: "Goats", value: 25, color: "#3b82f6" },
   { name: "Sheep", value: 20, color: "#f59e0b" },
   { name: "Buffaloes", value: 10, color: "#ef4444" },
