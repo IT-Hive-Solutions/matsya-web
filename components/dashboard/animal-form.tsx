@@ -103,7 +103,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         owners_contact: data?.owners_id?.owners_contact,
         vaccinated_date: data?.vaccinated_date,
       };
-      console.log({ fetchedData: data });
 
       form.reset(payload);
     }
@@ -160,14 +159,11 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
     resolver: zodResolver(CreateAnimalSchema),
     reValidateMode: "onChange",
   });
-  console.log({ formData: form.watch() });
-  console.log({ errors: form.formState.errors });
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
       mutateProtectedHandler(endpoints.animal_info, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["animals"],
       });
@@ -175,7 +171,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
 
       toast.error("Error creating animal!");
     },
@@ -187,7 +182,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         payload,
       ),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["animals"],
       });
@@ -195,13 +189,11 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
 
       toast.error("Error updating animal!");
     },
   });
   const onSubmit = (data: CreateAnimalDTO | UpdateAnimalDTO) => {
-    console.log({ data });
     if (animalId) {
       updateAnimalMutation.mutateAsync(data as UpdateAnimalDTO);
     } else {

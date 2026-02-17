@@ -1,6 +1,6 @@
 "use client"
 import { endpoints } from "@/core/contants/endpoints";
-import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useQuery } from "@tanstack/react-query";
@@ -18,33 +18,35 @@ type Props = {
   currentConfig: Config;
   setShowForm: Dispatch<SetStateAction<boolean>>;
 };
-export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
+
+
+export const animalTypesColumns: ColumnDef<IAnimalType>[] = [
   {
-    accessorKey: "category_name",
+    accessorKey: "animal_name",
     header: "Name",
   },
 ];
 
-const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
-  const [animalCategoriesLists, setAnimalCategoriesLists] = useState([]);
+const AnimalTypesLists = ({ currentConfig, setShowForm }: Props) => {
+  const [animalTypesLists, setAnimalTypesLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: fetchedAnimalCategoriesList, isLoading } = useQuery({
-    queryKey: ["animal-categories"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+  const { data: fetchedAnimalTypesList, isLoading } = useQuery({
+    queryKey: ["animal-type"],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
   });
   useEffect(() => {
-    if (fetchedAnimalCategoriesList?.data) {
-      setAnimalCategoriesLists(fetchedAnimalCategoriesList?.data);
+    if (fetchedAnimalTypesList?.data) {
+      setAnimalTypesLists(fetchedAnimalTypesList?.data);
     }
-  }, [fetchedAnimalCategoriesList]);
+  }, [fetchedAnimalTypesList]);
 
-  const animalCategoriesTable = useCustomReactPaginatedTable<
-    IAnimalCategories,
+  const animalTypesTable = useCustomReactPaginatedTable<
+    IAnimalType,
     any
   >({
-    data: animalCategoriesLists,
-    columns: animalCategoriesColumns,
+    data: animalTypesLists,
+    columns: animalTypesColumns,
   });
 
   if (isLoading) {
@@ -59,8 +61,8 @@ const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
-      {animalCategoriesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalCategoriesTable} />
+      {animalTypesLists?.length > 0 ? (
+        <DataTableWithPagination table={animalTypesTable} />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
@@ -80,4 +82,4 @@ const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
   );
 };
 
-export default AnimalCategoriesLists;
+export default AnimalTypesLists;

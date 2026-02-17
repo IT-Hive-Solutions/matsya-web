@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
-import { getMonthLabel } from "@/core/enums/month.enum";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
@@ -31,14 +30,15 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
+import AnimalDetail from "./animal-detail";
 import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
-import AnimalDetail from "./animal-detail";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -110,8 +110,13 @@ export default function OwnerAnimalView({
   const [selectedOwner, setSelectedOwner] = useState<GroupedAnimal | null>(
     null,
   );
+  const [filteredData, setFilteredData] = useState<GroupedAnimal[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const debouncedSearchValue = useDebounceHook({
+    value: searchTerm,
+    delay: 300,
+  });
   useEscapeKey(() => {
     setSelectedOwner(null);
   });
@@ -140,51 +145,60 @@ export default function OwnerAnimalView({
     },
   });
 
-  const { data: fetchedAnimalList, isLoading } = useQuery({
-    queryKey: ["animals"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_info),
+  const {
+    data: fetchedAnimalList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["animals", debouncedSearchValue],
+    queryFn: () =>
+      fetchProtectedHandler(endpoints.animal_info, {
+        searchQuery: debouncedSearchValue,
+      }),
   });
+  useEffect(() => {
+    const groupedData: GroupedAnimal[] = (() => {
+      if (!fetchedAnimalList?.data) return [];
 
-  const groupedData: GroupedAnimal[] = (() => {
-    if (!fetchedAnimalList?.data) return [];
+      const grouped = fetchedAnimalList.data.reduce(
+        (acc: Record<number, GroupedAnimal>, animal: IAnimal) => {
+          const ownerId = animal.owners_id?.id;
 
-    const grouped = fetchedAnimalList.data.reduce(
-      (acc: Record<number, GroupedAnimal>, animal: IAnimal) => {
-        const ownerId = animal.owners_id?.id;
+          if (!acc[ownerId]) {
+            acc[ownerId] = {
+              owner: {
+                id: animal.owners_id?.id,
+                name: animal.owners_id?.owners_name,
+                contact: animal.owners_id?.owners_contact,
+                localLevel: animal.owners_id?.local_level_name,
+                ward: animal.owners_id?.ward_number,
+                district: animal.owners_id?.district_id,
+              },
+              animals: [],
+            };
+          }
 
-        if (!acc[ownerId]) {
-          acc[ownerId] = {
-            owner: {
-              id: animal.owners_id?.id,
-              name: animal.owners_id?.owners_name,
-              contact: animal.owners_id?.owners_contact,
-              localLevel: animal.owners_id?.local_level_name,
-              ward: animal.owners_id?.ward_number,
-              district: animal.owners_id?.district_id,
-            },
-            animals: [],
-          };
-        }
+          acc[ownerId].animals.push(animal);
+          return acc;
+        },
+        {},
+      );
 
-        acc[ownerId].animals.push(animal);
-        return acc;
-      },
-      {},
+      return Object.values(grouped);
+    })();
+
+    const newFilteredData = groupedData.filter(
+      (group) =>
+        group.owner?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.owner?.contact?.includes(searchTerm) ||
+        group.animals?.some((animal) =>
+          animal.tag_number.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
     );
+    setFilteredData(newFilteredData);
+  }, [fetchedAnimalList]);
 
-    return Object.values(grouped);
-  })();
-
-  const filteredData = groupedData.filter(
-    (group) =>
-      group.owner?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      group.owner?.contact?.includes(searchTerm) ||
-      group.animals?.some((animal) =>
-        animal.tag_number.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-  );
-
-  if (isLoading) {
+  if (isLoading && !isFetching) {
     return <Loading />;
   }
 
@@ -352,6 +366,8 @@ export default function OwnerAnimalView({
                       </Card>
                     ))}
                   </div>
+                ) : isFetching ? (
+                  <Loading />
                 ) : (
                   <Card className="p-12 text-center border-slate-200 bg-white">
                     <div className="flex flex-col items-center gap-4">
@@ -481,7 +497,8 @@ export default function OwnerAnimalView({
                             <div className="flex items-center gap-1.5">
                               <Activity className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {animal.production_capacity || "N/A"}
+                                {animal.production_capacity.capacity_name ||
+                                  "N/A"}
                               </p>
                             </div>
                           </div>
@@ -531,14 +548,13 @@ export default function OwnerAnimalView({
                                   setOpen && setOpen(false);
                                 }}
                               >
-                                <Button
-                                  variant="outline"
+                                <div
                                   onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
+                                  className="gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
                                 >
                                   <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
                                   <span>Validate</span>
-                                </Button>
+                                </div>
                               </AlertDialogWrapper>
                             )}
                           {animal.verification_status ===

@@ -177,7 +177,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     name: "cattleEntries",
   });
 
-  const handleAddCattle = () => {
+  const handleAddLivestock = () => {
     append({
       animal_category: undefined,
       animal_type: undefined,
@@ -192,7 +192,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     });
   };
 
-  const handleRemoveCattle = (index: number) => {
+  const handleRemoveLivestock = (index: number) => {
     if (fields.length > 1) {
       remove(index);
     }
@@ -231,7 +231,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       }
 
       const data = await response.json();
-      console.log({ response, data });
 
       // Assuming the API returns { image_id: "some-id" } or { id: "some-id" }
       const imageId = data.fileId || data?.data?.id;
@@ -273,7 +272,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
     mutationFn: (payload: FormValues) =>
       mutateProtectedHandler(endpoints.animal_info["create-multiple"], payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["animals"],
       });
@@ -286,8 +284,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       setImagePreview({});
     },
     onError: (err) => {
-      console.log("error...", { err });
-
       toast.error("Error creating animal!");
     },
     onSettled: () => {
@@ -298,10 +294,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
   const onSubmit = async (data: FormValues) => {
     await createAnimalMutation.mutateAsync(data);
   };
-  console.log({
-    formData: form.watch("cattleEntries"),
-    error: form.formState.errors,
-  });
 
   return (
     <Form {...form}>
@@ -438,19 +430,19 @@ export default function TaggingForm({ user }: TaggingFormProps) {
             />
           </div>
         </FormSection>
-        {/* Cattle Details Section */}
+        {/* Livestock Details Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-foreground">
-              Cattle Details & Vaccination
+              Livestock Details & Vaccination
             </h3>
             <Button
               type="button"
-              onClick={handleAddCattle}
+              onClick={handleAddLivestock}
               variant="outline"
               className="text-sm bg-transparent"
             >
-              + Add Another Cattle
+              + Add Another Livestock
             </Button>
           </div>
 
@@ -459,15 +451,15 @@ export default function TaggingForm({ user }: TaggingFormProps) {
               key={field.id}
               className="border border-border rounded-lg p-4 sm:p-6 space-y-4 bg-card"
             >
-              {/* Cattle Card Header */}
+              {/* Livestock Card Header */}
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-base font-semibold text-foreground">
-                  Cattle #{idx + 1}
+                  Livestock #{idx + 1}
                 </h4>
                 {fields.length > 1 && (
                   <Button
                     type="button"
-                    onClick={() => handleRemoveCattle(idx)}
+                    onClick={() => handleRemoveLivestock(idx)}
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:bg-destructive/10"

@@ -3,6 +3,7 @@ import { VerificationStatus } from "../enums/verification-status.enum";
 import { IAnimalCategories } from "./animalCategory.interface";
 import { IAnimalType } from "./animalType.interface";
 import { IOwner } from "./ownersInfo.interface";
+import { IProductionCapacity } from "./productionCapacity.interface";
 import { Status } from "./status.interface";
 
 
@@ -40,7 +41,7 @@ export interface IAnimal {
     tag_number: string;
     verification_status: VerificationStatus;
     is_vaccination_applied: string;
-    production_capacity: string;
+    production_capacity: IProductionCapacity;
     rejection_reason: string;
     vaccinated_date: string;
     latitude: number;

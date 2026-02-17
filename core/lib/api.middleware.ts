@@ -13,7 +13,6 @@ export function withMiddleware(handler: RouteHandler) {
     return async (req: NextRequest, context: { params: any }) => {
         const cookieHandler = await cookies()
         const token = cookieHandler.get("directus_session_token")?.value;
-        console.log({ token });
 
         if (!token) {
             redirect("/auth/login");
@@ -51,8 +50,6 @@ export function withMiddleware(handler: RouteHandler) {
         const modifiedRequest = new NextRequest(req, {
             headers: requestHeaders,
         });
-
-        console.log(`${req.method} ${req.url}`);
 
 
         if (!token) {

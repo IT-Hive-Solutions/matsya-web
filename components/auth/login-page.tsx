@@ -36,7 +36,6 @@ export default function LoginPage() {
     mutationFn: (payload: LoginDTO) =>
       mutateHandler(endpoints.auth.login, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       toast.success("Login Successful!");
       setTimeout(() => {
         window.location.href = "/";
@@ -45,7 +44,6 @@ export default function LoginPage() {
       // router.refresh();
     },
     onError: (err) => {
-      console.log("error...", { err });
       toast.error("Error creating user!");
     },
     onSettled: () => {

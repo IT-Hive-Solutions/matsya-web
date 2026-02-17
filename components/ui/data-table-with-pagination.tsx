@@ -22,7 +22,6 @@ export function DataTableWithPagination<TData>({
   table,
   isLoading,
 }: DataTableProps<TData>) {
-  console.log({ length: table.getCanNextPage() });
 
   return (
     <div className="w-full h-full flex flex-col gap-4">

@@ -13,9 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
 import {
-  CreateAnimalCategoryDTO,
-  CreateAnimalCategorySchema,
-} from "@/core/dtos/animal-category.dto";
+  CreateAnimaTypeDTO,
+  CreateAnimaTypeSchema,
+} from "@/core/dtos/animal-type.dto";
 import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,27 +23,25 @@ import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface AnimalCategoryFormProps {
+interface AnimalTypeFormProps {
   onClose: () => void;
 }
 
-export default function AnimalCategoryForm({
-  onClose,
-}: AnimalCategoryFormProps) {
+export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
   const queryClient = useQueryClient();
-  const form = useForm<CreateAnimalCategoryDTO>({
+  const form = useForm<CreateAnimaTypeDTO>({
     defaultValues: {
-      category_name: "",
+      animal_name: "",
     },
-    resolver: zodResolver(CreateAnimalCategorySchema),
+    resolver: zodResolver(CreateAnimaTypeSchema),
   });
 
   const createAnimalCategoryMutation = useMutation({
-    mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      mutateProtectedHandler(endpoints.animal_category, payload),
+    mutationFn: (payload: CreateAnimaTypeDTO) =>
+      mutateProtectedHandler(endpoints.animal_types, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
-        queryKey: ["animal-categories"],
+        queryKey: ["animal-type"],
       });
       toast.success("Animal category  created successfully!");
       onClose();
@@ -53,7 +51,7 @@ export default function AnimalCategoryForm({
       toast.error("Error creating animal category!");
     },
   });
-  const onSubmit = (data: CreateAnimalCategoryDTO) => {
+  const onSubmit = (data: CreateAnimaTypeDTO) => {
     createAnimalCategoryMutation.mutateAsync(data);
   };
   return (
@@ -65,7 +63,7 @@ export default function AnimalCategoryForm({
               Create Animal Category
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Register a new livestock animal category
+              Create a new livestock type
             </p>
           </div>
           <button
@@ -87,13 +85,13 @@ export default function AnimalCategoryForm({
               {/* Animal Category  Name */}
               <FormField
                 control={form.control}
-                name="category_name"
+                name="animal_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Animal Category Name</FormLabel>
+                    <FormLabel>Livestock Type Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., District Veterinary Animal Category "
+                        placeholder="e.g., Cow "
                         {...field}
                       />
                     </FormControl>
@@ -117,7 +115,7 @@ export default function AnimalCategoryForm({
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Animal Category
+                Create Animal Type
               </Button>
             </div>
           </form>

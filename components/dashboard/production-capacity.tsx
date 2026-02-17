@@ -13,9 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
 import {
-  CreateAnimalCategoryDTO,
-  CreateAnimalCategorySchema,
-} from "@/core/dtos/animal-category.dto";
+  CreateProductionCapacityDTO,
+  CreateProductionCapacitySchema,
+} from "@/core/dtos/production-capacity.dto";
 import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,37 +23,37 @@ import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface AnimalCategoryFormProps {
+interface ProductionCapacityFormProps {
   onClose: () => void;
 }
 
-export default function AnimalCategoryForm({
+export default function ProductionCapacityForm({
   onClose,
-}: AnimalCategoryFormProps) {
+}: ProductionCapacityFormProps) {
   const queryClient = useQueryClient();
-  const form = useForm<CreateAnimalCategoryDTO>({
+  const form = useForm<CreateProductionCapacityDTO>({
     defaultValues: {
-      category_name: "",
+      capacity_name: "",
     },
-    resolver: zodResolver(CreateAnimalCategorySchema),
+    resolver: zodResolver(CreateProductionCapacitySchema),
   });
 
   const createAnimalCategoryMutation = useMutation({
-    mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      mutateProtectedHandler(endpoints.animal_category, payload),
+    mutationFn: (payload: CreateProductionCapacityDTO) =>
+      mutateProtectedHandler(endpoints.production_capacity, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
-        queryKey: ["animal-categories"],
+        queryKey: ["production-capacity"],
       });
-      toast.success("Animal category  created successfully!");
+      toast.success("Production Capacity  created successfully!");
       onClose();
     },
     onError: (err) => {
 
-      toast.error("Error creating animal category!");
+      toast.error("Error creating production capacity!");
     },
   });
-  const onSubmit = (data: CreateAnimalCategoryDTO) => {
+  const onSubmit = (data: CreateProductionCapacityDTO) => {
     createAnimalCategoryMutation.mutateAsync(data);
   };
   return (
@@ -62,10 +62,10 @@ export default function AnimalCategoryForm({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-xl font-semibold text-foreground">
-              Create Animal Category
+              Create Production Capacity
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Register a new livestock animal category
+              Create a new production capacity
             </p>
           </div>
           <button
@@ -82,20 +82,17 @@ export default function AnimalCategoryForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full flex flex-col gap-4"
           >
-            {/* Animal Category  Name & Phone */}
+            {/* Production Capacity  Name & Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Animal Category  Name */}
+              {/* Production Capacity  Name */}
               <FormField
                 control={form.control}
-                name="category_name"
+                name="capacity_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Animal Category Name</FormLabel>
+                    <FormLabel>Production Capacity Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., District Veterinary Animal Category "
-                        {...field}
-                      />
+                      <Input placeholder="e.g., Milk " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -117,7 +114,7 @@ export default function AnimalCategoryForm({
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Animal Category
+                Create Production Capacity
               </Button>
             </div>
           </form>

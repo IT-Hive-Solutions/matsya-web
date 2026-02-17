@@ -51,7 +51,6 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
     },
     resolver: zodResolver(CreateOfficeSchema),
   });
-  console.log({ provinceData: form.watch() });
 
   const { data: districtFetched } = useQuery({
     queryKey: ["district"],
@@ -85,7 +84,6 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
     mutationFn: (payload: CreateOfficeDTO) =>
       mutateProtectedHandler(endpoints.office, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["office"],
       });
@@ -93,13 +91,11 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
 
       toast.error("Error creating office!");
     },
   });
   const onSubmit = (data: CreateOfficeDTO) => {
-    console.log({ data });
     createOfficeMutation.mutateAsync(data);
   };
   return (

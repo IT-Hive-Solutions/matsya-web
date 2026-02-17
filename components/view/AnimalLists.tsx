@@ -103,7 +103,6 @@ const AnimalLists = ({ currentConfig, setShowForm }: Props) => {
       setAnimalLists(fetchedAnimalList?.data);
     }
   }, [fetchedAnimalList]);
-  console.log({ animalLists });
 
   const animalTable = useCustomReactPaginatedTable<IAnimal, any>({
     data: animalLists,

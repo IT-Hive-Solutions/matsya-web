@@ -13,9 +13,19 @@ import AnimalCategoriesLists from "../view/AnimalCategoriesList";
 import AnimalCategoryForm from "./animal-category-form";
 import AnimalLists from "../view/AnimalLists";
 import AnimalForm from "./animal-form";
+import AnimalTypesLists from "../view/AnimalTypeList";
+import AnimalTypeForm from "./animal-type-form";
+import ProductionCapacityLists from "../view/ProductionCapacityList";
+import ProductionCapacityForm from "./production-capacity";
 
 interface ManagementPageProps {
-  type: "animals" | "animal-category" | "user-accounts" | "offices";
+  type:
+    | "livestock"
+    | "livestock-category"
+    | "livestock-type"
+    | "user-accounts"
+    | "offices"
+    | "production-capacity";
 }
 export interface Config {
   title: string;
@@ -33,8 +43,8 @@ export default function ManagementPage({ type }: ManagementPageProps) {
   const config: {
     [key: string]: Config;
   } = {
-    animals: {
-      title: "Manage Animals",
+    livestock: {
+      title: "Manage Livestock",
       description: "Add and manage livestock types in your system",
       fields: [
         {
@@ -54,9 +64,9 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         },
       ],
     },
-    "animal-category": {
-      title: "Animal Categories",
-      description: "Create and manage animal breed categories",
+    "livestock-category": {
+      title: "Livestock Categories",
+      description: "Create and manage livestock breed categories",
       fields: [
         {
           name: "name",
@@ -75,6 +85,17 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         },
       ],
     },
+    "livestock-type": {
+      title: "Livestock Type",
+      description: "Create and manage livestock types",
+      fields: [
+        {
+          name: "animal_name",
+          label: "Type",
+          placeholder: "e.g., Dairy, Beef, Dual-purpose",
+        },
+      ],
+    },
     "user-accounts": {
       title: "Manage User Accounts",
       description: "Create and manage system user accounts",
@@ -83,6 +104,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
     offices: {
       title: "Create Office",
       description: "Register and manage livestock offices",
+      fields: [],
+    },
+    "production-capacity": {
+      title: "Create Production Capacity",
+      description: "Create and manage production capacity",
       fields: [],
     },
   };
@@ -95,7 +121,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {currentConfig.title}
+            {currentConfig?.title}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             {currentConfig.description}
@@ -120,11 +146,17 @@ export default function ManagementPage({ type }: ManagementPageProps) {
             {type === "offices" && (
               <OfficeForm onClose={() => setShowForm(false)} />
             )}
-            {type === "animal-category" && (
+            {type === "livestock-category" && (
               <AnimalCategoryForm onClose={() => setShowForm(false)} />
             )}
-            {type === "animals" && (
+            {type === "livestock-type" && (
+              <AnimalTypeForm onClose={() => setShowForm(false)} />
+            )}
+            {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
+            )}
+            {type === "production-capacity" && (
+              <ProductionCapacityForm onClose={() => setShowForm(false)} />
             )}
           </div>
         </div>
@@ -139,8 +171,20 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       {type === "user-accounts" && (
         <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )}
-      {type === "animal-category" && (
+      {type === "livestock-category" && (
         <AnimalCategoriesLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+        />
+      )}
+      {type === "livestock-type" && (
+        <AnimalTypesLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+        />
+      )}
+      {type === "production-capacity" && (
+        <ProductionCapacityLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
         />

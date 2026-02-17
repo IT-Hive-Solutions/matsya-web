@@ -19,7 +19,6 @@ async function postHandler(request: NextRequest) {
                 })
             )
             if (!owner[0]) {
-                console.log("CREATE!!!");
 
                 if (!body.owners_name) {
                     return NextResponse.json(
@@ -55,6 +54,7 @@ async function postHandler(request: NextRequest) {
                     latitude: body.latitude,
                     municipality: body.municipality,
                     longitude: body.longitude,
+                    status: "published" as "published"
                 }
                 const newOwner = await directus.request(
                     createItem('owners_info', payload)
@@ -67,9 +67,10 @@ async function postHandler(request: NextRequest) {
                 }
                 body.owner_id = newOwner.id;
             } else {
-                console.log("UPDATE!!!");
 
-                const updatePayload: any = {}
+                const updatePayload: any = {
+                    status: "published" as "published"
+                }
                 if (body.province_id) {
                     updatePayload.province_id = body.province_id
                 }

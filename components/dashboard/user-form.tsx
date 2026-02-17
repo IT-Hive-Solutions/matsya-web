@@ -49,7 +49,6 @@ export default function UserForm({ onClose }: UserFormProps) {
     },
     resolver: zodResolver(CreateUserSchema),
   });
-  console.log({ formData: form.watch() });
 
   const { data: officeFetched } = useQuery({
     queryKey: ["office"],
@@ -69,7 +68,6 @@ export default function UserForm({ onClose }: UserFormProps) {
     mutationFn: (payload: CreateUserDTO) =>
       mutateProtectedHandler(endpoints.users, payload),
     onSuccess: (res) => {
-      console.log("error...", { res });
       queryClient.invalidateQueries({
         queryKey: ["users"],
       });
@@ -77,13 +75,10 @@ export default function UserForm({ onClose }: UserFormProps) {
       onClose();
     },
     onError: (err) => {
-      console.log("error...", { err });
-
       toast.error("Error creating user!");
     },
   });
   const onSubmit = (data: CreateUserDTO) => {
-    console.log({ data });
     createUserMutation.mutateAsync(data);
   };
   return (

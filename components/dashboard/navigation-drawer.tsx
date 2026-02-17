@@ -85,10 +85,17 @@ export default function NavigationDrawer({
     },
     // { id: "animals", label: "Manage Animals", icon: <Home size={20} />, section: "animals" },
     {
-      id: "animal-category",
-      label: "Cattle Categories",
+      id: "livestock-category",
+      label: "Livestock Categories",
       icon: <Settings size={20} />,
-      section: "animal-category",
+      section: "livestock-category",
+      requiredRoles: ["admin", "province-level"],
+    },
+    {
+      id: "livestock-type",
+      label: "Livestock Types",
+      icon: <Settings size={20} />,
+      section: "livestock-type",
       requiredRoles: ["admin", "province-level"],
     },
     {
@@ -100,9 +107,16 @@ export default function NavigationDrawer({
     },
     {
       id: "offices",
-      label: "Create Office",
+      label: "Offices",
       icon: <Settings size={20} />,
       section: "offices",
+      requiredRoles: ["admin", "province-level"],
+    },
+    {
+      id: "production-capacity",
+      label: "Production Capacity",
+      icon: <Settings size={20} />,
+      section: "production-capacity",
       requiredRoles: ["admin", "province-level"],
     },
   ];
@@ -111,7 +125,6 @@ export default function NavigationDrawer({
     onNavigate(section);
     setIsOpen(false);
   };
-  console.log({ role: user.role.name });
 
   return (
     <>

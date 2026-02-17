@@ -16,19 +16,37 @@ async function getHandler(request: NextRequest) {
         const userRole = userData.role.name; // "vaccinator", "admin", etc.
         const userDistrictId = userData.office_id.district_id?.id;
         const userProvinceId = userData.office_id.province_id;
+        const { searchParams } = new URL(request.url);
+        const searchQuery = searchParams.get('searchQuery')?.trim();
+
+        // Build the search filter if a query is provided
+        const searchFilter = searchQuery
+            ? {
+                _or: [
+                    { animal_category: { category_name: { _contains: searchQuery } } },
+                    { animal_type: { animal_name: { _contains: searchQuery } } },
+                    { owners_id: { owners_name: { _contains: searchQuery } } },
+                    { owners_id: { owners_contact: { _contains: searchQuery } } },
+                    { owners_id: { district_id: { district_name: { _contains: searchQuery } } } },
+                    { owners_id: { district_id: { province_id: { province_name: { _contains: searchQuery } } } } },
+                    { tag_number: { _contains: searchQuery } },
+                    { production_capacity: { capacity_name: { _contains: searchQuery } } },
+                ],
+            }
+            : null;
 
         // Build the filter based on user role
-        let filter: any = {};
+        let roleFilter: any = {};
 
         switch (userRole) {
             case "admin":
-                // Admin can see all animals - no filter needed
+                // Admin can see all animals - no roleFilter needed
                 break;
 
             case "province-level":
                 // Province level officer sees animals from their province
                 if (userProvinceId) {
-                    filter = {
+                    roleFilter = {
                         owners_id: {
                             district_id: {
                                 province_id: {
@@ -47,7 +65,7 @@ async function getHandler(request: NextRequest) {
             case "vaccinator":
                 // District level, local level, and vaccinator see animals from their district
                 if (userDistrictId) {
-                    filter = {
+                    roleFilter = {
                         owners_id: {
                             district_id: {
                                 id: {
@@ -62,7 +80,7 @@ async function getHandler(request: NextRequest) {
             default:
                 // If role is unknown, restrict to district level as a safe default
                 if (userDistrictId) {
-                    filter = {
+                    roleFilter = {
                         owners_id: {
                             district_id: {
                                 id: {
@@ -75,6 +93,12 @@ async function getHandler(request: NextRequest) {
                 break;
         }
 
+        const filters = [roleFilter, searchFilter].filter(Boolean);
+        const filter = filters.length > 1
+            ? { _and: filters }
+            : filters[0] ?? {};
+
+
         const animal_info = await directus.request(
             readItems('animal_info', {
                 fields: [
@@ -82,6 +106,7 @@ async function getHandler(request: NextRequest) {
                     "owners_id.*",
                     "animal_category.*",
                     "animal_type.*",
+                    "production_capacity.*",
                     "owners_id.district_id.*",
                     "owners_id.district_id.province_id.*",
                 ],
@@ -96,6 +121,7 @@ async function getHandler(request: NextRequest) {
             // Optional: include metadata for debugging
             meta: {
                 userRole,
+                searchQuery: searchQuery ?? null,
                 filteredBy: userRole === "admin" ? "none" :
                     userRole === "province-level" ? `province_id: ${userProvinceId}` :
                         `district_id: ${userDistrictId}`
@@ -155,8 +181,6 @@ async function postHandler(request: NextRequest) {
                 })
             )
             if (!owner[0]) {
-                console.log("CREATE!!!");
-                
                 if (!body.owners_name) {
                     return NextResponse.json(
                         { success: false, error: 'Name is required' },
@@ -203,8 +227,6 @@ async function postHandler(request: NextRequest) {
                 }
                 body.owner_id = newOwner.id;
             } else {
-                console.log("UPDATE!!!");
-
                 const updatePayload: any = {}
                 if (body.province_id) {
                     updatePayload.province_id = body.province_id
@@ -262,7 +284,7 @@ async function postHandler(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: any) {
-        
+
         return NextResponse.json(
             { success: false, error: error.message || 'Failed to create animal' },
             { status: 500 }

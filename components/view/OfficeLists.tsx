@@ -60,7 +60,6 @@ const OfficeLists = ({ currentConfig, setShowForm }: Props) => {
       setOfficeLists(fetchedOfficeList?.data);
     }
   }, [fetchedOfficeList]);
-  console.log({ officeLists });
 
   const officeTable = useCustomReactPaginatedTable<IOffice, any>({
     data: officeLists,

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 import { endpoints } from "@/core/contants/endpoints";
-import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useQuery } from "@tanstack/react-query";
@@ -18,33 +18,34 @@ type Props = {
   currentConfig: Config;
   setShowForm: Dispatch<SetStateAction<boolean>>;
 };
-export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
+
+export const productionCapacityColumns: ColumnDef<IAnimalType>[] = [
   {
-    accessorKey: "category_name",
+    accessorKey: "capacity_name",
     header: "Name",
   },
 ];
 
-const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
-  const [animalCategoriesLists, setAnimalCategoriesLists] = useState([]);
+const ProductionCapacityLists = ({ currentConfig, setShowForm }: Props) => {
+  const [productionCapacityLists, setProductionCapacityLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: fetchedAnimalCategoriesList, isLoading } = useQuery({
-    queryKey: ["animal-categories"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+  const { data: fetchedProductionCapacityList, isLoading } = useQuery({
+    queryKey: ["production-capacity"],
+    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
   });
   useEffect(() => {
-    if (fetchedAnimalCategoriesList?.data) {
-      setAnimalCategoriesLists(fetchedAnimalCategoriesList?.data);
+    if (fetchedProductionCapacityList?.data) {
+      setProductionCapacityLists(fetchedProductionCapacityList?.data);
     }
-  }, [fetchedAnimalCategoriesList]);
+  }, [fetchedProductionCapacityList]);
 
-  const animalCategoriesTable = useCustomReactPaginatedTable<
-    IAnimalCategories,
+  const productionCapacityTable = useCustomReactPaginatedTable<
+    IAnimalType,
     any
   >({
-    data: animalCategoriesLists,
-    columns: animalCategoriesColumns,
+    data: productionCapacityLists,
+    columns: productionCapacityColumns,
   });
 
   if (isLoading) {
@@ -59,8 +60,8 @@ const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
-      {animalCategoriesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalCategoriesTable} />
+      {productionCapacityLists?.length > 0 ? (
+        <DataTableWithPagination table={productionCapacityTable} />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
@@ -80,4 +81,4 @@ const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
   );
 };
 
-export default AnimalCategoriesLists;
+export default ProductionCapacityLists;
