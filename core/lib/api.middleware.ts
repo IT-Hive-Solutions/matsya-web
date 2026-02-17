@@ -36,7 +36,7 @@ export function withMiddleware(handler: RouteHandler) {
             cookieHandler.set('user_data', user, {
                 sameSite: 'lax',
                 path: '/',
-                secure: false,
+                secure: process.env.NODE_ENV === "production",
                 httpOnly: true,
                 maxAge: 60 * 1440
             });
