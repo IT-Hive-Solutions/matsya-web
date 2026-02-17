@@ -531,14 +531,13 @@ export default function OwnerAnimalView({
                                   setOpen && setOpen(false);
                                 }}
                               >
-                                <Button
-                                  variant="outline"
+                                <div
                                   onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
+                                  className="gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
                                 >
                                   <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
                                   <span>Validate</span>
-                                </Button>
+                                </div>
                               </AlertDialogWrapper>
                             )}
                           {animal.verification_status ===
