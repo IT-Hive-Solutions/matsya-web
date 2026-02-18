@@ -39,6 +39,7 @@ import AnimalDetail from "./animal-detail";
 import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
 import { useDebounceHook } from "@/hooks/useDebounceHook";
+import { exportAnimalData } from "@/core/services/exportAnimalData";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -172,7 +173,7 @@ export default function OwnerAnimalView({
                 contact: animal.owners_id?.owners_contact,
                 localLevel: animal.owners_id?.local_level_name,
                 ward: animal.owners_id?.ward_number,
-                district: animal.owners_id?.district_id,
+                district: animal.owners_id?.district_id?.id,
               },
               animals: [],
             };
@@ -216,8 +217,8 @@ export default function OwnerAnimalView({
           >
             <div className="h-full flex flex-col">
               {/* Search Bar */}
-              <div className="mb-4">
-                <div className="relative">
+              <div className="mb-4 w-full flex items-center gap-4">
+                <div className="relative w-full ">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by owner name, contact, or tag number..."
@@ -226,6 +227,12 @@ export default function OwnerAnimalView({
                     className="pl-9 bg-white border-slate-200 focus-visible:ring-slate-900"
                   />
                 </div>
+                <Button
+                  onClick={() => exportAnimalData(fetchedAnimalList?.data)}
+                  className="hover:cursor-pointer"
+                >
+                  Export Excel
+                </Button>
               </div>
 
               {/* Owner Cards List */}

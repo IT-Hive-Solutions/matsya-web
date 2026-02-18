@@ -1,3 +1,4 @@
+import { IDistrict } from "./district.interface";
 import { Status } from "./status.interface";
 
 export interface OwnersInfoDirectus {
@@ -23,9 +24,10 @@ export interface IOwner {
     user_updated: string | null;
     date_updated: string | null;
     local_level_name: string;
+    municipality?: string;
     date: string;
     owners_name: string;
     ward_number: string;
-    district_id: number;
+    district_id: IDistrict;
     owners_contact: string;
 }
