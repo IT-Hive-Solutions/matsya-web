@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { endpoints } from "@/core/contants/endpoints";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { getAssetURL } from "@/core/lib/directus";
 
 type Roles =
   | "admin"
@@ -219,7 +220,11 @@ export default function NavigationDrawer({
           <div className="h-full flex flex-col justify-end py-4">
             {fetchedDownloadLinkData && (
               <Link
-                href={fetchedDownloadLinkData?.data?.url ?? "#"}
+                href={
+                  fetchedDownloadLinkData?.data?.apk
+                    ? getAssetURL(fetchedDownloadLinkData?.data?.apk)
+                    : "#"
+                }
                 target="_blank"
               >
                 <Button variant={"outline"} className="w-full">
