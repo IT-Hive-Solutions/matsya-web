@@ -1,13 +1,20 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
-import { directus, getDirectusClient } from './directus';
-import { readMe, } from '@directus/sdk';
+import { directus, getDirectusClient, Schema } from './directus';
+import { createDirectus, DirectusClient, readMe, RestClient, StaticTokenClient, } from '@directus/sdk';
+import { cookieConfig } from '../contants/cookie.config';
 
+
+export interface AuthenticatedRequest extends NextRequest {
+    directus: DirectusClient<Schema> & StaticTokenClient<Schema> & RestClient<Schema>
+
+}
 type RouteHandler = (
-    req: NextRequest,
+    req: AuthenticatedRequest,
     context: { params: any }
 ) => Promise<NextResponse> | NextResponse;
+
 
 export function withMiddleware(handler: RouteHandler) {
     return async (req: NextRequest, context: { params: any }) => {
@@ -37,24 +44,22 @@ export function withMiddleware(handler: RouteHandler) {
                     ]
                 }));
                 cookieHandler.set('user_data', user, {
-                    sameSite: 'lax',
-                    path: '/',
-                    secure: process.env.NODE_ENV === "production",
-                    httpOnly: true,
+                    ...cookieConfig,
                     maxAge: 60 * 1440
                 });
             } else {
                 user = JSON.parse(userFromCookie);
             }
             requestHeaders.set('x-user-data', JSON.stringify(user));
-            requestHeaders.set('x-directus-token', token);
 
-            const modifiedRequest = new NextRequest(req, {
+            const authenticatedReq = new NextRequest(req, {
                 headers: requestHeaders,
-            });
+            }) as AuthenticatedRequest;
+            authenticatedReq.directus = client;
+
 
             // Continue to handler
-            return handler(modifiedRequest, context);
+            return handler(authenticatedReq, context);
 
         } catch (error: any) {
             console.error("Middleware auth error:", error);

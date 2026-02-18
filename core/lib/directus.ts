@@ -12,7 +12,7 @@ import { AppDownloadLinkDirectus } from '../interfaces/appDownloadLink.interface
 
 const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
-type Schema = {
+export type Schema = {
     directus_users: UsersDirectus[];
     users: UsersDirectus[];
     province: ProvinceDirectus[];

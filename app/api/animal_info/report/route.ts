@@ -1,23 +1,12 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
-import { withMiddleware } from "@/core/lib/api.middleware";
-import { getDirectusClient } from "@/core/lib/directus";
+import { AuthenticatedRequest, withMiddleware } from "@/core/lib/api.middleware";
 import { readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-async function getHandler(request: NextRequest) {
+async function getHandler(request: AuthenticatedRequest) {
     try {
-        const token = request.headers.get('x-directus-token');
 
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-
-        const directus = getDirectusClient(token);
-        const animals = await directus.request(
+        const animals = await request.directus.request(
             readItems('animal_info', {
                 fields: ['*'],
                 sort: ['-date_created'],
