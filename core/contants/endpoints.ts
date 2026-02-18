@@ -47,4 +47,6 @@ export const endpoints = {
         `${baseUrl}/production_capacity`,
         { byId: (id: number) => `${baseUrl}/production_capacity/${id}`, }
     ),
+    app_download_link: `${baseUrl}/app_download_link`,
+
 }
