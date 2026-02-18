@@ -39,7 +39,7 @@ export interface Config {
 
 export default function ManagementPage({ type }: ManagementPageProps) {
   const [showForm, setShowForm] = useState(false);
-
+  const [isEditing, setEditing] = useState<boolean>(false);
   const config: {
     [key: string]: Config;
   } = {
@@ -150,7 +150,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               <AnimalCategoryForm onClose={() => setShowForm(false)} />
             )}
             {type === "livestock-type" && (
-              <AnimalTypeForm onClose={() => setShowForm(false)} />
+              <AnimalTypeForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
@@ -181,6 +185,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <AnimalTypesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
       {type === "production-capacity" && (

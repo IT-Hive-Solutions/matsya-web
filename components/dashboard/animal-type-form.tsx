@@ -16,25 +16,67 @@ import {
   CreateAnimaTypeDTO,
   CreateAnimaTypeSchema,
 } from "@/core/dtos/animal-type.dto";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  mutateProtectedHandler,
+  updateProtectedHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Loading from "../loading";
 
 interface AnimalTypeFormProps {
   onClose: () => void;
+  isEditing?: boolean;
+  setEditing?: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
+export default function AnimalTypeForm({
+  onClose,
+  isEditing = false,
+  setEditing,
+}: AnimalTypeFormProps) {
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [id, setId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const paramsId = searchParams.get("id");
+    if (paramsId) {
+      const intId = parseInt(paramsId);
+      if (!isNaN(intId)) {
+        setId(intId);
+      }
+    }
+  }, [searchParams.get("id")]);
   const form = useForm<CreateAnimaTypeDTO>({
     defaultValues: {
       animal_name: "",
     },
     resolver: zodResolver(CreateAnimaTypeSchema),
   });
+  console.log({ isEditing, id });
+
+  const { data: fetchedAnimalTypesDetail, isLoading } = useQuery({
+    queryKey: ["animal-type-single", id],
+    queryFn: () => fetchProtectedHandler(endpoints.animal_types.byId(id ?? -1)),
+    enabled: !!id && isEditing,
+  });
+
+  
+  const handleClose = () => {
+    form.reset();
+    setId(null);
+    setEditing && setEditing(false);
+    router.replace("/");
+    onClose();
+  };
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
@@ -44,16 +86,45 @@ export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
         queryKey: ["animal-type"],
       });
       toast.success("Animal category  created successfully!");
-      onClose();
+      handleClose();
     },
     onError: (err) => {
-
       toast.error("Error creating animal category!");
     },
   });
+
+  const updateAnimalCategoryMutation = useMutation({
+    mutationFn: (payload: CreateAnimaTypeDTO) =>
+      updateProtectedHandler(endpoints.animal_types.byId(id ?? -1), payload),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({
+        queryKey: ["animal-type"],
+      });
+      toast.success("Animal category  udpated successfully!");
+      handleClose();
+    },
+    onError: (err) => {
+      toast.error("Error updating animal category!");
+    },
+  });
+
   const onSubmit = (data: CreateAnimaTypeDTO) => {
-    createAnimalCategoryMutation.mutateAsync(data);
+    if (isEditing) {
+      updateAnimalCategoryMutation.mutateAsync(data);
+    } else {
+      createAnimalCategoryMutation.mutateAsync(data);
+    }
   };
+
+  useEffect(() => {
+    if (fetchedAnimalTypesDetail?.data) {
+      form.reset(fetchedAnimalTypesDetail?.data);
+    }
+  }, [fetchedAnimalTypesDetail]);
+
+  if (isEditing && (!fetchedAnimalTypesDetail || isLoading)) {
+    return <Loading />;
+  }
   return (
     <Card className="shadow-xl">
       <div className="p-6 sm:p-8">
@@ -67,7 +138,7 @@ export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-secondary rounded-lg transition-colors"
             aria-label="Close"
           >
@@ -90,10 +161,7 @@ export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
                   <FormItem>
                     <FormLabel>Livestock Type Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., Cow "
-                        {...field}
-                      />
+                      <Input placeholder="e.g., Cow " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -106,7 +174,7 @@ export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}
                 className="flex-1 bg-transparent"
               >
                 Cancel
@@ -115,7 +183,7 @@ export default function AnimalTypeForm({ onClose }: AnimalTypeFormProps) {
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Animal Type
+                {isEditing ? "Update" : "Create"} Animal Type
               </Button>
             </div>
           </form>
