@@ -32,7 +32,10 @@ export const directus = createDirectus<Schema>(url).
 // with(staticToken(staticTokenValue))
 
 
-
+export const getDirectusClient = (token: string) =>
+    createDirectus<Schema>(url)
+        .with(staticToken(token))
+        .with(rest());
 
 export function getAssetURL(fileId: string) {
 

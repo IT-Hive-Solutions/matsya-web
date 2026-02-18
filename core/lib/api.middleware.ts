@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
-import { directus } from './directus';
+import { directus, getDirectusClient } from './directus';
 import { readMe, } from '@directus/sdk';
 
 type RouteHandler = (
@@ -11,55 +11,60 @@ type RouteHandler = (
 
 export function withMiddleware(handler: RouteHandler) {
     return async (req: NextRequest, context: { params: any }) => {
-        const cookieHandler = await cookies()
-        const token = cookieHandler.get("directus_session_token")?.value;
+        try {
+            const cookieHandler = await cookies()
+            const token = cookieHandler.get("directus_session_token")?.value;
 
-        if (!token) {
-            redirect("/auth/login");
-        }
-        directus.setToken(token)
+            if (!token) {
+                return NextResponse.redirect(new URL("/auth/login", req.url));
+            }
+
+            const client = getDirectusClient(token);
+            const requestHeaders = new Headers(req.headers);
+            let user: any;
 
 
-        const userFromCookie = cookieHandler.get("logged_user")?.value;
-        const requestHeaders = new Headers(req.headers);
+            const userFromCookie = cookieHandler.get("logged_user")?.value;
 
-        if (!userFromCookie) {
-            const user: any = await directus.request(readMe({
-                fields: [
-                    "*",
-                    "office_id.*" as any,
-                    "office_id.district_id.*" as any,
-                    "office_id.district_id.province_id.*" as any,
-                    "role.*"
-                ]
-            }));
-            cookieHandler.set('user_data', user, {
-                sameSite: 'lax',
-                path: '/',
-                secure: process.env.NODE_ENV === "production",
-                httpOnly: true,
-                maxAge: 60 * 1440
-            });
+            if (!userFromCookie) {
+                user = await client.request(readMe({
+                    fields: [
+                        "*",
+                        "office_id.*" as any,
+                        "office_id.district_id.*" as any,
+                        "office_id.district_id.province_id.*" as any,
+                        "role.*"
+                    ]
+                }));
+                cookieHandler.set('user_data', user, {
+                    sameSite: 'lax',
+                    path: '/',
+                    secure: process.env.NODE_ENV === "production",
+                    httpOnly: true,
+                    maxAge: 60 * 1440
+                });
+            } else {
+                user = JSON.parse(userFromCookie);
+            }
             requestHeaders.set('x-user-data', JSON.stringify(user));
+            requestHeaders.set('x-directus-token', token);
 
+            const modifiedRequest = new NextRequest(req, {
+                headers: requestHeaders,
+            });
 
-        } else {
+            // Continue to handler
+            return handler(modifiedRequest, context);
 
-            requestHeaders.set('x-user-data', JSON.stringify(userFromCookie));
+        } catch (error: any) {
+            console.error("Middleware auth error:", error);
+
+            // Clear invalid session and redirect
+            const response = NextResponse.redirect(new URL("/auth/login", req.url));
+            response.cookies.delete("directus_session_token");
+            response.cookies.delete("directus_refresh_token");
+            response.cookies.delete("user_data");
+            return response;
         }
-        const modifiedRequest = new NextRequest(req, {
-            headers: requestHeaders,
-        });
-
-
-        if (!token) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-        // Continue to handler
-        return handler(modifiedRequest, context);
     };
 }

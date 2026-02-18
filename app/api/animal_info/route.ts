@@ -2,13 +2,25 @@
 // Handles GET (all animal_info) and POST (create item)
 import { VerificationStatus } from '@/core/enums/verification-status.enum';
 import { withMiddleware } from '@/core/lib/api.middleware';
-import { directus } from '@/core/lib/directus';
+import { getDirectusClient } from '@/core/lib/directus';
 import { createItem, readItems, updateItem } from '@directus/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET - Fetch all animal_info
 async function getHandler(request: NextRequest) {
     try {
+        const token = request.headers.get('x-directus-token');
+
+        if (!token) {
+            return NextResponse.json(
+                { success: false, error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+
+        const directus = getDirectusClient(token);
+
         const userDataString = request.headers.get('x-user-data');
         const userData = JSON.parse(userDataString ?? "")
 
@@ -128,10 +140,7 @@ async function getHandler(request: NextRequest) {
             }
         });
 
-        return NextResponse.json({
-            success: true,
-            data: animal_info
-        });
+
     } catch (error: any) {
         return NextResponse.json(
             { success: false, error: error.message || 'Failed to fetch animals' },
@@ -143,6 +152,18 @@ async function getHandler(request: NextRequest) {
 // POST - Create new item
 async function postHandler(request: NextRequest) {
     try {
+        const token = request.headers.get('x-directus-token');
+
+        if (!token) {
+            return NextResponse.json(
+                { success: false, error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+
+        const directus = getDirectusClient(token);
+        
         const body = await request.json();
 
         if (!(body.age_months || body.age_years)) {
