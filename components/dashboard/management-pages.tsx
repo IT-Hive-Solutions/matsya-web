@@ -148,7 +148,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               />
             )}
             {type === "offices" && (
-              <OfficeForm onClose={() => setShowForm(false)} />
+              <OfficeForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock-category" && (
               <AnimalCategoryForm
@@ -179,7 +183,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
       )}
 
       {type === "offices" && (
-        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+        <OfficeLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+          setEditing={setEditing}
+        />
       )}
       {/* {type === "animals" && (
         <AnimalLists currentConfig={currentConfig} setShowForm={setShowForm} />

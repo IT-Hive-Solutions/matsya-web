@@ -15,7 +15,7 @@ async function getHandler(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const office = await directus.request(
-            readItem('office', parseInt(id))
+            readItem('office', parseInt(id), { fields: ["*", "district_id.*", "district_id.province_id.*"] })
         );
 
         return NextResponse.json({
@@ -39,7 +39,11 @@ async function putHandler(request: NextRequest, { params }: Params) {
 
         const updatedOffice = await directus.request(
             updateItem('office', parseInt(id), {
-                district_name: body.district_name,
+                district_id: body.district_id,
+                province_id: body.province_id,
+                office_email: body.office_email,
+                office_address: body.office_address,
+                office_name: body.office_name,
             })
         );
 

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { endpoints } from "@/core/contants/endpoints";
 import { CreateOfficeDTO, CreateOfficeSchema } from "@/core/dtos/office.dto";
@@ -27,18 +27,43 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateProtectedHandler,
+  updateProtectedHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
+import { useRouter, useSearchParams } from "next/navigation";
+import Loading from "../loading";
 
 interface OfficeFormProps {
   onClose: () => void;
+  isEditing?: boolean;
+  setEditing?: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function OfficeForm({ onClose }: OfficeFormProps) {
+export default function OfficeForm({
+  onClose,
+  isEditing = false,
+  setEditing,
+}: OfficeFormProps) {
   const [districtData, setDistrictData] = useState([]);
   const [provinceData, setProvinceData] = useState([]);
 
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [id, setId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const paramsId = searchParams.get("id");
+    if (paramsId) {
+      const intId = parseInt(paramsId);
+      if (!isNaN(intId)) {
+        setId(intId);
+      }
+    }
+  }, [searchParams.get("id")]);
+
   const form = useForm<CreateOfficeDTO>({
     defaultValues: {
       district_id: undefined,
@@ -61,6 +86,12 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
     queryFn: () => fetchProtectedHandler(endpoints.province),
   });
 
+  const { data: fetchedOfficeDetail, isLoading } = useQuery({
+    queryKey: ["office-single", id],
+    queryFn: () => fetchProtectedHandler(endpoints.office.byId(id ?? -1)),
+    enabled: !!id && isEditing,
+  });
+
   useEffect(() => {
     if (districtFetched) {
       const data = districtFetched?.data?.map((p: any) => ({
@@ -80,6 +111,14 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
     }
   }, [provinceFetched]);
 
+  const handleClose = () => {
+    form.reset();
+    setId(null);
+    setEditing && setEditing(false);
+    router.replace("/");
+    onClose();
+  };
+
   const createOfficeMutation = useMutation({
     mutationFn: (payload: CreateOfficeDTO) =>
       mutateProtectedHandler(endpoints.office, payload),
@@ -88,16 +127,56 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
         queryKey: ["office"],
       });
       toast.success("Office created successfully!");
-      onClose();
+      handleClose();
     },
     onError: (err) => {
-
+      toast.error("Error creating office!");
+    },
+  });
+  const updateOfficeMutation = useMutation({
+    mutationFn: (payload: CreateOfficeDTO) =>
+      updateProtectedHandler(endpoints.office.byId(id ?? -1), payload),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({
+        queryKey: ["office"],
+      });
+      toast.success("Office updated successfully!");
+      handleClose();
+    },
+    onError: (err) => {
       toast.error("Error creating office!");
     },
   });
   const onSubmit = (data: CreateOfficeDTO) => {
-    createOfficeMutation.mutateAsync(data);
+    if (isEditing && id) {
+      updateOfficeMutation.mutateAsync(data);
+    } else {
+      createOfficeMutation.mutateAsync(data);
+    }
   };
+
+  useEffect(() => {
+    if (fetchedOfficeDetail?.data) {
+      const office = fetchedOfficeDetail?.data;
+      const payload: CreateOfficeDTO = {
+        district_id: office?.district_id?.id,
+        mun_id: undefined,
+        office_name: office?.office_name,
+        office_email: office?.office_email,
+        office_contact: office?.office_contact,
+        province_id: office?.district_id?.province_id?.id,
+        ward_number: undefined,
+      };
+      console.log({ payload });
+
+      form.reset(payload);
+    }
+  }, [fetchedOfficeDetail]);
+  console.log({ formData: form.watch() });
+
+  if (isEditing && (!fetchedOfficeDetail || isLoading)) {
+    return <Loading />;
+  }
   return (
     <Card className="shadow-xl">
       <div className="p-6 sm:p-8">
@@ -107,11 +186,11 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
               Create Office
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Register a new livestock office
+              {isEditing ? "Update" : "Register"} a new office
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-secondary rounded-lg transition-colors"
             aria-label="Close"
           >
@@ -312,7 +391,7 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}
                 className="flex-1 bg-transparent"
               >
                 Cancel
@@ -321,7 +400,7 @@ export default function OfficeForm({ onClose }: OfficeFormProps) {
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Office
+                {isEditing ? "Update" : "Create"} Office
               </Button>
             </div>
           </form>
