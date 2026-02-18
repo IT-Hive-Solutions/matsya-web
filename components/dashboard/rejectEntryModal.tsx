@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
+import { cn } from "@/core/lib/utils";
+import { buttonVariants } from "../ui/button";
 
 interface Props {
   title: string;
@@ -24,6 +26,15 @@ interface Props {
   ) => void;
   defaultOpen?: boolean;
   className?: string;
+  triggerVariant?:
+    | "link"
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | null
+    | undefined;
   children: React.ReactNode;
 }
 
@@ -35,6 +46,7 @@ const EntryRejectionWithReason = ({
   onCancel,
   onConfirm,
   defaultOpen = false,
+  triggerVariant,
   className,
 }: Props) => {
   const [isOpen, setOpen] = useState<boolean>(defaultOpen);
@@ -57,7 +69,14 @@ const EntryRejectionWithReason = ({
   return (
     <AlertDialog open={isOpen} defaultOpen={defaultOpen}>
       <AlertDialogTrigger className={className} onClick={() => setOpen(true)}>
-        {children}
+        <div
+          className={cn(
+            buttonVariants({ variant: triggerVariant }),
+            "flex gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white",
+          )}
+        >
+          {children}
+        </div>
       </AlertDialogTrigger>
       <AlertDialogContent className="print:hidden">
         <AlertDialogHeader>

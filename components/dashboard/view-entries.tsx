@@ -614,15 +614,10 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <Button
-                                  variant={"outline"}
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
-                                >
-                                  <LucideOctagonMinus className="h-4 w-4" />
-                                  <span>Reject</span>
-                                </Button>
+                                <LucideOctagonMinus className="h-4 w-4" />
+                                <span>Reject</span>
                               </EntryRejectionWithReason>
                             )}
                           {animal.verification_status ===
