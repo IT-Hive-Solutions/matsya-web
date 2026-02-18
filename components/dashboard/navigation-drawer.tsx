@@ -14,6 +14,12 @@ import {
   Layers,
 } from "lucide-react";
 import { IUser } from "@/core/interfaces/user.interface";
+import { Button } from "../ui/button";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { endpoints } from "@/core/contants/endpoints";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { getAssetURL } from "@/core/lib/directus";
 
 type Roles =
   | "admin"
@@ -126,6 +132,11 @@ export default function NavigationDrawer({
     setIsOpen(false);
   };
 
+  const { data: fetchedDownloadLinkData } = useQuery({
+    queryKey: ["download-link"],
+    queryFn: () => fetchProtectedHandler(endpoints.app_download_link),
+  });
+
   return (
     <>
       {/* Mobile Menu Button */}
@@ -147,11 +158,11 @@ export default function NavigationDrawer({
 
       {/* Drawer */}
       <nav
-        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-card border-r border-border shadow-lg transition-transform duration-300 z-40 ${
+        className={`fixed left-0 top-16 h-[92vh] w-64 bg-card border-r border-border shadow-lg transition-transform duration-300 z-40 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:top-0 lg:h-auto lg:w-64 lg:border-r overflow-y-auto`}
       >
-        <div className="p-4 space-y-2">
+        <div className="h-max p-4 space-y-2">
           {/* Section Groups */}
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mb-2">
@@ -204,6 +215,24 @@ export default function NavigationDrawer({
               </div>
             </div>
           )}
+
+          <hr className="border-border my-2" />
+          <div className="h-full flex flex-col justify-end py-4">
+            {fetchedDownloadLinkData && (
+              <Link
+                href={
+                  fetchedDownloadLinkData?.data?.apk
+                    ? getAssetURL(fetchedDownloadLinkData?.data?.apk)
+                    : "#"
+                }
+                target="_blank"
+              >
+                <Button variant={"outline"} className="w-full">
+                  Download Mobile App
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
     </>

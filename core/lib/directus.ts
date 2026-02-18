@@ -8,6 +8,7 @@ import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity
 import { ProvinceDirectus } from '@/core/interfaces/province.interface';
 import { UsersDirectus } from '@/core/interfaces/user.interface';
 import { authentication, createDirectus, rest, staticToken } from '@directus/sdk';
+import { AppDownloadLinkDirectus } from '../interfaces/appDownloadLink.interface';
 
 const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
@@ -22,6 +23,7 @@ type Schema = {
     production_capacity: ProductionCapacityDirectus[];
     owners_info: OwnersInfoDirectus[];
     office: OfficeDirectus[];
+    app_download_link: AppDownloadLinkDirectus[];
 };
 const url = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || ""
 export const directus = createDirectus<Schema>(url).
@@ -30,7 +32,10 @@ export const directus = createDirectus<Schema>(url).
 // with(staticToken(staticTokenValue))
 
 
-
+export const getDirectusClient = (token: string) =>
+    createDirectus<Schema>(url)
+        .with(staticToken(token))
+        .with(rest());
 
 export function getAssetURL(fileId: string) {
 

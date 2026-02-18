@@ -2,9 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readItems, createItem } from '@directus/sdk';
 import { directus } from '@/core/lib/directus'
+import { withMiddleware } from '@/core/lib/api.middleware';
 
 // GET - Fetch all province
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
         const province = await directus.request(
             readItems('province', {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create new item
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
 
@@ -55,3 +56,5 @@ export async function POST(request: NextRequest) {
     }
 }
 
+export const GET = withMiddleware(getHandler)
+export const POST = withMiddleware(postHandler)

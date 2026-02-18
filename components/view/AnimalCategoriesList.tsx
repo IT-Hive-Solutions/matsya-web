@@ -1,11 +1,11 @@
-"use client"
+"use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
@@ -13,10 +13,15 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
+import { useRouter } from "next/navigation";
+import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
+import { toast } from "sonner";
 
 type Props = {
   currentConfig: Config;
   setShowForm: Dispatch<SetStateAction<boolean>>;
+  setEditing?: Dispatch<SetStateAction<boolean>>;
 };
 export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
   {
@@ -25,13 +30,62 @@ export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
   },
 ];
 
-const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
+const AnimalCategoriesLists = ({
+  currentConfig,
+  setShowForm,
+  setEditing,
+}: Props) => {
   const [animalCategoriesLists, setAnimalCategoriesLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
+  const animalCategoriesColumnsWithAction: ColumnDef<IAnimalCategories>[] = [
+    ...animalCategoriesColumns,
+    {
+      accessorKey: "action",
+      header: "Action",
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant={"ghost"}
+              onClick={() => {
+                router.replace(`?tab=livestock-category&id=${row.original.id}`);
+                setEditing && setEditing(true);
+                setShowForm(true);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <AlertDialogWrapper
+              description="You cannot undo once deleted!"
+              title="Are you sure?"
+              triggerVariant={"ghost"}
+              onConfirm={() => {
+                deleteMutation.mutateAsync(row.original.id);
+              }}
+            >
+              <Trash className="w-4 h-4" />
+            </AlertDialogWrapper>
+          </div>
+        );
+      },
+    },
+  ];
   const { data: fetchedAnimalCategoriesList, isLoading } = useQuery({
     queryKey: ["animal-categories"],
     queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) =>
+      deleteProtectedHandler(endpoints.animal_category.byId(id)),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["animal-categories"],
+      });
+      toast.success("Data Deleted Successfully");
+    },
   });
   useEffect(() => {
     if (fetchedAnimalCategoriesList?.data) {
@@ -44,7 +98,7 @@ const AnimalCategoriesLists = ({ currentConfig, setShowForm }: Props) => {
     any
   >({
     data: animalCategoriesLists,
-    columns: animalCategoriesColumns,
+    columns: animalCategoriesColumnsWithAction,
   });
 
   if (isLoading) {

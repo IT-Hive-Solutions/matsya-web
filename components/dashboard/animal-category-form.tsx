@@ -16,27 +16,67 @@ import {
   CreateAnimalCategoryDTO,
   CreateAnimalCategorySchema,
 } from "@/core/dtos/animal-category.dto";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  mutateProtectedHandler,
+  updateProtectedHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Loading from "../loading";
 
 interface AnimalCategoryFormProps {
   onClose: () => void;
+  isEditing?: boolean;
+  setEditing?: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function AnimalCategoryForm({
   onClose,
+  isEditing = false,
+  setEditing,
 }: AnimalCategoryFormProps) {
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [id, setId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const paramsId = searchParams.get("id");
+    if (paramsId) {
+      const intId = parseInt(paramsId);
+      if (!isNaN(intId)) {
+        setId(intId);
+      }
+    }
+  }, [searchParams.get("id")]);
+
   const form = useForm<CreateAnimalCategoryDTO>({
     defaultValues: {
       category_name: "",
     },
     resolver: zodResolver(CreateAnimalCategorySchema),
   });
+
+  const { data: fetchedAnimalCategoryDetail, isLoading } = useQuery({
+    queryKey: ["animal-type-single", id],
+    queryFn: () =>
+      fetchProtectedHandler(endpoints.animal_category.byId(id ?? -1)),
+    enabled: !!id && isEditing,
+  });
+
+  const handleClose = () => {
+    form.reset();
+    setId(null);
+    setEditing && setEditing(false);
+    router.replace("/");
+    onClose();
+  };
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
@@ -46,16 +86,44 @@ export default function AnimalCategoryForm({
         queryKey: ["animal-categories"],
       });
       toast.success("Animal category  created successfully!");
-      onClose();
+      handleClose();
     },
     onError: (err) => {
-
       toast.error("Error creating animal category!");
     },
   });
+
+  const updateAnimalCategoryMutation = useMutation({
+    mutationFn: (payload: CreateAnimalCategoryDTO) =>
+      updateProtectedHandler(endpoints.animal_category.byId(id ?? -1), payload),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({
+        queryKey: ["animal-categories"],
+      });
+      toast.success("Animal category  updated successfully!");
+      handleClose();
+    },
+    onError: (err) => {
+      toast.error("Error creating animal category!");
+    },
+  });
+
   const onSubmit = (data: CreateAnimalCategoryDTO) => {
-    createAnimalCategoryMutation.mutateAsync(data);
+    if (isEditing && id) {
+      updateAnimalCategoryMutation.mutateAsync(data);
+    } else {
+      createAnimalCategoryMutation.mutateAsync(data);
+    }
   };
+  useEffect(() => {
+    if (fetchedAnimalCategoryDetail?.data) {
+      form.reset(fetchedAnimalCategoryDetail?.data);
+    }
+  }, [fetchedAnimalCategoryDetail]);
+
+  if (isEditing && (!fetchedAnimalCategoryDetail || isLoading)) {
+    return <Loading />;
+  }
   return (
     <Card className="shadow-xl">
       <div className="p-6 sm:p-8">
@@ -69,7 +137,7 @@ export default function AnimalCategoryForm({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-secondary rounded-lg transition-colors"
             aria-label="Close"
           >
@@ -108,7 +176,7 @@ export default function AnimalCategoryForm({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}
                 className="flex-1 bg-transparent"
               >
                 Cancel
@@ -117,7 +185,7 @@ export default function AnimalCategoryForm({
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Animal Category
+                {isEditing ? "Update" : "Create"} Animal Category
               </Button>
             </div>
           </form>

@@ -39,7 +39,7 @@ export interface Config {
 
 export default function ManagementPage({ type }: ManagementPageProps) {
   const [showForm, setShowForm] = useState(false);
-
+  const [isEditing, setEditing] = useState<boolean>(false);
   const config: {
     [key: string]: Config;
   } = {
@@ -141,52 +141,83 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-2xl my-8">
             {type === "user-accounts" && (
-              <UserForm onClose={() => setShowForm(false)} />
+              <UserForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "offices" && (
-              <OfficeForm onClose={() => setShowForm(false)} />
+              <OfficeForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock-category" && (
-              <AnimalCategoryForm onClose={() => setShowForm(false)} />
+              <AnimalCategoryForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock-type" && (
-              <AnimalTypeForm onClose={() => setShowForm(false)} />
+              <AnimalTypeForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock" && (
               <AnimalForm onClose={() => setShowForm(false)} />
             )}
             {type === "production-capacity" && (
-              <ProductionCapacityForm onClose={() => setShowForm(false)} />
+              <ProductionCapacityForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
           </div>
         </div>
       )}
 
       {type === "offices" && (
-        <OfficeLists currentConfig={currentConfig} setShowForm={setShowForm} />
+        <OfficeLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+          setEditing={setEditing}
+        />
       )}
       {/* {type === "animals" && (
         <AnimalLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )} */}
       {type === "user-accounts" && (
-        <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
+        <UserLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+          setEditing={setEditing}
+        />
       )}
       {type === "livestock-category" && (
         <AnimalCategoriesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
       {type === "livestock-type" && (
         <AnimalTypesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
       {type === "production-capacity" && (
         <ProductionCapacityLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
     </div>

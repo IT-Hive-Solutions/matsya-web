@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { directus } from '@/core/lib/directus';
 import { readItem, updateItem, deleteItem } from '@directus/sdk';
+import { withMiddleware } from '@/core/lib/api.middleware';
 
 type Params = {
     params: Promise<{
@@ -9,12 +10,12 @@ type Params = {
 };
 
 
-export async function GET(request: NextRequest, { params }: Params) {
+async function getHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
 
         const office = await directus.request(
-            readItem('office', parseInt(id))
+            readItem('office', parseInt(id), { fields: ["*", "district_id.*", "district_id.province_id.*"] })
         );
 
         return NextResponse.json({
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 }
 
 
-export async function PUT(request: NextRequest, { params }: Params) {
+async function putHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
 
@@ -38,7 +39,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         const updatedOffice = await directus.request(
             updateItem('office', parseInt(id), {
-                district_name: body.district_name,
+                district_id: body.district_id,
+                province_id: body.province_id,
+                office_email: body.office_email,
+                office_address: body.office_address,
+                office_name: body.office_name,
             })
         );
 
@@ -55,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+async function deleteHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
 
@@ -74,3 +79,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         );
     }
 }
+
+export const GET = withMiddleware(getHandler)
+export const PUT = withMiddleware(putHandler)
+export const DELETE = withMiddleware(deleteHandler)

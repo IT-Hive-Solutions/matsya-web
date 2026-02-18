@@ -39,6 +39,7 @@ import AnimalDetail from "./animal-detail";
 import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
 import { useDebounceHook } from "@/hooks/useDebounceHook";
+import { exportAnimalData } from "@/core/services/exportAnimalData";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -172,7 +173,7 @@ export default function OwnerAnimalView({
                 contact: animal.owners_id?.owners_contact,
                 localLevel: animal.owners_id?.local_level_name,
                 ward: animal.owners_id?.ward_number,
-                district: animal.owners_id?.district_id,
+                district: animal.owners_id?.district_id?.id,
               },
               animals: [],
             };
@@ -216,8 +217,8 @@ export default function OwnerAnimalView({
           >
             <div className="h-full flex flex-col">
               {/* Search Bar */}
-              <div className="mb-4">
-                <div className="relative">
+              <div className="mb-4 w-full flex items-center gap-4">
+                <div className="relative w-full ">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by owner name, contact, or tag number..."
@@ -226,6 +227,12 @@ export default function OwnerAnimalView({
                     className="pl-9 bg-white border-slate-200 focus-visible:ring-slate-900"
                   />
                 </div>
+                <Button
+                  onClick={() => exportAnimalData(fetchedAnimalList?.data)}
+                  className="hover:cursor-pointer"
+                >
+                  Export Excel
+                </Button>
               </div>
 
               {/* Owner Cards List */}
@@ -575,11 +582,9 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <div
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="flex item-center gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
-                                >
+                                <div className="flex items-center gap-2">
                                   <CheckCircleIcon className="h-4 w-4 text-blue-600" />
                                   <span>Verify</span>
                                 </div>
@@ -609,15 +614,10 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <Button
-                                  variant={"outline"}
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer text-red-600 focus:text-white hover:text-white"
-                                >
-                                  <LucideOctagonMinus className="h-4 w-4" />
-                                  <span>Reject</span>
-                                </Button>
+                                <LucideOctagonMinus className="h-4 w-4" />
+                                <span>Reject</span>
                               </EntryRejectionWithReason>
                             )}
                           {animal.verification_status ===
@@ -638,15 +638,12 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <Button
-                                  variant={"outline"}
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
+                                <div className="flex gap-2 cursor-pointer">
                                   <CheckCircleIcon className="h-4 w-4 text-blue-600" />
                                   <span>Accept</span>
-                                </Button>
+                                </div>
                               </AlertDialogWrapper>
                             )}
                         </div>
