@@ -582,11 +582,9 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <div
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="flex item-center gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
-                                >
+                                <div className="flex items-center gap-2">
                                   <CheckCircleIcon className="h-4 w-4 text-blue-600" />
                                   <span>Verify</span>
                                 </div>
@@ -645,15 +643,12 @@ export default function OwnerAnimalView({
                                   );
                                   setOpen && setOpen(false);
                                 }}
+                                triggerVariant={"outline"}
                               >
-                                <Button
-                                  variant={"outline"}
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer"
-                                >
+                                <div className="flex gap-2 cursor-pointer">
                                   <CheckCircleIcon className="h-4 w-4 text-blue-600" />
                                   <span>Accept</span>
-                                </Button>
+                                </div>
                               </AlertDialogWrapper>
                             )}
                         </div>
