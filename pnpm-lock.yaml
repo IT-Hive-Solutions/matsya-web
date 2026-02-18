@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@directus/sdk':
-        specifier: ^21.0.0
-        version: 21.0.0
+        specifier: 17.0.0
+        version: 17.0.0
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.71.1(react@19.2.0))
@@ -353,9 +353,9 @@ packages:
   '@date-fns/tz@1.2.0':
     resolution: {integrity: sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg==}
 
-  '@directus/sdk@21.0.0':
-    resolution: {integrity: sha512-+Uld9+anm5N1NfVgEmPBReOrT0uTkE3OnQginvqx7yGS94e20qzNsW8IJnstC1OvdUMTDteDrdYMfx6QG+kY7Q==}
-    engines: {node: '>=22'}
+  '@directus/sdk@17.0.0':
+    resolution: {integrity: sha512-ADKoFrLjWPVVsYNK0EffVFstl/ZHVaQbiUp4NCueKfvFaOSLQ16xSVNj5O//rP5+rU8t1HkjwC6JDh02rao7ZQ==}
+    engines: {node: '>=18.0.0'}
 
   '@emnapi/runtime@1.8.1':
     resolution: {integrity: sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg==}
@@ -2886,7 +2886,7 @@ snapshots:
 
   '@date-fns/tz@1.2.0': {}
 
-  '@directus/sdk@21.0.0': {}
+  '@directus/sdk@17.0.0': {}
 
   '@emnapi/runtime@1.8.1':
     dependencies:

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         }
 
 
-        const authUser = await directus.login({ email, password })
+        const authUser = await directus.login(email, password)
         console.log({ authUser });
 
 

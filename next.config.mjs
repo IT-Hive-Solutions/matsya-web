@@ -3,7 +3,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ["@directus/sdk"],
+  experimental: {
+    serverComponentsExternalPackages: ["@directus/sdk"],
+  },
+
   images: {
     unoptimized: true,
     remotePatterns: [

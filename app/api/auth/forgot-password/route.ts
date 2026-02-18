@@ -22,10 +22,8 @@ async function postHandler(req: NextRequest) {
 
         // Fetch user from custom users table by email
         const verification = await directus.login(
-            {
-                email,
-                password: old_password,
-            }
+            email,
+            old_password,
         );
 
 
