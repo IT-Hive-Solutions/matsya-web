@@ -61,15 +61,12 @@ export default function AnimalTypeForm({
     },
     resolver: zodResolver(CreateAnimaTypeSchema),
   });
-  console.log({ isEditing, id });
-
   const { data: fetchedAnimalTypesDetail, isLoading } = useQuery({
     queryKey: ["animal-type-single", id],
     queryFn: () => fetchProtectedHandler(endpoints.animal_types.byId(id ?? -1)),
     enabled: !!id && isEditing,
   });
 
-  
   const handleClose = () => {
     form.reset();
     setId(null);
@@ -78,7 +75,7 @@ export default function AnimalTypeForm({
     onClose();
   };
 
-  const createAnimalCategoryMutation = useMutation({
+  const createAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
       mutateProtectedHandler(endpoints.animal_types, payload),
     onSuccess: (res) => {
@@ -93,7 +90,7 @@ export default function AnimalTypeForm({
     },
   });
 
-  const updateAnimalCategoryMutation = useMutation({
+  const updateAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
       updateProtectedHandler(endpoints.animal_types.byId(id ?? -1), payload),
     onSuccess: (res) => {
@@ -109,10 +106,10 @@ export default function AnimalTypeForm({
   });
 
   const onSubmit = (data: CreateAnimaTypeDTO) => {
-    if (isEditing) {
-      updateAnimalCategoryMutation.mutateAsync(data);
+    if (isEditing && id) {
+      updateAnimalTypeMutation.mutateAsync(data);
     } else {
-      createAnimalCategoryMutation.mutateAsync(data);
+      createAnimalTypeMutation.mutateAsync(data);
     }
   };
 

@@ -147,7 +147,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               <OfficeForm onClose={() => setShowForm(false)} />
             )}
             {type === "livestock-category" && (
-              <AnimalCategoryForm onClose={() => setShowForm(false)} />
+              <AnimalCategoryForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "livestock-type" && (
               <AnimalTypeForm
@@ -179,6 +183,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <AnimalCategoriesLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
       {type === "livestock-type" && (
