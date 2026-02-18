@@ -141,7 +141,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-2xl my-8">
             {type === "user-accounts" && (
-              <UserForm onClose={() => setShowForm(false)} />
+              <UserForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
             {type === "offices" && (
               <OfficeForm onClose={() => setShowForm(false)} />
@@ -181,7 +185,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <AnimalLists currentConfig={currentConfig} setShowForm={setShowForm} />
       )} */}
       {type === "user-accounts" && (
-        <UserLists currentConfig={currentConfig} setShowForm={setShowForm} />
+        <UserLists
+          currentConfig={currentConfig}
+          setShowForm={setShowForm}
+          setEditing={setEditing}
+        />
       )}
       {type === "livestock-category" && (
         <AnimalCategoriesLists

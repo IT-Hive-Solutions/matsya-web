@@ -3,9 +3,9 @@ import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
@@ -17,16 +17,24 @@ import ConfirmationDialog from "../ui/confirmation-dialog";
 import { ResetPasswordDTO } from "@/core/dtos/reset-password.dto";
 import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
+import { useRouter } from "next/navigation";
+import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
 
 type Props = {
   currentConfig: Config;
   setShowForm: Dispatch<SetStateAction<boolean>>;
+  setEditing?: Dispatch<SetStateAction<boolean>>;
 };
 
-const UserLists = ({ currentConfig, setShowForm }: Props) => {
+const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   const [userLists, setUserLists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const userColumns: ColumnDef<IUser>[] = [
     {
       accessorKey: "full_name",
@@ -61,6 +69,36 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
       header: "Action",
       cell: ({ row }) => {
         return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant={"ghost"}
+              onClick={() => {
+                router.replace(`?tab=user&id=${row.original.id}`);
+                setEditing && setEditing(true);
+                setShowForm(true);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <AlertDialogWrapper
+              description="You cannot undo once deleted!"
+              title="Are you sure?"
+              triggerVariant={"ghost"}
+              onConfirm={() => {
+                deleteMutation.mutateAsync(row.original.id);
+              }}
+            >
+              <Trash className="w-4 h-4" />
+            </AlertDialogWrapper>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "reset-password",
+      header: "Reset Password",
+      cell: ({ row }) => {
+        return (
           <ConfirmationDialog
             cancelText="Cancel"
             confirmText="Reset"
@@ -91,7 +129,16 @@ const UserLists = ({ currentConfig, setShowForm }: Props) => {
       },
     },
   ];
-
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      deleteProtectedHandler(endpoints.users.byId(id)),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      toast.success("Data Deleted Successfully");
+    },
+  });
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ResetPasswordDTO) =>
       mutateHandler(endpoints.auth["reset-password"], payload),

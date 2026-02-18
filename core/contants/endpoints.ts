@@ -8,7 +8,7 @@ export const endpoints = {
     },
     users: Object.assign(
         `${baseUrl}/users`,
-        { byId: (id: number) => `${baseUrl}/users/${id}`, }
+        { byId: (id: string) => `${baseUrl}/users/${id}`, }
     ),
     province: Object.assign(
         `${baseUrl}/province`,

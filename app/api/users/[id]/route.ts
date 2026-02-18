@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { directus } from '@/core/lib/directus';
-import { readItem, updateItem, deleteItem, deleteUser } from '@directus/sdk';
+import { readItem, updateItem, deleteItem, deleteUser, readUser, updateUser, readRoles } from '@directus/sdk';
 import { withMiddleware } from '@/core/lib/api.middleware';
 
 type Params = {
@@ -15,7 +15,7 @@ async function getHandler(request: NextRequest, { params }: Params) {
         const { id } = await params
 
         const user = await directus.request(
-            readItem('users', parseInt(id))
+            readUser(id, { fields: ["*", " office_id.*", " role.*" as any] })
         );
 
         return NextResponse.json({
@@ -35,14 +35,24 @@ async function putHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
         const body = await request.json();
-
+        const payload: any = {
+            full_name: body.full_name,
+            email: body.email,
+            office_id: parseInt(body.office_id),
+            phone_number: body.phone_number,
+        }
+        if (body.userType) {
+            const roles = await directus.request(
+                readRoles({
+                    filter: {
+                        name: { _eq: body.user_type } // or 'Admin', 'Member', etc.
+                    }
+                })
+            );
+            payload.role = roles[0].id
+        }
         const updatedUser = await directus.request(
-            updateItem('users', parseInt(id), {
-                full_name: body.full_name,
-                email: body.email,
-                office_id: body.office_id,
-                phone_number: body.phone_number,
-            })
+            updateUser(id, payload)
         );
 
         return NextResponse.json({
