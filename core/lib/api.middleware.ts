@@ -1,9 +1,8 @@
+import { DirectusClient, readMe, RestClient, StaticTokenClient } from '@directus/sdk';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
-import { directus, getDirectusClient, Schema } from './directus';
-import { createDirectus, DirectusClient, readMe, RestClient, StaticTokenClient, } from '@directus/sdk';
 import { cookieConfig } from '../contants/cookie.config';
+import { getDirectusClient, Schema } from './directus';
 
 
 export interface AuthenticatedRequest extends NextRequest {
@@ -21,6 +20,9 @@ export function withMiddleware(handler: RouteHandler) {
         try {
             const cookieHandler = await cookies()
             const token = cookieHandler.get("directus_session_token")?.value;
+            console.log({ token });
+            console.log({ fullTokenValue: cookieHandler.get("directus_session_token") });
+
 
             if (!token) {
                 return NextResponse.redirect(new URL("/auth/login", req.url));
