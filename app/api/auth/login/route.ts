@@ -1,3 +1,4 @@
+import { cookieConfig } from "@/core/contants/cookie.config";
 import { directus } from "@/core/lib/directus";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
 
 
         const authUser = await directus.login({ email, password })
+        console.log({ authUser });
 
 
         if (!authUser.access_token) {
@@ -30,28 +32,19 @@ export async function POST(req: NextRequest) {
         const cookieStore = await cookies();
 
         cookieStore.set('directus_session_token', authUser.access_token, {
-            sameSite: 'lax',
-            path: '/',
-            secure: process.env.NODE_ENV === 'production',
-            httpOnly: true, // Important for security
+            ...cookieConfig, // Important for security
             maxAge: 60 * 1440 // 15 minutes (matches your token expiry)
         });
 
         if (authUser.refresh_token) {
             cookieStore.set('directus_refresh_token', authUser.refresh_token, {
-                sameSite: 'lax',
-                path: '/',
-                secure: process.env.NODE_ENV === 'production',
-                httpOnly: true,
+                ...cookieConfig,
                 maxAge: 60 * 60 * 24 * 7 // 7 days
             });
         }
         if (authUser.expires_at) {
             cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
-                sameSite: 'lax',
-                path: '/',
-                secure: process.env.NODE_ENV === 'production',
-                httpOnly: true,
+                ...cookieConfig,
                 maxAge: 60 * 60 * 24 * 7 // 7 days
             });
         }
