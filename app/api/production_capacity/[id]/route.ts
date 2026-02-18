@@ -39,7 +39,7 @@ async function putHandler(request: NextRequest, { params }: Params) {
 
         const updatedCapacity = await directus.request(
             updateItem('production_capacity', parseInt(id), {
-                district_name: body.district_name,
+                capacity_name: body.capacity_name,
             })
         );
 

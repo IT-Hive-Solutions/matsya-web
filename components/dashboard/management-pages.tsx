@@ -164,7 +164,11 @@ export default function ManagementPage({ type }: ManagementPageProps) {
               <AnimalForm onClose={() => setShowForm(false)} />
             )}
             {type === "production-capacity" && (
-              <ProductionCapacityForm onClose={() => setShowForm(false)} />
+              <ProductionCapacityForm
+                onClose={() => setShowForm(false)}
+                isEditing={isEditing}
+                setEditing={setEditing}
+              />
             )}
           </div>
         </div>
@@ -197,6 +201,7 @@ export default function ManagementPage({ type }: ManagementPageProps) {
         <ProductionCapacityLists
           currentConfig={currentConfig}
           setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       )}
     </div>
