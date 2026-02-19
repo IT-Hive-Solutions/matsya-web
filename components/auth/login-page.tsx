@@ -13,10 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { endpoints } from "@/core/contants/endpoints";
 import { LoginDTO, LoginSchema } from "@/core/dtos/login.dto";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateApiRouteHandler,
+  mutateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -34,7 +36,7 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: (payload: LoginDTO) =>
-      mutateHandler(endpoints.auth.login, payload),
+      mutateApiRouteHandler(endpoints.auth.login, payload),
     onSuccess: (res) => {
       toast.success("Login Successful!");
       setTimeout(() => {

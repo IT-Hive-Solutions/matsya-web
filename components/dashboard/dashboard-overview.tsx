@@ -3,7 +3,9 @@
 import { Card } from "@/components/ui/card";
 import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  fetchApiRouteHandler,
+} from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -40,13 +42,14 @@ export default function DashboardOverview({ user }: OverviewProps) {
   ];
   const [statValues, setStatValues] =
     useState<Record<string, string | number>>();
-  const { data: fetchedReport } = useQuery({
+  const { data: fetchedReport } = useQuery<any>({
     queryKey: ["animals", "report"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_info.report),
+    queryFn: () => fetchApiRouteHandler(endpoints.animal_info.report),
   });
 
   useEffect(() => {
     const data = fetchedReport?.data;
+
     if (data) {
       setStatValues(data);
     }

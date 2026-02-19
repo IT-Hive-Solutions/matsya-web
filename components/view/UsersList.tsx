@@ -1,7 +1,7 @@
 "use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,11 +15,15 @@ import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
 import ConfirmationDialog from "../ui/confirmation-dialog";
 import { ResetPasswordDTO } from "@/core/dtos/reset-password.dto";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateApiRouteHandler,
+  mutateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { useRouter } from "next/navigation";
-import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -28,7 +32,7 @@ type Props = {
 };
 
 const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
-  const [userLists, setUserLists] = useState([]);
+  const [userLists, setUserLists] = useState<IUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -130,8 +134,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     },
   ];
   const deleteMutation = useMutation({
-    mutationFn: (id: string) =>
-      deleteProtectedHandler(endpoints.users.byId(id)),
+    mutationFn: (id: string) => deleteHandler(directusEndpoints.users.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -141,7 +144,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ResetPasswordDTO) =>
-      mutateHandler(endpoints.auth["reset-password"], payload),
+      mutateApiRouteHandler(endpoints.auth["reset-password"], payload),
     onSuccess: (res) => {
       if (res.password_changed) {
         toast.success("Password Changed Successfully!.", {
@@ -162,7 +165,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
   const { data: fetchedUserList, isLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: () => fetchProtectedHandler(endpoints.users),
+    queryFn: () => fetchHandler<IUser[]>(directusEndpoints.users),
   });
 
   useEffect(() => {

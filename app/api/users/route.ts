@@ -1,38 +1,40 @@
 
-// app/api/users/route.ts
-// Handles GET (all users) and POST (create item)
+// // app/api/users/route.ts
+// // Handles GET (all users) and POST (create item)
 import { withMiddleware } from '@/core/lib/api.middleware';
-import { directus } from '@/core/lib/directus';
+import { getAccessToken } from '@/core/lib/auth';
+import { getDirectusClient } from '@/core/lib/directus';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
 import { sendMail } from '@/core/services/mail/sendMail';
 import { createUser, readRoles, readUsers } from '@directus/sdk';
 import bcrypt from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 
-// GET - Fetch all users
-async function getHandler(request: NextRequest) {
-    try {
-        const users = await directus.request(
-            readUsers({
-                fields: ['*', 'office_id.*' as any, 'office_id.province_id.*' as any, 'office_id.district_id.*' as any]
-            })
-        );
+// // GET - Fetch all users
+// async function getHandler(request: NextRequest) {
+//     try {
+//         const users = await directus.request(
+//             readUsers({
+//                 fields: ['*', 'office_id.*' as any, 'office_id.province_id.*' as any, 'office_id.district_id.*' as any]
+//             })
+//         );
 
-        return NextResponse.json({
-            success: true,
-            data: users
-        });
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: error.message || 'Failed to fetch users' },
-            { status: 500 }
-        );
-    }
-}
+//         return NextResponse.json({
+//             success: true,
+//             data: users
+//         });
+//     } catch (error: any) {
+//         return NextResponse.json(
+//             { success: false, error: error.message || 'Failed to fetch users' },
+//             { status: 500 }
+//         );
+//     }
+// }
 
-// POST - Create new item
+// // POST - Create new item
 async function postHandler(request: NextRequest) {
     try {
+
         const body = await request.json();
 
         if (!body.full_name) {
@@ -68,13 +70,16 @@ async function postHandler(request: NextRequest) {
         }
 
         const newPassword = generateSecurePassword(8)
-        console.log({ newPassword }); //8w!6Kszv
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
         const [first_name, ...rest] = body.full_name.split(" ")
         const last_name = rest.join(" ")
-        const roles = await directus.request(
+
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
+
+        const roles = await client.request(
             readRoles({
                 filter: {
                     name: { _eq: body.user_type } // or 'Admin', 'Member', etc.
@@ -82,7 +87,7 @@ async function postHandler(request: NextRequest) {
             })
         );
 
-        const newUser = await directus.request(
+        const newUser = await client.request(
             createUser({
                 first_name: first_name,
                 last_name: last_name,
@@ -94,7 +99,7 @@ async function postHandler(request: NextRequest) {
                 user_type: body.user_type,
                 role: roles[0].id,
                 status: 'active',
-            })
+            } as any)
         );
 
         const mailInfo = await sendMail({
@@ -103,7 +108,6 @@ async function postHandler(request: NextRequest) {
             subject: 'Your New Account Details',
             to: body.email,
         })
-        console.log({ mailInfo });
 
 
         return NextResponse.json(
@@ -119,5 +123,5 @@ async function postHandler(request: NextRequest) {
 }
 
 
-export const GET = withMiddleware(getHandler)
-export const POST = withMiddleware(postHandler)
+// export const GET = withMiddleware(getHandler)
+export const POST = postHandler

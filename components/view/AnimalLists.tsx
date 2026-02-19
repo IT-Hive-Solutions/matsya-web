@@ -6,7 +6,10 @@ import {
   VerificationStatus,
 } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  fetchApiRouteHandler,
+  fetchHandler,
+} from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -19,6 +22,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -92,11 +96,12 @@ export const animalColumns: ColumnDef<IAnimal>[] = [
 ];
 
 const AnimalLists = ({ currentConfig, setShowForm }: Props) => {
-  const [animalLists, setAnimalLists] = useState([]);
+  const [animalLists, setAnimalLists] = useState<IAnimal[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_info),
+    queryFn: () =>
+      fetchApiRouteHandler<IAnimal[]>(endpoints.animal_info),
   });
   useEffect(() => {
     if (fetchedAnimalList?.data) {

@@ -1,7 +1,7 @@
 "use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,8 +15,10 @@ import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -24,7 +26,7 @@ type Props = {
   setEditing?: Dispatch<SetStateAction<boolean>>;
 };
 
-export const productionCapacityColumns: ColumnDef<IAnimalType>[] = [
+export const productionCapacityColumns: ColumnDef<IProductionCapacity>[] = [
   {
     accessorKey: "capacity_name",
     header: "Name",
@@ -36,55 +38,61 @@ const ProductionCapacityLists = ({
   setShowForm,
   setEditing,
 }: Props) => {
-  const [productionCapacityLists, setProductionCapacityLists] = useState([]);
+  const [productionCapacityLists, setProductionCapacityLists] = useState<
+    IProductionCapacity[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const productionCapacityColumnsWithAction: ColumnDef<IAnimalType>[] = [
-    ...productionCapacityColumns,
-    {
-      accessorKey: "action",
-      header: "Action",
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant={"ghost"}
-              onClick={() => {
-                router.replace(
-                  `?tab=production-capacity&id=${row.original.id}`,
-                );
-                setEditing && setEditing(true);
-                setShowForm(true);
-              }}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <AlertDialogWrapper
-              description="You cannot undo once deleted!"
-              title="Are you sure?"
-              triggerVariant={"ghost"}
-              onConfirm={() => {
-                deleteMutation.mutateAsync(row.original.id);
-              }}
-            >
-              <Trash className="w-4 h-4" />
-            </AlertDialogWrapper>
-          </div>
-        );
+  const productionCapacityColumnsWithAction: ColumnDef<IProductionCapacity>[] =
+    [
+      ...productionCapacityColumns,
+      {
+        accessorKey: "action",
+        header: "Action",
+        cell: ({ row }) => {
+          return (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={"ghost"}
+                onClick={() => {
+                  router.replace(
+                    `?tab=production-capacity&id=${row.original.id}`,
+                  );
+                  setEditing && setEditing(true);
+                  setShowForm(true);
+                }}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <AlertDialogWrapper
+                description="You cannot undo once deleted!"
+                title="Are you sure?"
+                triggerVariant={"ghost"}
+                onConfirm={() => {
+                  deleteMutation.mutateAsync(row.original.id);
+                }}
+              >
+                <Trash className="w-4 h-4" />
+              </AlertDialogWrapper>
+            </div>
+          );
+        },
       },
-    },
-  ];
+    ];
 
   const { data: fetchedProductionCapacityList, isLoading } = useQuery({
     queryKey: ["production-capacity"],
-    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+    queryFn: () =>
+      fetchHandler<IProductionCapacity[]>(
+        directusEndpoints.production_capacity,
+      ),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      deleteProtectedHandler(endpoints.production_capacity.byId(id)),
+      deleteHandler(directusEndpoints.production_capacity.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],
@@ -99,7 +107,7 @@ const ProductionCapacityLists = ({
   }, [fetchedProductionCapacityList]);
 
   const productionCapacityTable = useCustomReactPaginatedTable<
-    IAnimalType,
+    IProductionCapacity,
     any
   >({
     data: productionCapacityLists,

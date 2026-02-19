@@ -22,18 +22,22 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { endpoints } from "@/core/contants/endpoints";
 import { CreateOfficeDTO, CreateOfficeSchema } from "@/core/dtos/office.dto";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "../loading";
+import { IDistrict } from "@/core/interfaces/district.interface";
+import { IProvince } from "@/core/interfaces/province.interface";
+import { IOffice } from "@/core/interfaces/office.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface OfficeFormProps {
   onClose: () => void;
@@ -46,8 +50,18 @@ export default function OfficeForm({
   isEditing = false,
   setEditing,
 }: OfficeFormProps) {
-  const [districtData, setDistrictData] = useState([]);
-  const [provinceData, setProvinceData] = useState([]);
+  const [districtData, setDistrictData] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [provinceData, setProvinceData] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
 
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -79,33 +93,34 @@ export default function OfficeForm({
 
   const { data: districtFetched } = useQuery({
     queryKey: ["district"],
-    queryFn: () => fetchProtectedHandler(endpoints.district),
+    queryFn: () => fetchHandler<IDistrict[]>(directusEndpoints.district),
   });
   const { data: provinceFetched } = useQuery({
     queryKey: ["province"],
-    queryFn: () => fetchProtectedHandler(endpoints.province),
+    queryFn: () => fetchHandler<IProvince[]>(directusEndpoints.province),
   });
 
   const { data: fetchedOfficeDetail, isLoading } = useQuery({
     queryKey: ["office-single", id],
-    queryFn: () => fetchProtectedHandler(endpoints.office.byId(id ?? -1)),
+    queryFn: () =>
+      fetchHandler<IOffice>(directusEndpoints.office.byId(id ?? -1)),
     enabled: !!id && isEditing,
   });
 
   useEffect(() => {
     if (districtFetched) {
-      const data = districtFetched?.data?.map((p: any) => ({
+      const data = districtFetched?.data?.map((p) => ({
         label: p.district_name,
-        value: p.id,
+        value: String(p.id),
       }));
       setDistrictData(data);
     }
   }, [districtFetched]);
   useEffect(() => {
-    if (provinceFetched) {
-      const data = provinceFetched?.data?.map((p: any) => ({
+    if (provinceFetched?.data) {
+      const data = provinceFetched?.data?.map((p) => ({
         label: p?.province_name ?? "",
-        value: p.id,
+        value: String(p.id),
       }));
       setProvinceData(data);
     }
@@ -121,7 +136,7 @@ export default function OfficeForm({
 
   const createOfficeMutation = useMutation({
     mutationFn: (payload: CreateOfficeDTO) =>
-      mutateProtectedHandler(endpoints.office, payload),
+      mutateHandler(directusEndpoints.office, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],
@@ -135,7 +150,7 @@ export default function OfficeForm({
   });
   const updateOfficeMutation = useMutation({
     mutationFn: (payload: CreateOfficeDTO) =>
-      updateProtectedHandler(endpoints.office.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.office.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],
@@ -167,12 +182,10 @@ export default function OfficeForm({
         province_id: office?.district_id?.province_id?.id,
         ward_number: undefined,
       };
-      console.log({ payload });
 
       form.reset(payload);
     }
   }, [fetchedOfficeDetail]);
-  console.log({ formData: form.watch() });
 
   if (isEditing && (!fetchedOfficeDetail || isLoading)) {
     return <Loading />;

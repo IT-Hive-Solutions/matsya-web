@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
-import { readItem, updateItem, deleteItem } from '@directus/sdk';
-import { withMiddleware } from '@/core/lib/api.middleware';
+import { readItem, updateItem } from '@directus/sdk';
+import { NextRequest, NextResponse } from 'next/server';
 
 type Params = {
     params: Promise<{
@@ -12,21 +12,12 @@ type Params = {
 
 async function getHandler(request: NextRequest, { params }: Params) {
     try {
-        const token = request.headers.get('x-directus-token');
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-
-        const directus = getDirectusClient(token);
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
         const { id } = await params
 
-        const animal = await directus.request(
+        const animal = await client.request(
             readItem('animal_info', parseInt(id), { fields: ["*", "owners_id.*", "animal_type.*", "animal_category.*"] })
         );
 
@@ -45,23 +36,15 @@ async function getHandler(request: NextRequest, { params }: Params) {
 
 async function putHandler(request: NextRequest, { params }: Params) {
     try {
-        const token = request.headers.get('x-directus-token');
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-
-        const directus = getDirectusClient(token);
 
         const body = await request.json();
 
         const { id } = await params
 
-        const updatedAnimal = await directus.request(
+        const updatedAnimal = await client.request(
             updateItem('animal_info', parseInt(id), {
                 ...body,
                 age_months: body.age_months,
@@ -91,38 +74,6 @@ async function putHandler(request: NextRequest, { params }: Params) {
 }
 
 
-async function deleteHandler(request: NextRequest, { params }: Params) {
-    try {
-        const token = request.headers.get('x-directus-token');
 
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-
-        const directus = getDirectusClient(token);
-
-        const { id } = await params
-
-        await directus.request(
-            deleteItem('animal_info', parseInt(id))
-        );
-
-        return NextResponse.json({
-            success: true,
-            message: 'Animal deleted successfully'
-        });
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: error.message || 'Failed to delete animal' },
-            { status: 500 }
-        );
-    }
-}
-
-export const GET = withMiddleware(getHandler)
-export const PUT = withMiddleware(putHandler)
-export const DELETE = withMiddleware(deleteHandler)
+export const GET = getHandler
+export const PUT = putHandler

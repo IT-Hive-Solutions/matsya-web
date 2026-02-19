@@ -7,8 +7,11 @@ import { endpoints } from "@/core/contants/endpoints";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
-import { updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  updateApiRouteHandler,
+  updateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { useEscapeKey } from "@/hooks/useEscapePress";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -40,6 +43,7 @@ import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
 import { useDebounceHook } from "@/hooks/useDebounceHook";
 import { exportAnimalData } from "@/core/services/exportAnimalData";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -128,7 +132,7 @@ export default function OwnerAnimalView({
       verification_status: VerificationStatus;
       reason?: string;
     }) =>
-      updateProtectedHandler(
+      updateApiRouteHandler(
         endpoints.animal_info.update_animal_status(payload.id),
         {
           verification_status: payload.verification_status,
@@ -153,8 +157,9 @@ export default function OwnerAnimalView({
   } = useQuery({
     queryKey: ["animals", debouncedSearchValue],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_info, {
+      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
         searchQuery: debouncedSearchValue,
+        fields: "*.*",
       }),
   });
   useEffect(() => {
@@ -228,7 +233,9 @@ export default function OwnerAnimalView({
                   />
                 </div>
                 <Button
-                  onClick={() => exportAnimalData(fetchedAnimalList?.data)}
+                  onClick={() =>
+                    exportAnimalData(fetchedAnimalList?.data ?? [])
+                  }
                   className="hover:cursor-pointer"
                 >
                   Export Excel
@@ -441,7 +448,7 @@ export default function OwnerAnimalView({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-base font-semibold text-slate-900 truncate">
-                                {animal.animal_type.animal_name}
+                                {animal.animal_type?.animal_name ?? ""}
                               </h3>
                               <Badge
                                 variant="secondary"

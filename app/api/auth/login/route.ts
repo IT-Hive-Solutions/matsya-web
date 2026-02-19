@@ -1,6 +1,5 @@
-import { cookieConfig } from "@/core/contants/cookie.config";
-import { directus } from "@/core/lib/directus";
-import { cookies } from "next/headers";
+    import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { setAuthCookies } from "@/core/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -16,48 +15,33 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        const directusRes = await fetch(directusEndpoints.auth.login, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
 
-        const authUser = await directus.login(email, password)
-        console.log({ authUser });
-
-
-        if (!authUser.access_token) {
+        if (!directusRes.ok) {
+            const err = await directusRes.json();
             return NextResponse.json(
-                { error: 'Invalid Credential!' },
-                { status: 401 }
+                { error: err?.errors?.[0]?.message ?? "Login failed" },
+                { status: directusRes.status }
             );
         }
 
-        // Set cookies
-        const cookieStore = await cookies();
+        const { data } = await directusRes.json();
+        const { access_token, refresh_token } = data;
 
-        cookieStore.set('directus_session_token', authUser.access_token, {
-            ...cookieConfig, // Important for security
-            maxAge: 60 * 1440 // 15 minutes (matches your token expiry)
-        });
-
-        if (authUser.refresh_token) {
-            cookieStore.set('directus_refresh_token', authUser.refresh_token, {
-                ...cookieConfig,
-                maxAge: 60 * 60 * 24 * 7 // 7 days
-            });
-        }
-        if (authUser.expires_at) {
-            cookieStore.set('directus_expires_at', authUser.expires_at.toString(), {
-                ...cookieConfig,
-                maxAge: 60 * 60 * 24 * 7 // 7 days
-            });
-        }
-        const response = NextResponse.json(
-            {
-                data: { data: authUser, message: 'Login successful', success: true }
-            },
-            { status: 200 }
-        );
+        const response = NextResponse.json({ success: true }, { status: 200 });
+        const headers = setAuthCookies(response, access_token, refresh_token);
 
         return NextResponse.json({
-            data: { data: authUser, message: 'Login successful', success: true }
-        });
+            data: {
+                data: response.body,
+                message: 'Login successful',
+                success: true
+            }
+        }, { headers });
 
 
     } catch (error: any) {

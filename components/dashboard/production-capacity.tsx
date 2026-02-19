@@ -11,20 +11,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { endpoints } from "@/core/contants/endpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import {
   CreateProductionCapacityDTO,
   CreateProductionCapacitySchema,
 } from "@/core/dtos/production-capacity.dto";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -71,12 +72,14 @@ export default function ProductionCapacityForm({
   const { data: fetchedProductionCapacityDetail, isLoading } = useQuery({
     queryKey: ["production-capacity-single", id],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.production_capacity.byId(id ?? -1)),
+      fetchHandler<IProductionCapacity>(
+        directusEndpoints.production_capacity.byId(id ?? -1),
+      ),
     enabled: !!id && isEditing,
   });
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateProductionCapacityDTO) =>
-      mutateProtectedHandler(endpoints.production_capacity, payload),
+      mutateHandler(directusEndpoints.production_capacity, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],
@@ -90,8 +93,8 @@ export default function ProductionCapacityForm({
   });
   const updateAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateProductionCapacityDTO) =>
-      updateProtectedHandler(
-        endpoints.production_capacity.byId(id ?? -1),
+      updateHandler(
+        directusEndpoints.production_capacity.byId(id ?? -1),
         payload,
       ),
     onSuccess: (res) => {

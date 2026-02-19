@@ -16,10 +16,13 @@ import {
   CreateAnimalCategoryDTO,
   CreateAnimalCategorySchema,
 } from "@/core/dtos/animal-category.dto";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  fetchApiRouteHandler,
+  fetchHandler,
+} from "@/core/services/apiHandler/fetchHandler";
+import {
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +32,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Loading from "../loading";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface AnimalCategoryFormProps {
   onClose: () => void;
@@ -66,7 +71,9 @@ export default function AnimalCategoryForm({
   const { data: fetchedAnimalCategoryDetail, isLoading } = useQuery({
     queryKey: ["animal-type-single", id],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_category.byId(id ?? -1)),
+      fetchHandler<IAnimalCategories>(
+        directusEndpoints.animal_category.byId(id ?? -1),
+      ),
     enabled: !!id && isEditing,
   });
 
@@ -80,7 +87,7 @@ export default function AnimalCategoryForm({
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      mutateProtectedHandler(endpoints.animal_category, payload),
+      mutateHandler(directusEndpoints.animal_category, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],
@@ -95,7 +102,7 @@ export default function AnimalCategoryForm({
 
   const updateAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      updateProtectedHandler(endpoints.animal_category.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.animal_category.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],

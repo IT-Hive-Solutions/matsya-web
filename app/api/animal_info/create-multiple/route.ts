@@ -1,15 +1,17 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
-import { withMiddleware } from "@/core/lib/api.middleware";
-import { directus } from "@/core/lib/directus";
+import { getAccessToken } from "@/core/lib/auth";
+import { getDirectusClient } from "@/core/lib/directus";
 import { createItem, createItems, readItems, updateItem } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
 async function postHandler(request: NextRequest) {
     try {
         const body = await request.json();
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
         if (body.owners_contact) {
-            const owner = await directus.request(
+            const owner = await client.request(
                 readItems('owners_info', {
                     filter: {
                         owners_contact: {
@@ -56,7 +58,7 @@ async function postHandler(request: NextRequest) {
                     longitude: body.longitude,
                     status: "published" as "published"
                 }
-                const newOwner = await directus.request(
+                const newOwner = await client.request(
                     createItem('owners_info', payload)
                 );
                 if (!newOwner) {
@@ -90,7 +92,7 @@ async function postHandler(request: NextRequest) {
                     updatePayload.longitude = body.longitude
                 }
 
-                const updatedOwner = await directus.request(
+                const updatedOwner = await client.request(
                     updateItem('owners_info', parseInt(String(owner[0].id)), updatePayload)
                 );
                 if (!updatedOwner) {
@@ -125,7 +127,7 @@ async function postHandler(request: NextRequest) {
         }
 
 
-        const newAnimals = await directus.request(
+        const newAnimals = await client.request(
             createItems('animal_info', payload)
         );
 
@@ -143,4 +145,4 @@ async function postHandler(request: NextRequest) {
     }
 }
 
-export const POST = withMiddleware(postHandler)
+export const POST = postHandler

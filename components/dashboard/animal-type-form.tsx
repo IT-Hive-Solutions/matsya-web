@@ -16,10 +16,10 @@ import {
   CreateAnimaTypeDTO,
   CreateAnimaTypeSchema,
 } from "@/core/dtos/animal-type.dto";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +29,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Loading from "../loading";
+import { IAnimalType } from "@/core/interfaces/animalType.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface AnimalTypeFormProps {
   onClose: () => void;
@@ -63,7 +65,8 @@ export default function AnimalTypeForm({
   });
   const { data: fetchedAnimalTypesDetail, isLoading } = useQuery({
     queryKey: ["animal-type-single", id],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_types.byId(id ?? -1)),
+    queryFn: () =>
+      fetchHandler<IAnimalType>(directusEndpoints.animal_types.byId(id ?? -1)),
     enabled: !!id && isEditing,
   });
 
@@ -77,7 +80,7 @@ export default function AnimalTypeForm({
 
   const createAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
-      mutateProtectedHandler(endpoints.animal_types, payload),
+      mutateHandler(directusEndpoints.animal_types, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],
@@ -92,7 +95,7 @@ export default function AnimalTypeForm({
 
   const updateAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
-      updateProtectedHandler(endpoints.animal_types.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.animal_types.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],

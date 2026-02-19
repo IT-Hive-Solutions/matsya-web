@@ -16,7 +16,9 @@ import {
   ForgotPasswordDTO,
   ForgotPasswordSchema,
 } from "@/core/dtos/forgot-password.dto";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateApiRouteHandler
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -40,7 +42,7 @@ export default function ResetPassword() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ForgotPasswordDTO) =>
-      mutateHandler(endpoints.auth["forgot-password"], payload),
+      mutateApiRouteHandler(endpoints.auth["forgot-password"], payload),
     onSuccess: (res) => {
       if (res.password_changed) {
         toast.success("Password Changed Successfully!.", {

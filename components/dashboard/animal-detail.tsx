@@ -1,6 +1,6 @@
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimal } from "@/core/interfaces/animal.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -27,6 +27,7 @@ import {
 import { StatusBadge } from "./view-entries";
 import Image from "next/image";
 import { getAssetURL } from "@/core/lib/directus";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   onClose: () => void;
@@ -38,7 +39,10 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
   const { data: fetchedAnimalData } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_info.byId(animalId ?? -1)),
+      fetchHandler<IAnimal>(
+        directusEndpoints.animal_info.byId(animalId ?? -1),
+        { fields: "*.*" },
+      ),
     enabled: !!animalId,
   });
   useEffect(() => {
@@ -53,7 +57,8 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-2xl">
-              {animal?.animal_type.animal_name} - Tag #{animal?.tag_number}
+              {animal?.animal_type?.animal_name ?? ""} - Tag #
+              {animal?.tag_number}
             </CardTitle>
             <CardDescription className="mt-1 flex flex-col gap-2">
               {animal?.animal_category.category_name}
@@ -95,7 +100,9 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Animal Type</p>
-              <p className="font-medium">{animal?.animal_type.animal_name}</p>
+              <p className="font-medium">
+                {animal?.animal_type?.animal_name ?? ""}
+              </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Category</p>
@@ -172,7 +179,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
                 // src={"http://directus-koko8soc8sckg0c4woggkwsk.159.65.150.129.sslip.io/assets/eb9db6bc-f6ef-42a1-8d2b-4a6c7ca6a844"}
                 height={300}
                 width={300}
-                alt={String(animal?.animal_type.animal_name) ?? ""}
+                alt={String(animal?.animal_type?.animal_name) ?? ""}
               />
             </div>
           )}
@@ -212,7 +219,9 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">District ID</p>
-              <p className="font-medium">{animal?.owners_id.district_id}</p>
+              <p className="font-medium">
+                {animal?.owners_id.district_id.district_name}
+              </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Registration Date</p>

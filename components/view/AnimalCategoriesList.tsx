@@ -1,7 +1,7 @@
 "use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,8 +15,9 @@ import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { useRouter } from "next/navigation";
-import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -35,7 +36,9 @@ const AnimalCategoriesLists = ({
   setShowForm,
   setEditing,
 }: Props) => {
-  const [animalCategoriesLists, setAnimalCategoriesLists] = useState([]);
+  const [animalCategoriesLists, setAnimalCategoriesLists] = useState<
+    IAnimalCategories[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -75,11 +78,12 @@ const AnimalCategoriesLists = ({
   ];
   const { data: fetchedAnimalCategoriesList, isLoading } = useQuery({
     queryKey: ["animal-categories"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+    queryFn: () =>
+      fetchHandler<IAnimalCategories[]>(directusEndpoints.animal_category),
   });
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      deleteProtectedHandler(endpoints.animal_category.byId(id)),
+      deleteHandler(directusEndpoints.animal_category.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],

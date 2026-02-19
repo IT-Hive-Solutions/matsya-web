@@ -1,7 +1,7 @@
 
 // Handles GET (all animal_info) and POST (create item)
 import { VerificationStatus } from '@/core/enums/verification-status.enum';
-import { withMiddleware } from '@/core/lib/api.middleware';
+import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
 import { createItem, readItems, updateItem } from '@directus/sdk';
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,17 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // GET - Fetch all animal_info
 async function getHandler(request: NextRequest) {
     try {
-        const token = request.headers.get('x-directus-token');
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-
-        const directus = getDirectusClient(token);
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
         const userDataString = request.headers.get('x-user-data');
         const userData = JSON.parse(userDataString ?? "")
@@ -111,7 +102,7 @@ async function getHandler(request: NextRequest) {
             : filters[0] ?? {};
 
 
-        const animal_info = await directus.request(
+        const animal_info = await client.request(
             readItems('animal_info', {
                 fields: [
                     '*',
@@ -152,18 +143,10 @@ async function getHandler(request: NextRequest) {
 // POST - Create new item
 async function postHandler(request: NextRequest) {
     try {
-        const token = request.headers.get('x-directus-token');
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
 
-        const directus = getDirectusClient(token);
-        
         const body = await request.json();
 
         if (!(body.age_months || body.age_years)) {
@@ -192,7 +175,7 @@ async function postHandler(request: NextRequest) {
         }
 
         if (body.owners_contact) {
-            const owner = await directus.request(
+            const owner = await client.request(
                 readItems('owners_info', {
                     filter: {
                         owners_contact: {
@@ -237,7 +220,7 @@ async function postHandler(request: NextRequest) {
                     municipality: body.municipality,
                     longitude: body.longitude,
                 }
-                const newOwner = await directus.request(
+                const newOwner = await client.request(
                     createItem('owners_info', payload)
                 );
                 if (!newOwner) {
@@ -268,7 +251,7 @@ async function postHandler(request: NextRequest) {
                     updatePayload.longitude = body.longitude
                 }
 
-                const updatedOwner = await directus.request(
+                const updatedOwner = await client.request(
                     updateItem('owners_info', parseInt(String(owner[0].id)), updatePayload)
                 );
                 if (!updatedOwner) {
@@ -284,7 +267,7 @@ async function postHandler(request: NextRequest) {
 
 
 
-        const newAnimal = await directus.request(
+        const newAnimal = await client.request(
             createItem('animal_info', {
                 age_months: body.age_months,
                 age_years: body.age_years,
@@ -314,5 +297,5 @@ async function postHandler(request: NextRequest) {
 }
 
 
-export const GET = withMiddleware(getHandler)
-export const POST = withMiddleware(postHandler)
+export const GET = getHandler
+export const POST = postHandler
