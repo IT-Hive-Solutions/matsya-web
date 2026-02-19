@@ -7,10 +7,14 @@ import { OwnersInfoDirectus } from '@/core/interfaces/ownersInfo.interface';
 import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity.interface';
 import { ProvinceDirectus } from '@/core/interfaces/province.interface';
 import { UsersDirectus } from '@/core/interfaces/user.interface';
-import { authentication, createDirectus, rest, staticToken } from '@directus/sdk';
+import {
+    createDirectus,
+    rest,
+    staticToken
+} from "@directus/sdk";
 import { AppDownloadLinkDirectus } from '../interfaces/appDownloadLink.interface';
+import { DIRECTUS_BASE_URL } from '../contants/directusEndpoints';
 
-const staticTokenValue = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN ?? ""
 
 export type Schema = {
     directus_users: UsersDirectus[];
@@ -25,23 +29,31 @@ export type Schema = {
     office: OfficeDirectus[];
     app_download_link: AppDownloadLinkDirectus[];
 };
-const url = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || ""
-export const directus = createDirectus<Schema>(url).
-    with(rest()).
-    with(authentication("cookie", { credentials: "include" }));
-// with(staticToken(staticTokenValue))
 
+export function getDirectusClient(token: string) {
+  return createDirectus(DIRECTUS_BASE_URL)
+    .with(staticToken(token))  // token already managed by your cookie system
+    .with(rest())
+}
 
-export const getDirectusClient = (token: string) =>
-    createDirectus<Schema>(url)
-        .with(staticToken(token))
-        .with(rest());
+export function createServerClient(token?: string) {
+    const client = createDirectus(DIRECTUS_BASE_URL).with(rest());
+    if (token) {
+        return createDirectus(DIRECTUS_BASE_URL).with(staticToken(token)).with(rest());
+    }
+    return client;
+}
+
+export const directusPublic = createDirectus(DIRECTUS_BASE_URL).with(rest());
+
 
 export function getAssetURL(fileId: string) {
-
-    return `${process.env.NEXT_PUBLIC_DIRECTUS_URL}assets/${fileId}`;
+    return `${process.env.NEXT_PUBLIC_DIRECTUS_BASE_URL}assets/${fileId}`;
 }
 
 export function getDownloadUrl(fileId: string) {
-    return `${process.env.NEXT_PUBLIC_DIRECTUS_URL}assets/${fileId}?download`;
+    return `${process.env.NEXT_PUBLIC_DIRECTUS_BASE_URL}assets/${fileId}?download`;
 }
+
+export { DIRECTUS_BASE_URL };
+

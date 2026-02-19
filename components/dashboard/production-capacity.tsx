@@ -16,10 +16,10 @@ import {
   CreateProductionCapacityDTO,
   CreateProductionCapacitySchema,
 } from "@/core/dtos/production-capacity.dto";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +29,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Loading from "../loading";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface ProductionCapacityFormProps {
   onClose: () => void;
@@ -71,12 +73,14 @@ export default function ProductionCapacityForm({
   const { data: fetchedProductionCapacityDetail, isLoading } = useQuery({
     queryKey: ["production-capacity-single", id],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.production_capacity.byId(id ?? -1)),
+      fetchHandler<IProductionCapacity>(
+        directusEndpoints.production_capacity.byId(id ?? -1),
+      ),
     enabled: !!id && isEditing,
   });
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateProductionCapacityDTO) =>
-      mutateProtectedHandler(endpoints.production_capacity, payload),
+      mutateHandler(endpoints.production_capacity, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],
@@ -90,10 +94,7 @@ export default function ProductionCapacityForm({
   });
   const updateAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateProductionCapacityDTO) =>
-      updateProtectedHandler(
-        endpoints.production_capacity.byId(id ?? -1),
-        payload,
-      ),
+      updateHandler(endpoints.production_capacity.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],

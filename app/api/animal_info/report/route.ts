@@ -1,12 +1,16 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
-import { AuthenticatedRequest, withMiddleware } from "@/core/lib/api.middleware";
+import { withMiddleware } from "@/core/lib/api.middleware";
+import { getAccessToken } from "@/core/lib/auth";
+import { getDirectusClient } from "@/core/lib/directus";
 import { readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-async function getHandler(request: AuthenticatedRequest) {
+async function getHandler(request: NextRequest) {
     try {
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
 
-        const animals = await request.directus.request(
+        const animals = await client.request(
             readItems('animal_info', {
                 fields: ['*'],
                 sort: ['-date_created'],
@@ -31,4 +35,4 @@ async function getHandler(request: AuthenticatedRequest) {
     }
 }
 
-export const GET = withMiddleware(getHandler)
+export const GET = getHandler   

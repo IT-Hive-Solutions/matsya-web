@@ -1,7 +1,7 @@
 "use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IOffice } from "@/core/interfaces/office.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -15,7 +15,7 @@ import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { deleteProtectedHandler } from "@/core/services/apiHandler/deleteHandler";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 
 type Props = {
@@ -47,7 +47,7 @@ export const officeColumns: ColumnDef<IOffice>[] = [
 ];
 
 const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
-  const [officeLists, setOfficeLists] = useState([]);
+  const [officeLists, setOfficeLists] = useState<IOffice[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -87,8 +87,7 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   ];
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) =>
-      deleteProtectedHandler(endpoints.office.byId(id)),
+    mutationFn: (id: number) => deleteHandler(endpoints.office.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],
@@ -98,7 +97,7 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
   const { data: fetchedOfficeList, isLoading } = useQuery({
     queryKey: ["office"],
-    queryFn: () => fetchProtectedHandler(endpoints.office),
+    queryFn: () => fetchHandler<IOffice[]>(endpoints.office),
   });
   useEffect(() => {
     if (fetchedOfficeList?.data) {

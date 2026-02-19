@@ -27,6 +27,7 @@ export interface IOffice {
     date_updated: string | null;
     office_name: string;
     office_address: string;
+    office_contact: string;
     office_email: string;
     province_id: IProvince;
     district_id: IDistrict;

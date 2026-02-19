@@ -26,10 +26,10 @@ import {
 } from "@/core/dtos/animal.dto";
 import { monthOptions } from "@/core/enums/month.enum";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
-  mutateProtectedHandler,
-  updateProtectedHandler,
+  mutateHandler,
+  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ import { Checkbox } from "../ui/checkbox";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { formatDateWithHyphen } from "@/core/services/dateTime/formatDate";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface AnimalFormProps {
   onClose: () => void;
@@ -70,20 +71,24 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   const { data: fetchedAnimalData } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_info.byId(animalId ?? -1)),
+      fetchHandler(directusEndpoints.animal_info.byId(animalId ?? -1)),
     enabled: !!animalId,
   });
   const { data: productionCapacityFetched } = useQuery({
     queryKey: ["production-types"],
-    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+    queryFn: () =>
+      fetchHandler<IProductionCapacity[]>(
+        directusEndpoints.production_capacity,
+      ),
   });
   const { data: animalTypesFetched } = useQuery({
     queryKey: ["animal-type"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
+    queryFn: () => fetchHandler<IAnimalType[]>(directusEndpoints.animal_types),
   });
   const { data: animalCategoryFetched } = useQuery({
     queryKey: ["animal-category"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+    queryFn: () =>
+      fetchHandler<IAnimalCategories[]>(directusEndpoints.animal_category),
   });
 
   useEffect(() => {
@@ -113,7 +118,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         (type: IProductionCapacity) => {
           return {
             label: type.capacity_name,
-            value: type.id,
+            value: String(type.id),
           };
         },
       );
@@ -125,7 +130,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {
         return {
           label: type.animal_name,
-          value: type.id,
+          value: String(type.id),
         };
       });
       setAnimalTypeOptions(payload);
@@ -133,12 +138,14 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   }, [animalTypesFetched]);
   useEffect(() => {
     if (animalCategoryFetched?.data) {
-      const payload = animalCategoryFetched?.data?.map((type: IAnimalCategories) => {
-        return {
-          label: type.category_name,
-          value: type.id,
-        };
-      });
+      const payload = animalCategoryFetched?.data?.map(
+        (type: IAnimalCategories) => {
+          return {
+            label: type.category_name,
+            value: String(type.id),
+          };
+        },
+      );
       setAnimalCategoryOptions(payload);
     }
   }, [animalCategoryFetched]);
@@ -162,7 +169,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
-      mutateProtectedHandler(endpoints.animal_info, payload),
+      mutateHandler(endpoints.animal_info, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],
@@ -171,16 +178,12 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       onClose();
     },
     onError: (err) => {
-
       toast.error("Error creating animal!");
     },
   });
   const updateAnimalMutation = useMutation({
     mutationFn: (payload: UpdateAnimalDTO) =>
-      updateProtectedHandler(
-        endpoints.animal_info.byId(animalId ?? -1),
-        payload,
-      ),
+      updateHandler(endpoints.animal_info.byId(animalId ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],
@@ -189,7 +192,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       onClose();
     },
     onError: (err) => {
-
       toast.error("Error updating animal!");
     },
   });

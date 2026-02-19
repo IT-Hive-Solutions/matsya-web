@@ -18,8 +18,10 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { endpoints } from "@/core/contants/endpoints";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { getAssetURL } from "@/core/lib/directus";
+import { AppDownloadLinkDirectus } from "@/core/interfaces/appDownloadLink.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Roles =
   | "admin"
@@ -134,7 +136,10 @@ export default function NavigationDrawer({
 
   const { data: fetchedDownloadLinkData } = useQuery({
     queryKey: ["download-link"],
-    queryFn: () => fetchProtectedHandler(endpoints.app_download_link),
+    queryFn: () =>
+      fetchHandler<AppDownloadLinkDirectus>(
+        directusEndpoints.app_download_link,
+      ),
   });
 
   return (

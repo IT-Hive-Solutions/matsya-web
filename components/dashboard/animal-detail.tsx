@@ -1,6 +1,6 @@
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimal } from "@/core/interfaces/animal.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -27,6 +27,7 @@ import {
 import { StatusBadge } from "./view-entries";
 import Image from "next/image";
 import { getAssetURL } from "@/core/lib/directus";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   onClose: () => void;
@@ -38,7 +39,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
   const { data: fetchedAnimalData } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_info.byId(animalId ?? -1)),
+      fetchHandler<IAnimal>(directusEndpoints.animal_info.byId(animalId ?? -1)),
     enabled: !!animalId,
   });
   useEffect(() => {
@@ -212,7 +213,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">District ID</p>
-              <p className="font-medium">{animal?.owners_id.district_id}</p>
+              <p className="font-medium">{animal?.owners_id.district_id.district_name}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Registration Date</p>

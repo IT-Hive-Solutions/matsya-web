@@ -15,9 +15,12 @@ import {
 import { AlertCircle, X } from "lucide-react";
 import { CreateUserDTO, CreateUserSchema } from "@/core/dtos/user.dto";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { mutateProtectedHandler, updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateHandler,
+  updateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { endpoints } from "@/core/contants/endpoints";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -29,9 +32,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { userTypeOptions } from "@/core/interfaces/user.interface";
+import {
+  IUser,
+  UserType,
+  userTypeOptions,
+} from "@/core/interfaces/user.interface";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "../loading";
+import { IOffice } from "@/core/interfaces/office.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface UserFormProps {
   onClose: () => void;
@@ -44,7 +53,9 @@ export default function UserForm({
   isEditing = false,
   setEditing,
 }: UserFormProps) {
-  const [officeData, setOfficeData] = useState([]);
+  const [officeData, setOfficeData] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -70,7 +81,7 @@ export default function UserForm({
   });
   const { data: fetchedUserDetail, isLoading } = useQuery({
     queryKey: ["user-single", id],
-    queryFn: () => fetchProtectedHandler(endpoints.users.byId(id ?? "")),
+    queryFn: () => fetchHandler<IUser>(directusEndpoints.users.byId(id ?? "")),
     enabled: !!id && isEditing,
   });
 
@@ -84,14 +95,14 @@ export default function UserForm({
 
   const { data: officeFetched } = useQuery({
     queryKey: ["office"],
-    queryFn: () => fetchProtectedHandler(endpoints.office),
+    queryFn: () => fetchHandler<IOffice[]>(directusEndpoints.office),
   });
 
   useEffect(() => {
     if (officeFetched?.data) {
-      const data = officeFetched?.data?.map((p: any) => ({
+      const data = officeFetched?.data?.map((p) => ({
         label: p.office_name,
-        value: p.id,
+        value: String(p.id),
       }));
       setOfficeData(data);
     }
@@ -99,7 +110,7 @@ export default function UserForm({
 
   const createUserMutation = useMutation({
     mutationFn: (payload: CreateUserDTO) =>
-      mutateProtectedHandler(endpoints.users, payload),
+      mutateHandler(endpoints.users, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -113,7 +124,7 @@ export default function UserForm({
   });
   const updateUserMutation = useMutation({
     mutationFn: (payload: CreateUserDTO) =>
-      updateProtectedHandler(endpoints.users.byId(id ?? ""), payload),
+      updateHandler(endpoints.users.byId(id ?? ""), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -142,7 +153,7 @@ export default function UserForm({
         full_name: `${user.first_name ?? ""} ${user.last_name ?? ""}`,
         office_id: String(user.office_id?.id),
         phone_number: user.phone_number,
-        user_type: user.role?.name ?? "",
+        user_type: user.role?.name as UserType,
       };
       console.log({ payload });
 

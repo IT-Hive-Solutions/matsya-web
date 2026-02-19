@@ -7,8 +7,8 @@ import { endpoints } from "@/core/contants/endpoints";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
-import { updateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import { updateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { useEscapeKey } from "@/hooks/useEscapePress";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -40,6 +40,7 @@ import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
 import { useDebounceHook } from "@/hooks/useDebounceHook";
 import { exportAnimalData } from "@/core/services/exportAnimalData";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -128,13 +129,10 @@ export default function OwnerAnimalView({
       verification_status: VerificationStatus;
       reason?: string;
     }) =>
-      updateProtectedHandler(
-        endpoints.animal_info.update_animal_status(payload.id),
-        {
-          verification_status: payload.verification_status,
-          rejection_reason: payload.reason,
-        },
-      ),
+      updateHandler(endpoints.animal_info.update_animal_status(payload.id), {
+        verification_status: payload.verification_status,
+        rejection_reason: payload.reason,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],
@@ -153,7 +151,7 @@ export default function OwnerAnimalView({
   } = useQuery({
     queryKey: ["animals", debouncedSearchValue],
     queryFn: () =>
-      fetchProtectedHandler(endpoints.animal_info, {
+      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
         searchQuery: debouncedSearchValue,
       }),
   });
@@ -228,7 +226,9 @@ export default function OwnerAnimalView({
                   />
                 </div>
                 <Button
-                  onClick={() => exportAnimalData(fetchedAnimalList?.data)}
+                  onClick={() =>
+                    exportAnimalData(fetchedAnimalList?.data ?? [])
+                  }
                   className="hover:cursor-pointer"
                 >
                   Export Excel

@@ -30,14 +30,15 @@ import { IUser } from "@/core/interfaces/user.interface";
 import { CreateAnimalSchema } from "@/core/dtos/animal.dto";
 import { monthOptions } from "@/core/enums/month.enum";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchProtectedHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
-import { mutateProtectedHandler } from "@/core/services/apiHandler/mutateHandler";
+import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface TaggingFormProps {
   user: IUser;
@@ -91,15 +92,19 @@ export default function TaggingForm({ user }: TaggingFormProps) {
 
   const { data: productionCapacityFetched } = useQuery({
     queryKey: ["production-types"],
-    queryFn: () => fetchProtectedHandler(endpoints.production_capacity),
+    queryFn: () =>
+      fetchHandler<IProductionCapacity[]>(
+        directusEndpoints.production_capacity,
+      ),
   });
   const { data: animalTypesFetched } = useQuery({
     queryKey: ["animal-type"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_types),
+    queryFn: () => fetchHandler<IAnimalType[]>(directusEndpoints.animal_types),
   });
   const { data: animalCategoryFetched } = useQuery({
     queryKey: ["animal-category"],
-    queryFn: () => fetchProtectedHandler(endpoints.animal_category),
+    queryFn: () =>
+      fetchHandler<IAnimalCategories[]>(directusEndpoints.animal_category),
   });
 
   useEffect(() => {
@@ -108,7 +113,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
         (type: IProductionCapacity) => {
           return {
             label: type.capacity_name,
-            value: type.id,
+            value: String(type.id),
           };
         },
       );
@@ -121,7 +126,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       const payload = animalTypesFetched?.data?.map((type: IAnimalType) => {
         return {
           label: type.animal_name,
-          value: type.id,
+          value: String(type.id),
         };
       });
       setAnimalTypeOptions(payload);
@@ -133,7 +138,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
         (type: IAnimalCategories) => {
           return {
             label: type.category_name,
-            value: type.id,
+            value: String(type.id),
           };
         },
       );
@@ -270,7 +275,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: FormValues) =>
-      mutateProtectedHandler(endpoints.animal_info["create-multiple"], payload),
+      mutateHandler(endpoints.animal_info["create-multiple"], payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],

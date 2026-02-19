@@ -1,128 +1,128 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getDirectusClient } from '@/core/lib/directus';
-import { readItem, updateItem, deleteItem } from '@directus/sdk';
-import { withMiddleware } from '@/core/lib/api.middleware';
+// import { NextRequest, NextResponse } from 'next/server';
+// import { getDirectusClient } from '@/core/lib/directus';
+// import { readItem, updateItem, deleteItem } from '@directus/sdk';
+// import { withMiddleware } from '@/core/lib/api.middleware';
 
-type Params = {
-    params: Promise<{
-        id: string;
-    }>;
-};
-
-
-async function getHandler(request: NextRequest, { params }: Params) {
-    try {
-        const token = request.headers.get('x-directus-token');
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
+// type Params = {
+//     params: Promise<{
+//         id: string;
+//     }>;
+// };
 
 
-        const directus = getDirectusClient(token);
+// async function getHandler(request: NextRequest, { params }: Params) {
+//     try {
+//         const token = request.headers.get('x-directus-token');
 
-        const { id } = await params
-
-        const animal = await directus.request(
-            readItem('animal_info', parseInt(id), { fields: ["*", "owners_id.*", "animal_type.*", "animal_category.*"] })
-        );
-
-        return NextResponse.json({
-            success: true,
-            data: animal
-        });
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: 'Animal not found' },
-            { status: 404 }
-        );
-    }
-}
+//         if (!token) {
+//             return NextResponse.json(
+//                 { success: false, error: 'Unauthorized' },
+//                 { status: 401 }
+//             );
+//         }
 
 
-async function putHandler(request: NextRequest, { params }: Params) {
-    try {
-        const token = request.headers.get('x-directus-token');
+//         const directus = getDirectusClient(token);
 
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
+//         const { id } = await params
 
+//         const animal = await directus.request(
+//             readItem('animal_info', parseInt(id), { fields: ["*", "owners_id.*", "animal_type.*", "animal_category.*"] })
+//         );
 
-        const directus = getDirectusClient(token);
-
-        const body = await request.json();
-
-        const { id } = await params
-
-        const updatedAnimal = await directus.request(
-            updateItem('animal_info', parseInt(id), {
-                ...body,
-                age_months: body.age_months,
-                age_years: body.age_years,
-                animal_category: body.animal_category,
-                animal_type: body.animal_type,
-                is_vaccination_applied: body.is_vaccination_applied,
-                latitude: body.latitude,
-                longitude: body.longitude,
-                owners_id: body.owners_id,
-                production_capacity: body.production_capacity,
-                num_of_animals: body.num_of_animals,
-                verification_status: body.verification_status,
-            })
-        );
-
-        return NextResponse.json({
-            success: true,
-            data: updatedAnimal
-        });
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: error.message || 'Failed to update animal' },
-            { status: 500 }
-        );
-    }
-}
+//         return NextResponse.json({
+//             success: true,
+//             data: animal
+//         });
+//     } catch (error: any) {
+//         return NextResponse.json(
+//             { success: false, error: 'Animal not found' },
+//             { status: 404 }
+//         );
+//     }
+// }
 
 
-async function deleteHandler(request: NextRequest, { params }: Params) {
-    try {
-        const token = request.headers.get('x-directus-token');
+// async function putHandler(request: NextRequest, { params }: Params) {
+//     try {
+//         const token = request.headers.get('x-directus-token');
 
-        if (!token) {
-            return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
+//         if (!token) {
+//             return NextResponse.json(
+//                 { success: false, error: 'Unauthorized' },
+//                 { status: 401 }
+//             );
+//         }
 
 
-        const directus = getDirectusClient(token);
+//         const directus = getDirectusClient(token);
 
-        const { id } = await params
+//         const body = await request.json();
 
-        await directus.request(
-            deleteItem('animal_info', parseInt(id))
-        );
+//         const { id } = await params
 
-        return NextResponse.json({
-            success: true,
-            message: 'Animal deleted successfully'
-        });
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: error.message || 'Failed to delete animal' },
-            { status: 500 }
-        );
-    }
-}
+//         const updatedAnimal = await directus.request(
+//             updateItem('animal_info', parseInt(id), {
+//                 ...body,
+//                 age_months: body.age_months,
+//                 age_years: body.age_years,
+//                 animal_category: body.animal_category,
+//                 animal_type: body.animal_type,
+//                 is_vaccination_applied: body.is_vaccination_applied,
+//                 latitude: body.latitude,
+//                 longitude: body.longitude,
+//                 owners_id: body.owners_id,
+//                 production_capacity: body.production_capacity,
+//                 num_of_animals: body.num_of_animals,
+//                 verification_status: body.verification_status,
+//             })
+//         );
 
-export const GET = withMiddleware(getHandler)
-export const PUT = withMiddleware(putHandler)
-export const DELETE = withMiddleware(deleteHandler)
+//         return NextResponse.json({
+//             success: true,
+//             data: updatedAnimal
+//         });
+//     } catch (error: any) {
+//         return NextResponse.json(
+//             { success: false, error: error.message || 'Failed to update animal' },
+//             { status: 500 }
+//         );
+//     }
+// }
+
+
+// async function deleteHandler(request: NextRequest, { params }: Params) {
+//     try {
+//         const token = request.headers.get('x-directus-token');
+
+//         if (!token) {
+//             return NextResponse.json(
+//                 { success: false, error: 'Unauthorized' },
+//                 { status: 401 }
+//             );
+//         }
+
+
+//         const directus = getDirectusClient(token);
+
+//         const { id } = await params
+
+//         await directus.request(
+//             deleteItem('animal_info', parseInt(id))
+//         );
+
+//         return NextResponse.json({
+//             success: true,
+//             message: 'Animal deleted successfully'
+//         });
+//     } catch (error: any) {
+//         return NextResponse.json(
+//             { success: false, error: error.message || 'Failed to delete animal' },
+//             { status: 500 }
+//         );
+//     }
+// }
+
+// export const GET = withMiddleware(getHandler)
+// export const PUT = withMiddleware(putHandler)
+// export const DELETE = withMiddleware(deleteHandler)
