@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import DashboardHeader from "./dashboard-header";
-import NavigationDrawer from "./navigation-drawer";
-import DashboardContent from "./dashboard-content";
-import DashboardCharts from "./dashboard-charts";
-import ManagementPage from "./management-pages";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
+import {
+  fetchHandler
+} from "@/core/services/apiHandler/fetchHandler";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import Loading from "../loading";
+import AnalyticsDashboard from "../view/DashboardView";
+import DashboardCharts from "./dashboard-charts";
+import DashboardContent from "./dashboard-content";
+import DashboardHeader from "./dashboard-header";
+import ManagementPage from "./management-pages";
+import NavigationDrawer from "./navigation-drawer";
 
 interface DashboardProps {
   user: IUser;
@@ -15,14 +23,18 @@ interface DashboardProps {
 export default function Dashboard({ user }: DashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
+  const { data: fetchedAnimalList, isLoading } = useQuery({
+    queryKey: ["animals"],
+    queryFn: () =>
+      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, { fields: "*.*" }),
+  });
+
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
         return (
-          <DashboardContent
-            user={user}
-            activeTab="overview"
-            setActiveTab={setActiveTab}
+          <AnalyticsDashboard
+            animals={(fetchedAnimalList?.data as IAnimal[]) ?? []}
           />
         );
       case "new-entry":
@@ -65,6 +77,10 @@ export default function Dashboard({ user }: DashboardProps) {
         );
     }
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

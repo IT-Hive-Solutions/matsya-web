@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 export default async function Home() {
   const { user } = await getUserData();
 
-  console.log({ fetchedUser: user });
-
   if (user.needs_password_change) {
     redirect(`/auth/reset-password?email=${user.email}`);
   }
