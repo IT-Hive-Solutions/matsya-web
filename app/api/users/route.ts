@@ -70,7 +70,6 @@ async function postHandler(request: NextRequest) {
         }
 
         const newPassword = generateSecurePassword(8)
-        console.log({ newPassword }); //8w!6Kszv
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
@@ -109,7 +108,6 @@ async function postHandler(request: NextRequest) {
             subject: 'Your New Account Details',
             to: body.email,
         })
-        console.log({ mailInfo });
 
 
         return NextResponse.json(

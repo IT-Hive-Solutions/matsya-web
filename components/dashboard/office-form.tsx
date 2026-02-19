@@ -182,12 +182,10 @@ export default function OfficeForm({
         province_id: office?.district_id?.province_id?.id,
         ward_number: undefined,
       };
-      console.log({ payload });
 
       form.reset(payload);
     }
   }, [fetchedOfficeDetail]);
-  console.log({ formData: form.watch() });
 
   if (isEditing && (!fetchedOfficeDetail || isLoading)) {
     return <Loading />;

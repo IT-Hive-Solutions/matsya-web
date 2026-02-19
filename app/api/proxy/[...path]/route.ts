@@ -7,13 +7,8 @@ async function proxyRequest(
     path: string[],
     accessToken: string
 ): Promise<Response> {
-    console.log(
-        { path }
-    );
-
     const directusPath = path.join("/");
     const targetUrl = new URL(`${DIRECTUS_BASE_URL}${directusPath}`);
-    console.log({ targetUrl });
 
     // Forward query params
     req.nextUrl.searchParams.forEach((value, key) => {

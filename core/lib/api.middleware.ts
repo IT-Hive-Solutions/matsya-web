@@ -20,10 +20,7 @@ export function withMiddleware(handler: RouteHandler) {
         try {
             const cookieHandler = await cookies()
             const token = cookieHandler.get("directus_session_token")?.value;
-            console.log({ token });
-            console.log("All cookies:", cookieHandler.getAll().map(c => c.name));
 
-            console.log({ fullTokenValue: cookieHandler.get("directus_session_token") });
 
 
             if (!token) {

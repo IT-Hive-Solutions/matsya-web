@@ -151,7 +151,6 @@ export default function UserForm({
   useEffect(() => {
     if (fetchedUserDetail?.data && officeData) {
       const user = fetchedUserDetail?.data;
-      console.log({ user });
 
       const payload = {
         email: user.email,
@@ -160,12 +159,10 @@ export default function UserForm({
         phone_number: user.phone_number,
         user_type: user.role?.name as UserType,
       };
-      console.log({ payload });
 
       form.reset(payload);
     }
   }, [fetchedUserDetail, officeData]);
-  console.log({ userValues: form.watch() });
 
   if (isEditing && (!fetchedUserDetail || isLoading)) {
     return <Loading />;
