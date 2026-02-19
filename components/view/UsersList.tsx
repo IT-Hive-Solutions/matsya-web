@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { useRouter } from "next/navigation";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -133,7 +134,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     },
   ];
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteHandler(endpoints.users.byId(id)),
+    mutationFn: (id: string) => deleteHandler(directusEndpoints.users.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -164,7 +165,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
   const { data: fetchedUserList, isLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: () => fetchHandler<IUser[]>(endpoints.users),
+    queryFn: () => fetchHandler<IUser[]>(directusEndpoints.users),
   });
 
   useEffect(() => {

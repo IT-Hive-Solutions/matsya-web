@@ -19,10 +19,10 @@ export async function POST(_req: NextRequest) {
 
     const response = NextResponse.json({ success: true }, { status: 200 });
     const headers = clearAuthCookies(new Headers(response.headers));
-
-    return new NextResponse(response.body, { status: 200, headers });
+    headers.set("Location", "/");
+    return new NextResponse(null, { status: 302, headers });
   } catch (error) {
     console.error("[Logout Error]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_APP_URL!));
   }
 }

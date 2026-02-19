@@ -136,7 +136,7 @@ export default function OfficeForm({
 
   const createOfficeMutation = useMutation({
     mutationFn: (payload: CreateOfficeDTO) =>
-      mutateHandler(endpoints.office, payload),
+      mutateHandler(directusEndpoints.office, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],
@@ -150,7 +150,7 @@ export default function OfficeForm({
   });
   const updateOfficeMutation = useMutation({
     mutationFn: (payload: CreateOfficeDTO) =>
-      updateHandler(endpoints.office.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.office.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],

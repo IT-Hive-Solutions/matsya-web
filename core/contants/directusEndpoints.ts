@@ -11,48 +11,47 @@ export const directusEndpoints = {
         "forgot-password": `${DIRECTUS_BASE_URL}/auth/forgot-password`
     },
     users: Object.assign(
-        `${DIRECTUS_BASE_URL}/directus_users`,
+        `users`,
         {
-            byId: (id: string) => `${DIRECTUS_BASE_URL}/directus_users/${id}`,
+            byId: (id: string) => `users/${id}`,
             me: `users/me`,
         }
     ),
     province: Object.assign(
-        `province`,
-        { byId: (id: number) => `province/${id}`, }
+        `items/province`,
+        { byId: (id: number) => `items/province/${id}`, }
     ),
     district: Object.assign(
-        `district`,
-        { byId: (id: number) => `district/${id}`, }
+        `items/district`,
+        { byId: (id: number) => `items/district/${id}`, }
     ),
     animal_category: Object.assign(
-        `animal_category`,
-        { byId: (id: number) => `animal_category/${id}`, }
+        `items/animal_category`,
+        { byId: (id: number) => `items/animal_category/${id}`, }
     ),
     animal_types: Object.assign(
-        `animal_types`,
-        { byId: (id: number) => `animal_types/${id}`, }
+        `items/animal_types`,
+        { byId: (id: number) => `items/animal_types/${id}`, }
     ),
     animal_info: Object.assign(
-        `animal_info`,
+        `items/animal_info`,
         {
-            byId: (id: number) => `animal_info/${id}`,
-            "create-multiple": `animal_info/create-multiple`,
-            "update_animal_status": (id: number) => `animal_info/${id}/update_animal_status`,
+            byId: (id: number) => `items/animal_info/${id}`,
+            "create-multiple": `items/animal_info/create-multiple`,
         }
     ),
     office: Object.assign(
-        `office`,
-        { byId: (id: number) => `office/${id}`, }
+        `items/office`,
+        { byId: (id: number) => `items/office/${id}`, }
     ),
     owner_info: Object.assign(
-        `owner_info`,
-        { byId: (id: number) => `owner_info/${id}`, }
+        `items/owner_info`,
+        { byId: (id: number) => `items/owner_info/${id}`, }
     ),
     production_capacity: Object.assign(
-        `production_capacity`,
-        { byId: (id: number) => `production_capacity/${id}`, }
+        `items/production_capacity`,
+        { byId: (id: number) => `items/production_capacity/${id}`, }
     ),
-    app_download_link: `app_download_link`,
+    app_download_link: `items/app_download_link`,
 
 }

@@ -275,7 +275,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: FormValues) =>
-      mutateHandler(endpoints.animal_info["create-multiple"], payload),
+      mutateHandler(directusEndpoints.animal_info["create-multiple"], payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],

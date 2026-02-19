@@ -80,7 +80,7 @@ export default function AnimalTypeForm({
 
   const createAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
-      mutateHandler(endpoints.animal_types, payload),
+      mutateHandler(directusEndpoints.animal_types, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],
@@ -95,7 +95,7 @@ export default function AnimalTypeForm({
 
   const updateAnimalTypeMutation = useMutation({
     mutationFn: (payload: CreateAnimaTypeDTO) =>
-      updateHandler(endpoints.animal_types.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.animal_types.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],

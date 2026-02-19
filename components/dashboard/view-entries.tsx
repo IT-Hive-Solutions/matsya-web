@@ -8,7 +8,10 @@ import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { updateHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  updateApiRouteHandler,
+  updateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { useEscapeKey } from "@/hooks/useEscapePress";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -129,10 +132,13 @@ export default function OwnerAnimalView({
       verification_status: VerificationStatus;
       reason?: string;
     }) =>
-      updateHandler(endpoints.animal_info.update_animal_status(payload.id), {
-        verification_status: payload.verification_status,
-        rejection_reason: payload.reason,
-      }),
+      updateApiRouteHandler(
+        endpoints.animal_info.update_animal_status(payload.id),
+        {
+          verification_status: payload.verification_status,
+          rejection_reason: payload.reason,
+        },
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],

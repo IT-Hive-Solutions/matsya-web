@@ -28,7 +28,7 @@ export const updateHandler = async <T = unknown>(
     url: string,
     payload: T
 ): Promise<unknown> => {
-    const res = await authClient.put(url, payload);
+    const res = await authClient.patch(url, payload);
 
     if (!res.ok) {
         throw new Error(`Request failed: ${res.status} ${res.statusText}`);

@@ -5,6 +5,7 @@ export interface SearchFilter {
     searchQuery?: string;
     fromDate?: string;
     toDate?: string;
+    fields?: string
 }
 
 export interface FetchResult<T = any> {
@@ -31,6 +32,9 @@ export const fetchHandler = async <T = any>(
     }
     if (filter?.toDate) {
         params.set("filter[date_created][_lte]", filter.toDate);
+    }
+    if (filter?.fields) {
+        params.set("fields", String(filter.fields))
     }
 
     const queryString = params.toString();

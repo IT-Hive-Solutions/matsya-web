@@ -19,6 +19,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -96,7 +97,7 @@ const AnimalLists = ({ currentConfig, setShowForm }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
-    queryFn: () => fetchHandler<IAnimal[]>(endpoints.animal_info),
+    queryFn: () => fetchHandler<IAnimal[]>(directusEndpoints.animal_info),
   });
   useEffect(() => {
     if (fetchedAnimalList?.data) {

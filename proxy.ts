@@ -20,16 +20,16 @@ export async function proxy(req: NextRequest) {
     if (refreshToken) {
         // Let the client handle refresh; redirect to login with returnUrl
         const url = req.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set("returnUrl", pathname);
+        url.pathname = "/auth/login";
+        // url.searchParams.set("returnUrl", pathname);
         return NextResponse.redirect(url);
     }
 
     const url = req.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/auth/login";
     return NextResponse.redirect(url);
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/profile/:path*", "/admin/:path*"],
+    matcher: ["/dashboard/:path*", "/profile/:path*", "/admin/:path*",],
 };

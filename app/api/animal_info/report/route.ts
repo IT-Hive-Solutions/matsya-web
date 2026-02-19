@@ -1,5 +1,4 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
-import { withMiddleware } from "@/core/lib/api.middleware";
 import { getAccessToken } from "@/core/lib/auth";
 import { getDirectusClient } from "@/core/lib/directus";
 import { readItems } from "@directus/sdk";

@@ -28,7 +28,9 @@ import { monthOptions } from "@/core/enums/month.enum";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
+  mutateApiRouteHandler,
   mutateHandler,
+  updateApiRouteHandler,
   updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,7 +171,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
-      mutateHandler(endpoints.animal_info, payload),
+      mutateApiRouteHandler(endpoints.animal_info, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],
@@ -183,7 +185,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   });
   const updateAnimalMutation = useMutation({
     mutationFn: (payload: UpdateAnimalDTO) =>
-      updateHandler(endpoints.animal_info.byId(animalId ?? -1), payload),
+      updateApiRouteHandler(
+        endpoints.animal_info.byId(animalId ?? -1),
+        payload,
+      ),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],

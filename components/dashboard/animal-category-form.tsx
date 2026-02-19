@@ -87,7 +87,7 @@ export default function AnimalCategoryForm({
 
   const createAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      mutateHandler(endpoints.animal_category, payload),
+      mutateHandler(directusEndpoints.animal_category, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],
@@ -102,7 +102,7 @@ export default function AnimalCategoryForm({
 
   const updateAnimalCategoryMutation = useMutation({
     mutationFn: (payload: CreateAnimalCategoryDTO) =>
-      updateHandler(endpoints.animal_category.byId(id ?? -1), payload),
+      updateHandler(directusEndpoints.animal_category.byId(id ?? -1), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],

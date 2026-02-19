@@ -32,16 +32,16 @@ export const authClient = {
             credentials: "same-origin",
         }),
 
-    get: (path: string) => apiFetch(path),
+    get: (path: string, options?: RequestInit) => apiFetch(path, options),
     post: (path: string, body: unknown) =>
         apiFetch(path, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
         }),
-    put: (path: string, body: unknown) =>
+    patch: (path: string, body: unknown) =>
         apiFetch(path, {
-            method: "PUT",
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
         }),

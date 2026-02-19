@@ -83,7 +83,7 @@ const AnimalCategoriesLists = ({
   });
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      deleteHandler(endpoints.animal_category.byId(id)),
+      deleteHandler(directusEndpoints.animal_category.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-categories"],

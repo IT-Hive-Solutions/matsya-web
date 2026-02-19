@@ -17,6 +17,7 @@ import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { useRouter } from "next/navigation";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -77,11 +78,11 @@ const AnimalTypesLists = ({
 
   const { data: fetchedAnimalTypesList, isLoading } = useQuery({
     queryKey: ["animal-type"],
-    queryFn: () => fetchHandler<IAnimalType[]>(endpoints.animal_types),
+    queryFn: () => fetchHandler<IAnimalType[]>(directusEndpoints.animal_types),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteHandler(endpoints.animal_types.byId(id)),
+    mutationFn: (id: number) => deleteHandler(directusEndpoints.animal_types.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],

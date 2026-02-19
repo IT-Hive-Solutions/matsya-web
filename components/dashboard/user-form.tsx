@@ -16,7 +16,9 @@ import { AlertCircle, X } from "lucide-react";
 import { CreateUserDTO, CreateUserSchema } from "@/core/dtos/user.dto";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  mutateApiRouteHandler,
   mutateHandler,
+  updateApiRouteHandler,
   updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
 import { endpoints } from "@/core/contants/endpoints";
@@ -81,7 +83,10 @@ export default function UserForm({
   });
   const { data: fetchedUserDetail, isLoading } = useQuery({
     queryKey: ["user-single", id],
-    queryFn: () => fetchHandler<IUser>(directusEndpoints.users.byId(id ?? "")),
+    queryFn: () =>
+      fetchHandler<IUser>(directusEndpoints.users.byId(id ?? ""), {
+        fields: "*.*",
+      }),
     enabled: !!id && isEditing,
   });
 
@@ -110,7 +115,7 @@ export default function UserForm({
 
   const createUserMutation = useMutation({
     mutationFn: (payload: CreateUserDTO) =>
-      mutateHandler(endpoints.users, payload),
+      mutateApiRouteHandler(endpoints.users, payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
@@ -124,7 +129,7 @@ export default function UserForm({
   });
   const updateUserMutation = useMutation({
     mutationFn: (payload: CreateUserDTO) =>
-      updateHandler(endpoints.users.byId(id ?? ""), payload),
+      updateApiRouteHandler(endpoints.users.byId(id ?? ""), payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],

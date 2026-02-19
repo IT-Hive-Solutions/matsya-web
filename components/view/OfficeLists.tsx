@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -87,7 +88,8 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   ];
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteHandler(endpoints.office.byId(id)),
+    mutationFn: (id: number) =>
+      deleteHandler(directusEndpoints.office.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["office"],
@@ -97,7 +99,7 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
   const { data: fetchedOfficeList, isLoading } = useQuery({
     queryKey: ["office"],
-    queryFn: () => fetchHandler<IOffice[]>(endpoints.office),
+    queryFn: () => fetchHandler<IOffice[]>(directusEndpoints.office),
   });
   useEffect(() => {
     if (fetchedOfficeList?.data) {

@@ -18,6 +18,7 @@ import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -84,12 +85,14 @@ const ProductionCapacityLists = ({
   const { data: fetchedProductionCapacityList, isLoading } = useQuery({
     queryKey: ["production-capacity"],
     queryFn: () =>
-      fetchHandler<IProductionCapacity[]>(endpoints.production_capacity),
+      fetchHandler<IProductionCapacity[]>(
+        directusEndpoints.production_capacity,
+      ),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      deleteHandler(endpoints.production_capacity.byId(id)),
+      deleteHandler(directusEndpoints.production_capacity.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["production-capacity"],

@@ -12,7 +12,8 @@ async function proxyRequest(
     );
 
     const directusPath = path.join("/");
-    const targetUrl = new URL(`${DIRECTUS_BASE_URL}/${directusPath}`);
+    const targetUrl = new URL(`${DIRECTUS_BASE_URL}${directusPath}`);
+    console.log({ targetUrl });
 
     // Forward query params
     req.nextUrl.searchParams.forEach((value, key) => {
@@ -90,38 +91,62 @@ async function handler(
             statusText: directusRes.statusText,
         });
 
-        directusRes.headers.forEach((value, key) => {
-            if (!["set-cookie", "transfer-encoding"].includes(key.toLowerCase())) {
-                response.headers.set(key, value);
-            }
-        });
+        forwardHeaders(directusRes, response.headers)
+
 
         const headers = setAuthCookies(
-            response,
+            new NextResponse(),
             refreshed.accessToken,
             refreshed.refreshToken
         );
+        headers.forEach((value, key) => {
+            response.headers.append(key, value);
+        });
+
 
         return new NextResponse(body, {
             status: directusRes.status,
-            headers,
+            headers: response.headers,
         });
     }
 
     // Stream the directus response back
     const body = await directusRes.arrayBuffer();
+
+    if (directusRes.status === 204 || body.byteLength === 0) {
+        const responseHeaders = new Headers();
+        forwardHeaders(directusRes, responseHeaders);
+
+        return new NextResponse(null, {
+            status: directusRes.status,
+            headers: responseHeaders,
+        });
+    }
     const response = new NextResponse(body, {
         status: directusRes.status,
         statusText: directusRes.statusText,
     });
 
-    directusRes.headers.forEach((value, key) => {
-        if (!["set-cookie", "transfer-encoding"].includes(key.toLowerCase())) {
-            response.headers.set(key, value);
-        }
-    });
+    forwardHeaders(directusRes, response.headers)
+
 
     return response;
+}
+
+
+function forwardHeaders(from: Response, to: Headers) {
+    from.headers.forEach((value, key) => {
+        if (
+            ![
+                "set-cookie",
+                "transfer-encoding",
+                "content-encoding",
+                "content-length",
+            ].includes(key.toLowerCase())
+        ) {
+            to.set(key, value);
+        }
+    });
 }
 
 export const GET = handler;
