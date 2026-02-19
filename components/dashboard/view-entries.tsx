@@ -159,6 +159,7 @@ export default function OwnerAnimalView({
     queryFn: () =>
       fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
         searchQuery: debouncedSearchValue,
+        fields: "*.*",
       }),
   });
   useEffect(() => {
@@ -447,7 +448,7 @@ export default function OwnerAnimalView({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-base font-semibold text-slate-900 truncate">
-                                {animal.animal_type.animal_name}
+                                {animal.animal_type?.animal_name ?? ""}
                               </h3>
                               <Badge
                                 variant="secondary"
