@@ -599,7 +599,7 @@ export default function AnalyticsDashboard({
                     y1="27"
                     x2="90"
                     y2="35"
-                    stroke="#E0DDD7"
+                    stroke="#f4fff2"
                     strokeWidth="1.5"
                   />
                   <line
@@ -607,7 +607,7 @@ export default function AnalyticsDashboard({
                     y1="95"
                     x2="28"
                     y2="95"
-                    stroke="#E0DDD7"
+                    stroke="#f4fff2"
                     strokeWidth="1.5"
                   />
                   <line
@@ -615,7 +615,7 @@ export default function AnalyticsDashboard({
                     y1="95"
                     x2="152"
                     y2="95"
-                    stroke="#E0DDD7"
+                    stroke="#f4fff2"
                     strokeWidth="1.5"
                   />
                   <text

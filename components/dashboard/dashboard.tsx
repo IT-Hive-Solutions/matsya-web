@@ -3,9 +3,7 @@
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import {
-  fetchHandler
-} from "@/core/services/apiHandler/fetchHandler";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Loading from "../loading";
@@ -83,18 +81,16 @@ export default function Dashboard({ user }: DashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen min-w-screen overflow-hidden bg-background flex flex-col">
       <DashboardHeader user={user} />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-screen min-w-screen overflow-hidden">
         <NavigationDrawer
           onNavigate={setActiveTab}
           currentSection={activeTab}
           user={user}
         />
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  ">
-            {renderContent()}
-          </div>
+        <main className="h-[90vh] w-screen lg:w-[88vw]  flex-1 overflow-auto ">
+          <div className=" px-4 sm:px-6 lg:px-8  ">{renderContent()}</div>
         </main>
       </div>
     </div>

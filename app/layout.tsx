@@ -1,13 +1,15 @@
 import type React from "react";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import QueryWrapper from "@/components/wrapper/QueryWrapper";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const _poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Matsya Web App - Livestock Management",
@@ -46,7 +48,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body
+        className={`font-sans antialiased w-screen h-screen overflow-hidden ${_poppins.className} `}
+      >
         <QueryWrapper>
           <Suspense>
             {children}

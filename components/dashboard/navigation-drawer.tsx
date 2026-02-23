@@ -163,9 +163,9 @@ export default function NavigationDrawer({
 
       {/* Drawer */}
       <nav
-        className={`fixed left-0 top-16 h-[92vh] w-64 bg-card border-r border-border shadow-lg transition-transform duration-300 z-40 ${
+        className={`fixed left-0 top-16 h-[90vh] w-max bg-card border-r border-border shadow-lg transition-transform duration-300 z-40 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:top-0 lg:h-auto lg:w-64 lg:border-r overflow-y-auto`}
+        } lg:translate-x-0 lg:static lg:top-0 lg:h-auto max-md:w-max  lg:w-[22vw] lg:border-r overflow-y-auto`}
       >
         <div className="h-max p-4 space-y-2">
           {/* Section Groups */}

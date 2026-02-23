@@ -159,7 +159,11 @@ export default function OwnerAnimalView({
     queryFn: () =>
       fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
         searchQuery: debouncedSearchValue,
-        fields: "*.*",
+        fields: [
+          "*.*",
+          "owners_id.district_id.*",
+          "owners_id.district_id.province_id.*",
+        ],
       }),
   });
   useEffect(() => {
