@@ -47,6 +47,7 @@ export default function AnimalTypeForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -75,6 +76,7 @@ export default function AnimalTypeForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
 
@@ -86,7 +88,10 @@ export default function AnimalTypeForm({
         queryKey: ["animal-type"],
       });
       toast.success("Animal category  created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating animal category!");
@@ -101,7 +106,10 @@ export default function AnimalTypeForm({
         queryKey: ["animal-type"],
       });
       toast.success("Animal category  udpated successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error updating animal category!");
@@ -109,6 +117,8 @@ export default function AnimalTypeForm({
   });
 
   const onSubmit = (data: CreateAnimaTypeDTO) => {
+    setIsFormSubmitting(true);
+
     if (isEditing && id) {
       updateAnimalTypeMutation.mutateAsync(data);
     } else {
@@ -176,12 +186,15 @@ export default function AnimalTypeForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} Animal Type
               </Button>
