@@ -103,7 +103,9 @@ export default function OfficeForm({
   const { data: fetchedOfficeDetail, isLoading } = useQuery({
     queryKey: ["office-single", id],
     queryFn: () =>
-      fetchHandler<IOffice>(directusEndpoints.office.byId(id ?? -1)),
+      fetchHandler<IOffice>(directusEndpoints.office.byId(id ?? -1), {
+        fields: ["*.*", "district_id.*", "district_id.province_id.*"],
+      }),
     enabled: !!id && isEditing,
   });
 
@@ -171,7 +173,11 @@ export default function OfficeForm({
   };
 
   useEffect(() => {
-    if (fetchedOfficeDetail?.data) {
+    if (
+      fetchedOfficeDetail?.data &&
+      districtData.length > 0 &&
+      provinceData.length > 0
+    ) {
       const office = fetchedOfficeDetail?.data;
       const payload: CreateOfficeDTO = {
         district_id: office?.district_id?.id,
@@ -185,7 +191,7 @@ export default function OfficeForm({
 
       form.reset(payload);
     }
-  }, [fetchedOfficeDetail]);
+  }, [fetchedOfficeDetail, districtData, provinceData]);
 
   if (isEditing && (!fetchedOfficeDetail || isLoading)) {
     return <Loading />;
@@ -270,7 +276,10 @@ export default function OfficeForm({
                         <Select
                           {...field}
                           value={field.value?.toString() ?? ""}
-                          onValueChange={(val) => field.onChange(parseInt(val))}
+                          onValueChange={(val) => {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) field.onChange(parsed);
+                          }}
                         >
                           <SelectTrigger
                             className={
@@ -308,7 +317,10 @@ export default function OfficeForm({
                         <Select
                           {...field}
                           value={field.value?.toString() ?? ""}
-                          onValueChange={(val) => field.onChange(parseInt(val))}
+                          onValueChange={(val) => {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) field.onChange(parsed);
+                          }}
                           disabled={!form.watch("province_id")}
                         >
                           <SelectTrigger

@@ -102,7 +102,10 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
   const { data: fetchedOfficeList, isLoading } = useQuery({
     queryKey: ["office"],
-    queryFn: () => fetchHandler<IOffice[]>(directusEndpoints.office),
+    queryFn: () =>
+      fetchHandler<IOffice[]>(directusEndpoints.office, {
+        fields: ["*.*", "district_id.*", "district_id.province_id.*"],
+      }),
   });
   useEffect(() => {
     if (fetchedOfficeList?.data) {

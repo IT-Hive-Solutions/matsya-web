@@ -80,6 +80,7 @@ export default function UserForm({
       user_type: undefined,
     },
     resolver: zodResolver(CreateUserSchema),
+    reValidateMode: "onSubmit",
   });
   const { data: fetchedUserDetail, isLoading } = useQuery({
     queryKey: ["user-single", id],
@@ -249,7 +250,10 @@ export default function UserForm({
                       <Select
                         {...field}
                         defaultValue={String(field.value)}
-                        onValueChange={(val) => field.onChange(val)}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
@@ -288,7 +292,10 @@ export default function UserForm({
                       <Select
                         {...field}
                         defaultValue={String(field.value)}
-                        onValueChange={(val) => field.onChange(val)}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
