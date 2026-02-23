@@ -75,7 +75,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
         return (
           <div className="flex items-center gap-2">
             <Button
-              variant={"ghost"}
+              variant={"outline"}
               onClick={() => {
                 router.replace(`?tab=user&id=${row.original.id}`);
                 setEditing && setEditing(true);
@@ -83,16 +83,19 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
               }}
             >
               <Edit className="w-4 h-4" />
+              Edit
             </Button>
             <AlertDialogWrapper
               description="You cannot undo once deleted!"
               title="Are you sure?"
-              triggerVariant={"ghost"}
+              triggerVariant={"outline"}
               onConfirm={() => {
                 deleteMutation.mutateAsync(row.original.id);
               }}
+              className="text-destructive"
             >
               <Trash className="w-4 h-4" />
+              Delete
             </AlertDialogWrapper>
           </div>
         );
