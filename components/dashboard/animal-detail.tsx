@@ -113,8 +113,14 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Age</p>
               <p className="font-medium">
-                {animal?.age_years} {animal?.age_years === 1 ? "year" : "years"}
-                {animal?.age_months && ` ${animal?.age_months} months`}
+                {animal?.age_years}{" "}
+                {animal?.age_years === 1 || animal?.age_years === 0
+                  ? "year"
+                  : "years"}{" "}
+                {animal?.age_months}{" "}
+                {animal?.age_months == "1" || animal?.age_months == "0"
+                  ? "month"
+                  : "months"}
               </p>
             </div>
             <div className="space-y-1">
