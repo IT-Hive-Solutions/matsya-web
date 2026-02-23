@@ -67,6 +67,7 @@ export default function OfficeForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -118,6 +119,7 @@ export default function OfficeForm({
       setDistrictData(data);
     }
   }, [districtFetched]);
+
   useEffect(() => {
     if (provinceFetched?.data) {
       const data = provinceFetched?.data?.map((p) => ({
@@ -133,6 +135,7 @@ export default function OfficeForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
 
@@ -144,7 +147,10 @@ export default function OfficeForm({
         queryKey: ["office"],
       });
       toast.success("Office created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating office!");
@@ -158,13 +164,17 @@ export default function OfficeForm({
         queryKey: ["office"],
       });
       toast.success("Office updated successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating office!");
     },
   });
   const onSubmit = (data: CreateOfficeDTO) => {
+    setIsFormSubmitting(true);
     if (isEditing && id) {
       updateOfficeMutation.mutateAsync(data);
     } else {
@@ -418,12 +428,15 @@ export default function OfficeForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} Office
               </Button>
