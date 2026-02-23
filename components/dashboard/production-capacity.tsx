@@ -46,6 +46,7 @@ export default function ProductionCapacityForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -61,6 +62,7 @@ export default function ProductionCapacityForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
   const form = useForm<CreateProductionCapacityDTO>({
@@ -85,7 +87,10 @@ export default function ProductionCapacityForm({
         queryKey: ["production-capacity"],
       });
       toast.success("Production Capacity  created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating production capacity!");
@@ -102,7 +107,10 @@ export default function ProductionCapacityForm({
         queryKey: ["production-capacity"],
       });
       toast.success("Production Capacity  created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating production capacity!");
@@ -110,6 +118,8 @@ export default function ProductionCapacityForm({
   });
 
   const onSubmit = (data: CreateProductionCapacityDTO) => {
+    setIsFormSubmitting(true);
+
     if (isEditing && id) {
       updateAnimalCategoryMutation.mutateAsync(data);
     } else {
@@ -177,12 +187,15 @@ export default function ProductionCapacityForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} Production Capacity
               </Button>

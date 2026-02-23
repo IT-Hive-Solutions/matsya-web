@@ -20,9 +20,9 @@ export default function DashboardHeader({ user }: HeaderProps) {
   };
 
   return (
-    <header className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="bg-card border-b border-border sticky top-0 z-40 h-[10vh] shadow-sm">
+      <div className="h-full px-4 sm:px-6 lg:px-8">
+        <div className="h-full flex items-center justify-between ">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary">

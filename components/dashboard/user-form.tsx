@@ -63,6 +63,7 @@ export default function UserForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<string | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -80,6 +81,7 @@ export default function UserForm({
       user_type: undefined,
     },
     resolver: zodResolver(CreateUserSchema),
+    reValidateMode: "onSubmit",
   });
   const { data: fetchedUserDetail, isLoading } = useQuery({
     queryKey: ["user-single", id],
@@ -95,6 +97,7 @@ export default function UserForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
 
@@ -121,7 +124,10 @@ export default function UserForm({
         queryKey: ["users"],
       });
       toast.success("User created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating user!");
@@ -135,13 +141,17 @@ export default function UserForm({
         queryKey: ["users"],
       });
       toast.success("User updated successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating user!");
     },
   });
   const onSubmit = (data: CreateUserDTO) => {
+    setIsFormSubmitting(true);
     if (isEditing && id) {
       updateUserMutation.mutateAsync(data);
     } else {
@@ -249,7 +259,10 @@ export default function UserForm({
                       <Select
                         {...field}
                         defaultValue={String(field.value)}
-                        onValueChange={(val) => field.onChange(val)}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
@@ -288,7 +301,10 @@ export default function UserForm({
                       <Select
                         {...field}
                         defaultValue={String(field.value)}
-                        onValueChange={(val) => field.onChange(val)}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
@@ -324,12 +340,15 @@ export default function UserForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} User
               </Button>

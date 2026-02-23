@@ -19,13 +19,27 @@ import {
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function LoginPage() {
   // const router = useRouter();
+  const params = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormSubmitting, setFormSubmitting] = useState<boolean>(false);
+  useEffect(() => {
+    console.log(params);
+
+    if (params.get("reason") === "session_expired") {
+      toast.error("Session expired. Please Login in again!");
+    }
+    return () => {
+      toast.dismiss();
+    };
+  }, []);
+
   const form = useForm<LoginDTO>({
     defaultValues: {
       password: "",
@@ -46,13 +60,13 @@ export default function LoginPage() {
       // router.refresh();
     },
     onError: (err) => {
-      toast.error("Error creating user!");
-    },
-    onSettled: () => {
       setIsLoading(false);
+
+      toast.error("Error creating user!");
     },
   });
   const handleSubmit = async (data: LoginDTO) => {
+    setIsLoading(true);
     await loginMutation.mutateAsync(data);
   };
 
@@ -127,7 +141,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 mt-6 transition-all duration-200"
-                  disabled={isLoading}
+                  isLoading={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>

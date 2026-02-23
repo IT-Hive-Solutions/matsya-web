@@ -5,7 +5,7 @@ export interface SearchFilter {
     searchQuery?: string;
     fromDate?: string;
     toDate?: string;
-    fields?: string
+    fields?: string | string[]
 }
 
 export interface FetchResult<T = any> {

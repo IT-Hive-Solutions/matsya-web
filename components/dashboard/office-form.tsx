@@ -67,6 +67,7 @@ export default function OfficeForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -103,7 +104,9 @@ export default function OfficeForm({
   const { data: fetchedOfficeDetail, isLoading } = useQuery({
     queryKey: ["office-single", id],
     queryFn: () =>
-      fetchHandler<IOffice>(directusEndpoints.office.byId(id ?? -1)),
+      fetchHandler<IOffice>(directusEndpoints.office.byId(id ?? -1), {
+        fields: ["*.*", "district_id.*", "district_id.province_id.*"],
+      }),
     enabled: !!id && isEditing,
   });
 
@@ -116,6 +119,7 @@ export default function OfficeForm({
       setDistrictData(data);
     }
   }, [districtFetched]);
+
   useEffect(() => {
     if (provinceFetched?.data) {
       const data = provinceFetched?.data?.map((p) => ({
@@ -131,6 +135,7 @@ export default function OfficeForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
 
@@ -142,7 +147,10 @@ export default function OfficeForm({
         queryKey: ["office"],
       });
       toast.success("Office created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating office!");
@@ -156,13 +164,17 @@ export default function OfficeForm({
         queryKey: ["office"],
       });
       toast.success("Office updated successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating office!");
     },
   });
   const onSubmit = (data: CreateOfficeDTO) => {
+    setIsFormSubmitting(true);
     if (isEditing && id) {
       updateOfficeMutation.mutateAsync(data);
     } else {
@@ -171,7 +183,11 @@ export default function OfficeForm({
   };
 
   useEffect(() => {
-    if (fetchedOfficeDetail?.data) {
+    if (
+      fetchedOfficeDetail?.data &&
+      districtData.length > 0 &&
+      provinceData.length > 0
+    ) {
       const office = fetchedOfficeDetail?.data;
       const payload: CreateOfficeDTO = {
         district_id: office?.district_id?.id,
@@ -185,7 +201,7 @@ export default function OfficeForm({
 
       form.reset(payload);
     }
-  }, [fetchedOfficeDetail]);
+  }, [fetchedOfficeDetail, districtData, provinceData]);
 
   if (isEditing && (!fetchedOfficeDetail || isLoading)) {
     return <Loading />;
@@ -270,7 +286,10 @@ export default function OfficeForm({
                         <Select
                           {...field}
                           value={field.value?.toString() ?? ""}
-                          onValueChange={(val) => field.onChange(parseInt(val))}
+                          onValueChange={(val) => {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) field.onChange(parsed);
+                          }}
                         >
                           <SelectTrigger
                             className={
@@ -308,7 +327,10 @@ export default function OfficeForm({
                         <Select
                           {...field}
                           value={field.value?.toString() ?? ""}
-                          onValueChange={(val) => field.onChange(parseInt(val))}
+                          onValueChange={(val) => {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) field.onChange(parsed);
+                          }}
                           disabled={!form.watch("province_id")}
                         >
                           <SelectTrigger
@@ -406,12 +428,15 @@ export default function OfficeForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} Office
               </Button>

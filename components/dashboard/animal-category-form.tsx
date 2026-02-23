@@ -11,15 +11,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { endpoints } from "@/core/contants/endpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import {
   CreateAnimalCategoryDTO,
   CreateAnimalCategorySchema,
 } from "@/core/dtos/animal-category.dto";
-import {
-  fetchApiRouteHandler,
-  fetchHandler,
-} from "@/core/services/apiHandler/fetchHandler";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
   mutateHandler,
   updateHandler,
@@ -27,13 +25,11 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Loading from "../loading";
-import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface AnimalCategoryFormProps {
   onClose: () => void;
@@ -50,6 +46,7 @@ export default function AnimalCategoryForm({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   useEffect(() => {
     const paramsId = searchParams.get("id");
@@ -82,6 +79,7 @@ export default function AnimalCategoryForm({
     setId(null);
     setEditing && setEditing(false);
     router.replace("/");
+    setIsFormSubmitting(false);
     onClose();
   };
 
@@ -93,7 +91,10 @@ export default function AnimalCategoryForm({
         queryKey: ["animal-categories"],
       });
       toast.success("Animal category  created successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating animal category!");
@@ -108,7 +109,10 @@ export default function AnimalCategoryForm({
         queryKey: ["animal-categories"],
       });
       toast.success("Animal category  updated successfully!");
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+        setIsFormSubmitting(false);
+      }, 500);
     },
     onError: (err) => {
       toast.error("Error creating animal category!");
@@ -116,6 +120,8 @@ export default function AnimalCategoryForm({
   });
 
   const onSubmit = (data: CreateAnimalCategoryDTO) => {
+    setIsFormSubmitting(true);
+
     if (isEditing && id) {
       updateAnimalCategoryMutation.mutateAsync(data);
     } else {
@@ -185,12 +191,15 @@ export default function AnimalCategoryForm({
                 variant="outline"
                 onClick={handleClose}
                 className="flex-1 bg-transparent"
+                disabled={isFormSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
+                isLoading={isFormSubmitting}
+                disabled={isFormSubmitting}
               >
                 {isEditing ? "Update" : "Create"} Animal Category
               </Button>

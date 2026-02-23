@@ -11,15 +11,20 @@ type Params = {
 };
 
 
-async function patchHandler(request: NextRequest, { params }: Params) {
+async function putHandler(request: NextRequest, { params }: Params) {
     try {
         const { id } = await params
         const body = await request.json();
         const payload: any = {
-            full_name: body.full_name,
             email: body.email,
             office_id: parseInt(body.office_id),
             phone_number: body.phone_number,
+        }
+        if (body?.full_name) {
+            const [first_name, ...rest] = body.full_name.split(" ")
+            const last_name = rest.join(" ")
+            payload.first_name = first_name
+            payload.last_name = last_name
         }
         const token = await getAccessToken();
         const client = getDirectusClient(token!);
@@ -50,4 +55,4 @@ async function patchHandler(request: NextRequest, { params }: Params) {
     }
 }
 
-export const PATCH = patchHandler
+export const PUT = putHandler
