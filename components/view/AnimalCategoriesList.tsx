@@ -1,23 +1,22 @@
 "use client";
-import { endpoints } from "@/core/contants/endpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
-import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { useRouter } from "next/navigation";
-import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
-import { toast } from "sonner";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 type Props = {
   currentConfig: Config;
@@ -28,6 +27,9 @@ export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
   {
     accessorKey: "category_name",
     header: "Name",
+    cell: ({ row }) => {
+      return <p className="min-w-24 pr-2">{row.original.category_name}</p>;
+    },
   },
 ];
 
@@ -121,7 +123,10 @@ const AnimalCategoriesLists = ({
       />
 
       {animalCategoriesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalCategoriesTable} />
+        <DataTableWithPagination
+          table={animalCategoriesTable}
+          fullWidth={false}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">

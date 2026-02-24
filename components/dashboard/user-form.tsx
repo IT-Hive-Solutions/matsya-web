@@ -165,7 +165,7 @@ export default function UserForm({
       const payload = {
         email: user.email,
         full_name: `${user.first_name ?? ""} ${user.last_name ?? ""}`,
-        office_id: String(user.office_id?.id),
+        office_id: user.office_id?.id,
         phone_number: user.phone_number,
         user_type: user.role?.name as UserType,
       };
@@ -258,9 +258,16 @@ export default function UserForm({
                     <FormControl>
                       <Select
                         {...field}
+                        value={String(field.value)}
                         defaultValue={String(field.value)}
                         onValueChange={(val) => {
+                          console.log("OFFICE VALUE: ", val, {
+                            isNaN: !isNaN(parseInt(val)),
+                          });
+
                           const parsed = parseInt(val);
+                          console.log({ parsed });
+
                           if (!isNaN(parsed)) field.onChange(parsed);
                         }}
                       >
@@ -302,8 +309,7 @@ export default function UserForm({
                         {...field}
                         defaultValue={String(field.value)}
                         onValueChange={(val) => {
-                          const parsed = parseInt(val);
-                          if (!isNaN(parsed)) field.onChange(parsed);
+                          if (val) field.onChange(val);
                         }}
                       >
                         <SelectTrigger

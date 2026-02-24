@@ -16,16 +16,21 @@ import { Loader2 } from "lucide-react";
 interface DataTableProps<TData> {
   table: TableType<TData>;
   isLoading?: boolean;
+  fullWidth?: boolean;
 }
 
 export function DataTableWithPagination<TData>({
   table,
   isLoading,
+  fullWidth = true,
 }: DataTableProps<TData>) {
-
   return (
-    <div className="w-full h-full flex flex-col gap-4">
-      <div className="w-full rounded-xl shadow-md print:shadow-none print:rounded-sm print:border-black h-full border">
+    <div
+      className={`${fullWidth ? "w-full" : "w-max"} h-full flex flex-col gap-4`}
+    >
+      <div
+        className={`${fullWidth ? "w-full" : "w-max"} rounded-xl shadow-md print:shadow-none print:rounded-sm print:border-black h-full border`}
+      >
         <Table>
           <TableHeader className="heading-h5 ">
             {table?.getHeaderGroups().map((headerGroup) => (
@@ -37,7 +42,7 @@ export function DataTableWithPagination<TData>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -66,7 +71,7 @@ export function DataTableWithPagination<TData>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
