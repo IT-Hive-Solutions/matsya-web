@@ -48,11 +48,11 @@ export const directusPublic = createDirectus(DIRECTUS_BASE_URL).with(rest());
 
 
 export function getAssetURL(fileId: string) {
-    return `${process.env.NEXT_PUBLIC_DIRECTUS_BASE_URL}assets/${fileId}`;
+    return `${DIRECTUS_BASE_URL}assets/${fileId}`;
 }
 
 export function getDownloadUrl(fileId: string) {
-    return `${process.env.NEXT_PUBLIC_DIRECTUS_BASE_URL}assets/${fileId}?download`;
+    return `${DIRECTUS_BASE_URL}assets/${fileId}?download`;
 }
 
 export { DIRECTUS_BASE_URL };

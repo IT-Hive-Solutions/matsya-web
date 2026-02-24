@@ -28,6 +28,7 @@ import { StatusBadge } from "./view-entries";
 import Image from "next/image";
 import { getAssetURL } from "@/core/lib/directus";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import Loading from "../loading";
 
 type Props = {
   onClose: () => void;
@@ -36,12 +37,20 @@ type Props = {
 
 const AnimalDetail = ({ onClose, animalId }: Props) => {
   const [animal, setAnimal] = useState<IAnimal>();
-  const { data: fetchedAnimalData } = useQuery({
+  const { data: fetchedAnimalData, isLoading } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
       fetchHandler<IAnimal>(
         directusEndpoints.animal_info.byId(animalId ?? -1),
-        { fields: "*.*" },
+        {
+          fields: [
+            "*",
+            "animal_type.*",
+            "animal_category.*",
+            "owners_id.*",
+            "production_capacity.*",
+          ],
+        },
       ),
     enabled: !!animalId,
   });
@@ -51,14 +60,21 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
     }
   }, [fetchedAnimalData]);
 
+  if (isLoading) {
+    return <Loading />;
+  }
+  console.log({ animal });
+
   return (
     <Card className="w-full h-3/4 overflow-y-auto max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-2xl">
-              {animal?.animal_type?.animal_name ?? ""} - Tag #
-              {animal?.tag_number}
+              {animal?.animal_type?.animal_name
+                ? `${animal?.animal_type?.animal_name}-`
+                : ""}{" "}
+              {animal?.tag_number && `Tag #${animal?.tag_number}`}
             </CardTitle>
             <CardDescription className="mt-1 flex flex-col gap-2">
               {animal?.animal_category.category_name}
@@ -178,9 +194,11 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
           {animal?.image && (
             <div className="w-full max-h-96 flex flex-col gap-2 pt-4">
               <p className="text-sm text-muted-foreground">Tagging Image</p>
-              <img
+              <Image
                 src={
-                  animal?.image ? getAssetURL(animal?.image ?? "") : undefined
+                  animal?.image
+                    ? getAssetURL(animal?.image ?? "")
+                    : "/placeholder.png"
                 }
                 // src={"http://directus-koko8soc8sckg0c4woggkwsk.159.65.150.129.sslip.io/assets/eb9db6bc-f6ef-42a1-8d2b-4a6c7ca6a844"}
                 height={300}
