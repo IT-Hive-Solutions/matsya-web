@@ -20,24 +20,23 @@ import {
 } from "@/components/ui/select";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { endpoints } from "@/core/contants/endpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { CreateOfficeDTO, CreateOfficeSchema } from "@/core/dtos/office.dto";
+import { IDistrict } from "@/core/interfaces/district.interface";
+import { IOffice } from "@/core/interfaces/office.interface";
+import { IProvince } from "@/core/interfaces/province.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
-import { useForm } from "react-hook-form";
 import {
   mutateHandler,
   updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import Loading from "../loading";
-import { IDistrict } from "@/core/interfaces/district.interface";
-import { IProvince } from "@/core/interfaces/province.interface";
-import { IOffice } from "@/core/interfaces/office.interface";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface OfficeFormProps {
   onClose: () => void;
