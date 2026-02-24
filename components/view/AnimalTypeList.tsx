@@ -29,6 +29,9 @@ export const animalTypesColumns: ColumnDef<IAnimalType>[] = [
   {
     accessorKey: "animal_name",
     header: "Name",
+    cell: ({ row }) => {
+      return <p className="min-w-24 pr-2">{row.original.animal_name}</p>;
+    },
   },
 ];
 
@@ -49,7 +52,7 @@ const AnimalTypesLists = ({
       header: "Action",
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2">
+          <div className="w-max flex items-center gap-2">
             <Button
               variant={"outline"}
               onClick={() => {
@@ -85,7 +88,8 @@ const AnimalTypesLists = ({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteHandler(directusEndpoints.animal_types.byId(id)),
+    mutationFn: (id: number) =>
+      deleteHandler(directusEndpoints.animal_types.byId(id)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["animal-type"],
@@ -117,7 +121,9 @@ const AnimalTypesLists = ({
       />
 
       {animalTypesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalTypesTable} />
+        <div className="w-1/2">
+          <DataTableWithPagination table={animalTypesTable} fullWidth={false} />
+        </div>
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
