@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { Badge } from "../ui/badge";
 
 type Props = {
   currentConfig: Config;
@@ -27,10 +28,29 @@ type Props = {
 
 export const animalTypesColumns: ColumnDef<IAnimalType>[] = [
   {
+    accessorKey: "sn",
+    header: "S.N.",
+    cell: ({ row }) => {
+      return <p className="min-w-24 pr-2">{row.index + 1}</p>;
+    },
+  },
+  {
     accessorKey: "animal_name",
     header: "Name",
     cell: ({ row }) => {
       return <p className="min-w-24 pr-2">{row.original.animal_name}</p>;
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      return (
+        <Badge
+          variant={row.original.status === "published" ? "default" : "outline"}
+          className="min-w-24 pr-2"
+        >{`${row.original.status.charAt(0).toUpperCase()}${row.original.status.slice(1)}`}</Badge>
+      );
     },
   },
 ];
@@ -50,6 +70,7 @@ const AnimalTypesLists = ({
     {
       accessorKey: "action",
       header: "Action",
+
       cell: ({ row }) => {
         return (
           <div className="w-max flex items-center gap-2">
@@ -79,6 +100,7 @@ const AnimalTypesLists = ({
           </div>
         );
       },
+      // size: 150,
     },
   ];
 
@@ -121,9 +143,7 @@ const AnimalTypesLists = ({
       />
 
       {animalTypesLists?.length > 0 ? (
-        <div className="w-1/2">
-          <DataTableWithPagination table={animalTypesTable} fullWidth={false} />
-        </div>
+        <DataTableWithPagination table={animalTypesTable} />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
