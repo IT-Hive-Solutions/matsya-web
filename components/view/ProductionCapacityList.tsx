@@ -19,6 +19,7 @@ import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { Badge } from "../ui/badge";
 
 type Props = {
   currentConfig: Config;
@@ -28,8 +29,27 @@ type Props = {
 
 export const productionCapacityColumns: ColumnDef<IProductionCapacity>[] = [
   {
+    accessorKey: "sn",
+    header: "S.N.",
+    cell: ({ row }) => {
+      return <p className="min-w-24 pr-2">{row.index + 1}</p>;
+    },
+  },
+  {
     accessorKey: "capacity_name",
     header: "Name",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      return (
+        <Badge
+          variant={row.original.status === "published" ? "default" : "outline"}
+          className="min-w-24 "
+        >{`${row.original.status.charAt(0).toUpperCase()}${row.original.status.slice(1)}`}</Badge>
+      );
+    },
   },
 ];
 

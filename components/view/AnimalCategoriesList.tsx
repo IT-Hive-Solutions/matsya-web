@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
 
 type Props = {
   currentConfig: Config;
@@ -25,10 +26,29 @@ type Props = {
 };
 export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
   {
+    accessorKey: "sn",
+    header: "S.N.",
+    cell: ({ row }) => {
+      return <p className="min-w-24 pr-2">{row.index + 1}</p>;
+    },
+  },
+  {
     accessorKey: "category_name",
     header: "Name",
     cell: ({ row }) => {
       return <p className="min-w-24 pr-2">{row.original.category_name}</p>;
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      return (
+        <Badge
+          variant={row.original.status === "published" ? "default" : "outline"}
+          className="min-w-24 "
+        >{`${row.original.status.charAt(0).toUpperCase()}${row.original.status.slice(1)}`}</Badge>
+      );
     },
   },
 ];
@@ -50,9 +70,10 @@ const AnimalCategoriesLists = ({
     {
       accessorKey: "action",
       header: "Action",
+      size: 150,
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2">
+          <div className="w-max flex items-center gap-2">
             <Button
               variant={"outline"}
               onClick={() => {
@@ -123,10 +144,7 @@ const AnimalCategoriesLists = ({
       />
 
       {animalCategoriesLists?.length > 0 ? (
-        <DataTableWithPagination
-          table={animalCategoriesTable}
-          fullWidth={false}
-        />
+        <DataTableWithPagination table={animalCategoriesTable} />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
