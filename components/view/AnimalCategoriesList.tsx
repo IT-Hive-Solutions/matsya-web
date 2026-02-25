@@ -46,7 +46,7 @@ export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
       return (
         <Badge
           variant={row.original.status === "published" ? "default" : "outline"}
-          className="min-w-24 pr-2"
+          className="min-w-24 "
         >{`${row.original.status.charAt(0).toUpperCase()}${row.original.status.slice(1)}`}</Badge>
       );
     },
