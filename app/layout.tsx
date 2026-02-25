@@ -12,8 +12,8 @@ const _poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Matsya Web App - Livestock Management",
-  description: "Livestock tagging and vaccination data collection system",
+  title: "AIVR - Animal Identification and Vaccination Recording",
+  description: "Animal tagging and vaccination data collection system",
   icons: {
     icon: [
       {

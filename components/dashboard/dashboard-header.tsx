@@ -30,10 +30,10 @@ export default function DashboardHeader({ user }: HeaderProps) {
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                Matsya
+                AIVR
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Livestock Management
+                Animal Management
               </p>
             </div>
           </div>
