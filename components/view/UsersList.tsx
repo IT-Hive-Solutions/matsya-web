@@ -53,6 +53,16 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
       header: "Email",
     },
     {
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => {
+        const name = row.original.role?.name?.split("-") ?? [];
+        return (
+          <p>{name.map((n) => `${n.charAt(0).toUpperCase()}${n.slice(1)} `)}</p>
+        );
+      },
+    },
+    {
       accessorKey: "phone_number",
       header: "Contact",
     },
@@ -168,7 +178,16 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
   const { data: fetchedUserList, isLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: () => fetchHandler<IUser[]>(directusEndpoints.users),
+    queryFn: () =>
+      fetchHandler<IUser[]>(directusEndpoints.users, {
+        fields: [
+          "*",
+          "office_id.*",
+          "role.*",
+          "office_id.province_id.*",
+          "office_id.district_id.*",
+        ],
+      }),
   });
 
   useEffect(() => {
