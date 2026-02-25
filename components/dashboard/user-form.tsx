@@ -261,12 +261,7 @@ export default function UserForm({
                         value={String(field.value)}
                         defaultValue={String(field.value)}
                         onValueChange={(val) => {
-                          console.log("OFFICE VALUE: ", val, {
-                            isNaN: !isNaN(parseInt(val)),
-                          });
-
                           const parsed = parseInt(val);
-                          console.log({ parsed });
 
                           if (!isNaN(parsed)) field.onChange(parsed);
                         }}

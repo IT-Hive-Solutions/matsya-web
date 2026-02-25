@@ -28,10 +28,7 @@ export default function LoginPage() {
   // const router = useRouter();
   const params = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFormSubmitting, setFormSubmitting] = useState<boolean>(false);
   useEffect(() => {
-    console.log(params);
-
     if (params.get("reason") === "session_expired") {
       toast.error("Session expired. Please Login in again!");
     }

@@ -63,8 +63,6 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
   if (isLoading) {
     return <Loading />;
   }
-  console.log({ animal });
-
   return (
     <Card className="w-full h-3/4 overflow-y-auto max-w-4xl mx-auto">
       <CardHeader>
