@@ -75,9 +75,9 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl  from-primary to-primary/80 mb-4 shadow-lg">
             <span className="text-4xl">🐄</span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Matsya</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">AIVR</h1>
           <p className="text-muted-foreground text-sm">
-            Livestock Tagging & Vaccination System
+            Animal Identification and Vaccination Recording System
           </p>
         </div>
 
