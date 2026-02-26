@@ -48,5 +48,8 @@ export const endpoints = {
         { byId: (id: number) => `${baseUrl}/production_capacity/${id}`, }
     ),
     app_download_link: `${baseUrl}/app_download_link`,
+    image: {
+        getRawImageById: (id: string) => `${baseUrl}/image/getById/${id}`,
+    }
 
 }

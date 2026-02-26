@@ -8,7 +8,7 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'http',
+        protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_DIRECTUS_URL || 'directus-koko8soc8sckg0c4woggkwsk.159.65.150.129.sslip.io',
       },
     ],

@@ -195,7 +195,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
               <Image
                 src={
                   animal?.image
-                    ? getAssetURL(animal?.image ?? "")
+                    ? endpoints.image.getRawImageById(animal.image)
                     : "/placeholder.png"
                 }
                 // src={"http://directus-koko8soc8sckg0c4woggkwsk.159.65.150.129.sslip.io/assets/eb9db6bc-f6ef-42a1-8d2b-4a6c7ca6a844"}
