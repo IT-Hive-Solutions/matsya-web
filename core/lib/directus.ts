@@ -8,6 +8,7 @@ import { ProductionCapacityDirectus } from '@/core/interfaces/productionCapacity
 import { ProvinceDirectus } from '@/core/interfaces/province.interface';
 import { UsersDirectus } from '@/core/interfaces/user.interface';
 import {
+    authentication,
     createDirectus,
     rest,
     staticToken
@@ -31,9 +32,9 @@ export type Schema = {
 };
 
 export function getDirectusClient(token: string) {
-  return createDirectus(DIRECTUS_BASE_URL)
-    .with(staticToken(token))  // token already managed by your cookie system
-    .with(rest())
+    return createDirectus(DIRECTUS_BASE_URL)
+        .with(staticToken(token))  // token already managed by your cookie system
+        .with(rest())
 }
 
 export function createServerClient(token?: string) {
@@ -45,6 +46,7 @@ export function createServerClient(token?: string) {
 }
 
 export const directusPublic = createDirectus(DIRECTUS_BASE_URL).with(rest());
+export const loginDirectus = createDirectus(DIRECTUS_BASE_URL).with(rest()).with(authentication('json'));
 
 
 export function getAssetURL(fileId: string) {
