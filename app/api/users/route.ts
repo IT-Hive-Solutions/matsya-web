@@ -71,8 +71,7 @@ async function postHandler(request: NextRequest) {
 
         const newPassword = generateSecurePassword(8)
 
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+        
         const [first_name, ...rest] = body.full_name.split(" ")
         const last_name = rest.join(" ")
 
@@ -92,7 +91,7 @@ async function postHandler(request: NextRequest) {
                 first_name: first_name,
                 last_name: last_name,
                 email: body.email,
-                password: hashedPassword,
+                password: newPassword,
                 office_id: body.office_id,
                 needs_password_change: true,
                 phone_number: body.phone_number,

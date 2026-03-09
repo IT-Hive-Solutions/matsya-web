@@ -16,9 +16,7 @@ import {
   ForgotPasswordDTO,
   ForgotPasswordSchema,
 } from "@/core/dtos/forgot-password.dto";
-import {
-  mutateApiRouteHandler
-} from "@/core/services/apiHandler/mutateHandler";
+import { mutateApiRouteHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -48,12 +46,16 @@ export default function ResetPassword() {
         toast.success("Password Changed Successfully!.", {
           description: "Please login with your new password.",
         });
-        router.push("/auth/login");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 3000);
         return;
       }
       localStorage.setItem("user", JSON.stringify(res));
       toast.success("User created successfully!");
-      router.push("/");
+      setTimeout(() => {
+        router.push("/");
+      }, 3000);
     },
     onError: (err) => {
       toast.error("Error creating user!");
