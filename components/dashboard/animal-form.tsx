@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { endpoints } from "@/core/contants/endpoints";
 import {
   CreateAnimalDTO,
@@ -25,14 +26,15 @@ import {
   UpdateAnimalDTO,
 } from "@/core/dtos/animal.dto";
 import { monthOptions } from "@/core/enums/month.enum";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import {
   mutateApiRouteHandler,
-  mutateHandler,
   updateApiRouteHandler,
-  updateHandler,
 } from "@/core/services/apiHandler/mutateHandler";
+import { formatDateWithHyphen } from "@/core/services/dateTime/formatDate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -40,10 +42,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Checkbox } from "../ui/checkbox";
-import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
-import { formatDateWithHyphen } from "@/core/services/dateTime/formatDate";
-import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface AnimalFormProps {
   onClose: () => void;
@@ -73,7 +71,13 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   const { data: fetchedAnimalData } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
-      fetchHandler(directusEndpoints.animal_info.byId(animalId ?? -1)),
+      fetchHandler(directusEndpoints.animal_info.byId(animalId ?? -1), {
+        fields: [
+          "*.*",
+          "owners_id.district_id.*",
+          "owners_id.district_id.province_id.*",
+        ],
+      }),
     enabled: !!animalId,
   });
   const { data: productionCapacityFetched } = useQuery({
