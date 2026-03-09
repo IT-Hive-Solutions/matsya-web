@@ -2,26 +2,24 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { AppDownloadLinkDirectus } from "@/core/interfaces/appDownloadLink.interface";
+import { IUser } from "@/core/interfaces/user.interface";
+import { getAssetURL } from "@/core/lib/directus";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import { useQuery } from "@tanstack/react-query";
 import {
+  BarChart3,
+  Layers,
   Menu,
-  X,
   Plus,
   Settings,
-  BarChart3,
   Users,
-  Home,
-  Layers,
+  X,
 } from "lucide-react";
-import { IUser } from "@/core/interfaces/user.interface";
-import { Button } from "../ui/button";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { endpoints } from "@/core/contants/endpoints";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { getAssetURL } from "@/core/lib/directus";
-import { AppDownloadLinkDirectus } from "@/core/interfaces/appDownloadLink.interface";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { useState } from "react";
+import { Button } from "../ui/button";
 
 type Roles =
   | "admin"
@@ -73,7 +71,6 @@ export default function NavigationDrawer({
       requiredRoles: [
         "admin",
         "province-level",
-        "district-level",
         "local-level",
         "vaccinator",
       ],
@@ -183,7 +180,7 @@ export default function NavigationDrawer({
                       ? "bg-primary text-white"
                       : "text-foreground hover:bg-secondary"
                   }
-                  ${!item.requiredRoles.includes(user.role.name as Roles) && "hidden"}
+                  ${!item.requiredRoles.includes((user.role?.name ?? "") as Roles) && "hidden"}
                   `}
                 >
                   {item.icon}
@@ -196,8 +193,8 @@ export default function NavigationDrawer({
           <hr className="border-border my-2" />
 
           {/* Management Section */}
-          {(user.role.name === "admin" ||
-            user.role.name === "province-level") && (
+          {((user.role?.name ?? "") === "admin" ||
+            (user.role?.name ?? "") === "province-level") && (
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mb-2">
                 Management
@@ -211,7 +208,7 @@ export default function NavigationDrawer({
                       currentSection === item.section
                         ? "bg-primary text-white"
                         : "text-foreground hover:bg-secondary"
-                    }  ${!item.requiredRoles.includes(user.role.name as Roles) && "hidden"}`}
+                    }  ${!item.requiredRoles.includes((user.role?.name ?? "") as Roles) && "hidden"}`}
                   >
                     {item.icon}
                     <span>{item.label}</span>

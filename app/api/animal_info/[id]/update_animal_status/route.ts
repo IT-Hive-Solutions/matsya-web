@@ -1,5 +1,4 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
-import { withMiddleware } from "@/core/lib/api.middleware";
 import { getAccessToken } from "@/core/lib/auth";
 import { getDirectusClient } from "@/core/lib/directus";
 import { updateItem } from "@directus/sdk";
@@ -32,12 +31,16 @@ async function putHandler(request: NextRequest, { params }: Params) {
                 rejection_reason: body?.rejection_reason ?? ""
             })
         );
+        console.log({ updatedAnimal });
+
 
         return NextResponse.json({
             success: true,
             data: updatedAnimal
         });
     } catch (error: any) {
+        console.log({ error });
+
         return NextResponse.json(
             { success: false, error: error.message || 'Failed to update animal' },
             { status: 500 }
@@ -45,4 +48,4 @@ async function putHandler(request: NextRequest, { params }: Params) {
     }
 }
 
-export const PUT = withMiddleware(putHandler)
+export const PUT = putHandler

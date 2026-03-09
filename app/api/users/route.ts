@@ -1,13 +1,11 @@
 
 // // app/api/users/route.ts
 // // Handles GET (all users) and POST (create item)
-import { withMiddleware } from '@/core/lib/api.middleware';
 import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
 import { sendMail } from '@/core/services/mail/sendMail';
-import { createUser, readRoles, readUsers } from '@directus/sdk';
-import bcrypt from 'bcrypt';
+import { createUser, readRoles } from '@directus/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 // // GET - Fetch all users

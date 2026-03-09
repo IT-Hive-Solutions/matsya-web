@@ -1,4 +1,4 @@
-import { readMe } from '@directus/sdk';
+import { readMe, readRolesMe } from '@directus/sdk';
 import { redirect } from 'next/navigation';
 import 'server-only';
 import { IUser } from '../interfaces/user.interface';
@@ -20,10 +20,10 @@ export async function getUserData(formLogin?: boolean): Promise<UserDataResponse
                 "office_id.*" as any,
                 "office_id.district_id.*" as any,
                 "office_id.district_id.province_id.*" as any,
-                "role.*"
+                "role.id",
+                "role.name",
             ]
         }));
-
 
         const response: UserDataResponse = {
             success: true,

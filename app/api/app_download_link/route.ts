@@ -1,10 +1,14 @@
-// import { directus } from "@/core/lib/directus";
+// import { getAccessToken } from "@/core/lib/auth";
+// import { getDirectusClient } from "@/core/lib/directus";
 // import { readItems } from "@directus/sdk";
 // import { NextRequest, NextResponse } from "next/server";
 
 // export async function GET(request: NextRequest) {
 //     try {
-//         const app_link = await directus.request(
+//         const token = await getAccessToken();
+//         const client = getDirectusClient(token!);
+
+//         const app_link = await client.request(
 //             readItems('app_download_link', {
 //                 fields: ['*'],
 //             })

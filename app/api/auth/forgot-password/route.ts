@@ -1,7 +1,5 @@
-import { withMiddleware } from "@/core/lib/api.middleware";
-import { getAccessToken } from "@/core/lib/auth";
 import { getDirectusClient, loginDirectus } from "@/core/lib/directus";
-import { login, readUsers, updateUser } from "@directus/sdk";
+import { readUsers, updateUser } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
 async function postHandler(req: NextRequest) {
