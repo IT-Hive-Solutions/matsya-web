@@ -8,12 +8,20 @@ importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-comp
 // Config is injected at registration time via ServiceWorkerRegistration.postMessage
 // or you can hardcode the public values here since they are not secret.
 firebase.initializeApp({
-  apiKey: self.__FIREBASE_CONFIG__.apiKey,
-  authDomain: self.__FIREBASE_CONFIG__.authDomain,
-  projectId: self.__FIREBASE_CONFIG__.projectId,
-  storageBucket: self.__FIREBASE_CONFIG__.storageBucket,
-  messagingSenderId: self.__FIREBASE_CONFIG__.messagingSenderId,
-  appId: self.__FIREBASE_CONFIG__.appId,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+});
+console.log("FIREBASE", {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 });
 
 const messaging = firebase.messaging();

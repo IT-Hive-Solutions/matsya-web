@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Months } from "@/core/enums/month.enum";
 import { IUser } from "@/core/interfaces/user.interface";
+import NotificationBell from "./notification-bell";
 
 interface HeaderProps {
   user?: IUser;
@@ -40,6 +41,8 @@ export default function DashboardHeader({ user }: HeaderProps) {
 
           {/* User Info */}
           <div className="flex items-center gap-2 sm:gap-6">
+            <NotificationBell userId={user?.id ?? ""} />
+
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">
                 {user?.first_name ?? ""} {user?.last_name ?? ""}

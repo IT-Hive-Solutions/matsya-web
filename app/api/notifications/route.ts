@@ -33,7 +33,7 @@ export async function GET(
         // ── Fetch notifications from Directus ─────────────────────────────────────
         const notifications = (await directus.request(
             readItems("notifications", {
-                filter: { user_id: { _eq: userId } },
+                filter: { user: { _eq: userId } },
                 sort: ["-date_created"],
                 limit: 30,
             })
@@ -48,7 +48,7 @@ export async function GET(
         });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
-        console.error("[GET /api/notifications] Error:", message);
+        console.error("[GET /api/notifications] Error:", error);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
