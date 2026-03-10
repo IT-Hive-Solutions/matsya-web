@@ -7,7 +7,10 @@ import { endpoints } from "@/core/contants/endpoints";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  fetchApiRouteHandler,
+  fetchHandler,
+} from "@/core/services/apiHandler/fetchHandler";
 import {
   updateApiRouteHandler,
   updateHandler,
@@ -157,15 +160,16 @@ export default function OwnerAnimalView({
   } = useQuery({
     queryKey: ["animals", debouncedSearchValue],
     queryFn: () =>
-      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
+      fetchApiRouteHandler<IAnimal[]>(endpoints.animal_info, {
         searchQuery: debouncedSearchValue,
-        fields: [
-          "*.*",
-          "owners_id.district_id.*",
-          "owners_id.district_id.province_id.*",
-        ],
+        // fields: [
+        //   "*.*",
+        //   "owners_id.district_id.*",
+        //   "owners_id.district_id.province_id.*",
+        // ],
       }),
   });
+  console.log({ fetchedAnimalList });
   useEffect(() => {
     const groupedData: GroupedAnimal[] = (() => {
       if (!fetchedAnimalList?.data) return [];
@@ -465,8 +469,10 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {!(animal.verification_status ===
-                            VerificationStatus.Rejected) &&
+                          {!(
+                            animal.verification_status ===
+                            VerificationStatus.Rejected
+                          ) &&
                             user.role.name !== "vaccinator" && (
                               <Button
                                 variant={"ghost"}
