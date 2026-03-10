@@ -3,7 +3,7 @@
 import { VerificationStatus } from '@/core/enums/verification-status.enum';
 import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
-import { createItem, readItems, updateItem } from '@directus/sdk';
+import { createItem, readItems, readMe, updateItem } from '@directus/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET - Fetch all animal_info
@@ -12,9 +12,15 @@ async function getHandler(request: NextRequest) {
         const token = await getAccessToken();
         const client = getDirectusClient(token!);
 
-        const userDataString = request.headers.get('x-user-data');
-        const userData = JSON.parse(userDataString ?? "")
-
+        const userData = await client.request(readMe({
+            fields: [
+                "*",
+                "office_id.*" as any,
+                "office_id.district_id.*" as any,
+                "office_id.district_id.province_id.*" as any,
+                "role.*"
+            ]
+        }));
         // Determine the user's role
         const userRole = userData.role.name; // "vaccinator", "admin", etc.
         const userDistrictId = userData.office_id.district_id?.id;
@@ -65,8 +71,8 @@ async function getHandler(request: NextRequest) {
 
             case "district-level":
             case "local-level":
-            case "vaccinator":
-                // District level, local level, and vaccinator see animals from their district
+
+                // District level, and local level see animals from their district
                 if (userDistrictId) {
                     roleFilter = {
                         owners_id: {
@@ -79,7 +85,17 @@ async function getHandler(request: NextRequest) {
                     };
                 }
                 break;
-
+            case "vaccinator":
+                if (userData) {
+                    roleFilter = {
+                        user_created: {
+                            id: {
+                                _eq: userData.id
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 // If role is unknown, restrict to district level as a safe default
                 if (userDistrictId) {
@@ -120,7 +136,7 @@ async function getHandler(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            data: animal_info,
+            data: { data: animal_info },
             // Optional: include metadata for debugging
             meta: {
                 userRole,
