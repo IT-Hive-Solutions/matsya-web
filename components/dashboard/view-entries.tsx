@@ -169,7 +169,7 @@ export default function OwnerAnimalView({
         // ],
       }),
   });
-  console.log({ fetchedAnimalList });
+
   useEffect(() => {
     const groupedData: GroupedAnimal[] = (() => {
       if (!fetchedAnimalList?.data) return [];
@@ -469,11 +469,13 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {!(
+                          {(!(
                             animal.verification_status ===
-                            VerificationStatus.Rejected
+                              VerificationStatus.Rejected ||
+                            animal.verification_status ===
+                              VerificationStatus.Validated
                           ) &&
-                            user.role.name !== "vaccinator" && (
+                            (user.role.name !== "district-level") )&& (
                               <Button
                                 variant={"ghost"}
                                 onClick={() => {
@@ -572,9 +574,9 @@ export default function OwnerAnimalView({
                               >
                                 <div
                                   onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+                                  className="gap-2 flex cursor-pointer  bg-primary shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
                                 >
-                                  <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
+                                  <CheckCheckIcon className="h-4 w-4 text-white" />
                                   <span>Validate</span>
                                 </div>
                               </AlertDialogWrapper>
