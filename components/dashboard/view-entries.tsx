@@ -142,10 +142,14 @@ export default function OwnerAnimalView({
           rejection_reason: payload.reason,
         },
       ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["animals"],
-      });
+    onSuccess: (res) => {
+      queryClient.invalidateQueries();
+      console.log({ res });
+      selectedOwner?.animals.map(
+        (animal) =>
+          res.id === animal.id &&
+          (animal.verification_status = res?.verification_status as VerificationStatus),
+      );
       toast.success("Status updated successfully!");
     },
     onError: () => {
@@ -469,13 +473,13 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {(!(
+                          {!(
                             animal.verification_status ===
                               VerificationStatus.Rejected ||
                             animal.verification_status ===
                               VerificationStatus.Validated
                           ) &&
-                            (user.role.name !== "district-level") )&& (
+                            user.role.name !== "district-level" && (
                               <Button
                                 variant={"ghost"}
                                 onClick={() => {
