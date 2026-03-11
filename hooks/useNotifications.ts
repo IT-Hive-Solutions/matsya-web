@@ -92,6 +92,7 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
         refetchOnWindowFocus: true,
         placeholderData: (prev) => prev,
     });
+    console.log({ data });
 
     const notifications: Notification[] = data?.notifications ?? [];
 
@@ -221,29 +222,46 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
             setPermission(result as PermissionState);
             if (result !== "granted" || !userId) return;
 
-            const registration = await navigator.serviceWorker.register(
-                "/firebase-messaging-sw.js"
-            );
+            await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-            registration.active?.postMessage({
-                type: "FIREBASE_CONFIG",
-                config: {
-                    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-                    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-                    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-                    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-                    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-                    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-                },
+            const registration = await navigator.serviceWorker.ready;
+            console.log({ registration });
+
+
+
+            await new Promise<void>((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error("SW init timeout")), 10_000);
+
+                navigator.serviceWorker.addEventListener("message", function handler(event) {
+                    if (event.data?.type !== "FIREBASE_READY") return;
+                    clearTimeout(timeout);
+                    navigator.serviceWorker.removeEventListener("message", handler);
+                    resolve();
+                });
+
+                registration.active!.postMessage({
+                    type: "FIREBASE_CONFIG",
+                    config: {
+                        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+                        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+                        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+                        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+                        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+                        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+                    },
+                });
             });
 
             const messaging = await getFirebaseMessaging();
+            console.log({ messaging });
+
             if (!messaging) return;
 
             const token = await getToken(messaging, {
                 vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY!,
                 serviceWorkerRegistration: registration,
             });
+            console.log({ token });
 
             if (!token) {
                 console.warn("FCM token not received.");

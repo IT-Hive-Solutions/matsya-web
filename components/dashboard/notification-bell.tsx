@@ -1,4 +1,3 @@
-// components/NotificationBell.jsx
 "use client";
 import { useState } from "react";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -13,9 +12,9 @@ export default function NotificationBell({ userId }: { userId: string }) {
   return (
     <div className="relative">
       <button onClick={() => setOpen(!open)} className="relative p-2">
-        <BellIcon  className="w-4 h-4 hover:scale-[1.05] transition-all"/>
+        <BellIcon  className="w-5 h-5 hover:scale-[1.05] transition-all"/>
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white  rounded-full w-4 h-4 text-xs p-1 flex items-center justify-center">
             {unread}
           </span>
         )}
