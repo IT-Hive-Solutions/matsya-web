@@ -14,15 +14,15 @@ import { Notification, UpdateNotificationPayload, UpdateNotificationResponse } f
 
 
 interface RouteParams {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }
 
-export async function PUT(
+export async function PATCH(
     request: NextRequest,
     { params }: RouteParams
 ): Promise<NextResponse<UpdateNotificationResponse | { error: string }>> {
     try {
-        const { id } = params;
+        const { id } = await params;
         const body = (await request.json()) as UpdateNotificationPayload;
 
         if (typeof body.read !== "boolean") {
@@ -40,8 +40,10 @@ export async function PUT(
 
         return NextResponse.json({ success: true, notification: updated });
     } catch (error) {
+        const { id } = await params;
+
         const message = error instanceof Error ? error.message : "Unknown error";
-        console.error(`[PATCH /api/notifications/${params.id}] Error:`, message);
+        console.error(`[PATCH /api/notifications/${id}] Error:`, message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }

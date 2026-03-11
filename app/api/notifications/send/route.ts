@@ -40,7 +40,7 @@ export async function POST(
         // ── 1. Save notification to Directus (in-app record) ──────────────────────
         await directus.request(
             createItem("notifications", {
-                user_id: userId,
+                user: userId,
                 title,
                 body: notifBody,
                 type,
@@ -52,7 +52,7 @@ export async function POST(
         // ── 2. Fetch user's FCM tokens ─────────────────────────────────────────────
         const tokens = (await directus.request(
             readItems("user_fcm_tokens", {
-                filter: { user_id: { _eq: userId } },
+                filter: { user: { _eq: userId } },
                 fields: ["token"],
             })
         )) as Pick<UserFcmToken, "token">[];
