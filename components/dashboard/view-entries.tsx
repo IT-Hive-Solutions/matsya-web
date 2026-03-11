@@ -7,7 +7,10 @@ import { endpoints } from "@/core/contants/endpoints";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  fetchApiRouteHandler,
+  fetchHandler,
+} from "@/core/services/apiHandler/fetchHandler";
 import {
   updateApiRouteHandler,
   updateHandler,
@@ -139,10 +142,14 @@ export default function OwnerAnimalView({
           rejection_reason: payload.reason,
         },
       ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["animals"],
-      });
+    onSuccess: (res) => {
+      queryClient.invalidateQueries();
+      console.log({ res });
+      selectedOwner?.animals.map(
+        (animal) =>
+          res.id === animal.id &&
+          (animal.verification_status = res?.verification_status as VerificationStatus),
+      );
       toast.success("Status updated successfully!");
     },
     onError: () => {
@@ -157,15 +164,16 @@ export default function OwnerAnimalView({
   } = useQuery({
     queryKey: ["animals", debouncedSearchValue],
     queryFn: () =>
-      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, {
+      fetchApiRouteHandler<IAnimal[]>(endpoints.animal_info, {
         searchQuery: debouncedSearchValue,
-        fields: [
-          "*.*",
-          "owners_id.district_id.*",
-          "owners_id.district_id.province_id.*",
-        ],
+        // fields: [
+        //   "*.*",
+        //   "owners_id.district_id.*",
+        //   "owners_id.district_id.province_id.*",
+        // ],
       }),
   });
+
   useEffect(() => {
     const groupedData: GroupedAnimal[] = (() => {
       if (!fetchedAnimalList?.data) return [];
@@ -465,9 +473,13 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {!(animal.verification_status ===
-                            VerificationStatus.Rejected) &&
-                            user.role.name !== "vaccinator" && (
+                          {!(
+                            animal.verification_status ===
+                              VerificationStatus.Rejected ||
+                            animal.verification_status ===
+                              VerificationStatus.Validated
+                          ) &&
+                            user.role.name !== "district-level" && (
                               <Button
                                 variant={"ghost"}
                                 onClick={() => {
@@ -566,9 +578,9 @@ export default function OwnerAnimalView({
                               >
                                 <div
                                   onSelect={(e) => e.preventDefault()}
-                                  className="gap-2 cursor-pointer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+                                  className="gap-2 flex cursor-pointer  bg-primary shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
                                 >
-                                  <CheckCheckIcon className="h-4 w-4 text-emerald-600" />
+                                  <CheckCheckIcon className="h-4 w-4 text-white" />
                                   <span>Validate</span>
                                 </div>
                               </AlertDialogWrapper>
