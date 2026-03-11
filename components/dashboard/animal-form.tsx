@@ -100,6 +100,8 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   useEffect(() => {
     const data = fetchedAnimalData?.data;
     if (data) {
+      console.log({ fetchedData: data });
+
       const payload: UpdateAnimalDTO = {
         age_months: data?.age_months,
         age_years: data?.age_years,
@@ -108,16 +110,18 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         is_vaccination_applied: data?.is_vaccination_applied,
         latitude: data?.latitude,
         longitude: data?.longitude,
-        num_of_animals: data?.num_of_animals,
-        production_capacity: parseInt(data?.production_capacity),
+        num_of_animals: 1,
+        production_capacity: parseInt(data?.production_capacity?.id),
         tag_number: data?.tag_number,
         owners_contact: data?.owners_id?.owners_contact,
         vaccinated_date: data?.vaccinated_date,
       };
+      console.log({ payload });
 
       form.reset(payload);
     }
   }, [fetchedAnimalData]);
+
   useEffect(() => {
     if (productionCapacityFetched?.data) {
       const payload = productionCapacityFetched?.data?.map(
@@ -172,6 +176,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
     resolver: zodResolver(CreateAnimalSchema),
     reValidateMode: "onChange",
   });
+  console.log({ formData: form.watch() });
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
@@ -254,6 +259,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
               <FormField
                 control={form.control}
                 name="num_of_animals"
+                disabled
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Number of Animals</FormLabel>
@@ -347,7 +353,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                       <span className="text-destructive">*</span>
                     </FormLabel>
                     <Select
-                      onValueChange={(val) => field.onChange(parseInt(val))}
+                      onValueChange={(val) => {
+                        const parsed = parseInt(val);
+                        if (!isNaN(parsed)) field.onChange(parsed);
+                      }}
                       value={String(field.value)}
                     >
                       <FormControl>
@@ -381,11 +390,13 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="Ex: 2022"
+                        placeholder="Age in Years"
                         {...field}
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value))
                         }
+                        className="flex-1"
+                        min={0}
                       />
                     </FormControl>
                     <FormMessage />
@@ -397,33 +408,19 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                 name="age_months"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Birth Months</FormLabel>
+                    <FormLabel>Age (Months)</FormLabel>
                     <FormControl>
-                      <Select
+                      <Input
+                        type="number"
+                        placeholder="Age in Months"
                         {...field}
-                        value={field.value?.toString() ?? ""}
-                        onValueChange={(val) => field.onChange(val)}
-                      >
-                        <SelectTrigger
-                          className={`${
-                            form.formState.errors.age_months
-                              ? "border-destructive"
-                              : ""
-                          } w-full`}
-                        >
-                          <SelectValue placeholder="Select Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {monthOptions.map((type: any) => (
-                            <SelectItem
-                              key={type.value.toString()}
-                              value={type.value.toString()}
-                            >
-                              {type?.label ?? ""}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
+                        className="flex-1"
+                        min={0}
+                        max={11}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -441,7 +438,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                       <Select
                         {...field}
                         value={field.value?.toString() ?? ""}
-                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
@@ -478,7 +478,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                       <Select
                         {...field}
                         value={field.value?.toString() ?? ""}
-                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        onValueChange={(val) => {
+                          const parsed = parseInt(val);
+                          if (!isNaN(parsed)) field.onChange(parsed);
+                        }}
                       >
                         <SelectTrigger
                           className={`${
@@ -521,7 +524,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                Create Office
+                Update Entry
               </Button>
             </div>
           </form>
