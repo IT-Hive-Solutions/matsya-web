@@ -49,6 +49,7 @@ export async function POST(
             })
         );
 
+
         // ── 2. Fetch user's FCM tokens ─────────────────────────────────────────────
         const tokens = (await directus.request(
             readItems("user_fcm_tokens", {
@@ -56,6 +57,7 @@ export async function POST(
                 fields: ["token"],
             })
         )) as Pick<UserFcmToken, "token">[];
+        console.log({ tokens });
 
         if (tokens.length === 0) {
             return NextResponse.json({ success: true, pushed: false });
@@ -99,6 +101,7 @@ export async function POST(
                 expiredTokens.push(tokenValues[idx]);
             }
         });
+        console.log({ ...fcmResponse });
 
         if (expiredTokens.length > 0) {
             // Fire-and-forget cleanup — don't block the response
@@ -112,6 +115,8 @@ export async function POST(
             failureCount: fcmResponse.failureCount,
         });
     } catch (error) {
+        console.log("Notification Error: ", error);
+
         const message = error instanceof Error ? error.message : "Unknown error";
         console.error("[send-notification] Error:", message);
         return NextResponse.json(

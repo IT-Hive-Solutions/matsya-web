@@ -24,7 +24,7 @@ export async function POST(
 ): Promise<NextResponse<{ success: boolean; created: boolean } | { error: string }>> {
     try {
         const body = (await request.json()) as RequestBody;
-        const { userId, device } = body;
+        const { userId, device, token: fcmToken } = body;
 
         if (!userId || !device) {
             return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(
         // ── Check if this token already exists — avoid duplicates ──────────────
         const existing = (await directus.request(
             readItems("user_fcm_tokens", {
-                filter: { token: { _eq: token } },
+                filter: { token: { _eq: fcmToken } },
                 fields: ["id"],
                 limit: 1,
             })
@@ -51,7 +51,7 @@ export async function POST(
 
         // ── Save the new token ─────────────────────────────────────────────────
         await directus.request(
-            createItem("user_fcm_tokens", { user_id: userId, token, device })
+            createItem("user_fcm_tokens", { user: userId, token: fcmToken, device })
         );
 
         return NextResponse.json({ success: true, created: true });
