@@ -239,7 +239,7 @@ function useAnalytics(animals: IAnimal[]) {
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-4 my-8 md:my-10">
-      <span className="text-[10px] font-bold tracking-[.12em] uppercase text-[#A8A49E] whitespace-nowrap">
+      <span className="text-[10px] font-bold tracking-[.12em] uppercase text-muted-foreground whitespace-nowrap">
         {label}
       </span>
       <div className="flex-1 h-px bg-[#E8E4DC]" />
@@ -265,7 +265,7 @@ function KpiCard({
       className="bg-white flex flex-col gap-2 p-6 md:p-7 animate-fadeUp"
       style={{ animationDelay: delay, animationFillMode: "both" }}
     >
-      <span className="text-[10px] font-bold tracking-widest uppercase text-[#A8A49E]">
+      <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
         {label}
       </span>
       <span
@@ -273,7 +273,7 @@ function KpiCard({
       >
         {value}
       </span>
-      <span className="text-[11.5px] text-[#A8A49E] mt-1">{meta}</span>
+      <span className="text-[11.5px] text-muted-foreground mt-1">{meta}</span>
     </div>
   );
 }
@@ -303,7 +303,7 @@ function CardShell({
           <div className="text-[17px] font-medium text-[#1C2025] tracking-tight leading-snug">
             {title}
           </div>
-          <div className="text-[11.5px] text-[#A8A49E] mt-1">{desc}</div>
+          <div className="text-[11.5px] text-muted-foreground mt-1">{desc}</div>
         </div>
         {badge && (
           <span
@@ -328,7 +328,7 @@ function DonutCenter({ total }: { total: number }) {
       <span className="text-[28px] font-bold leading-none text-[#1C2025]">
         {total}
       </span>
-      <span className="text-[9px] font-bold tracking-[.08em] uppercase text-[#A8A49E] mt-1">
+      <span className="text-[9px] font-bold tracking-[.08em] uppercase text-muted-foreground mt-1">
         Total
       </span>
     </div>
@@ -352,7 +352,7 @@ function HBar({
         <span className="text-[12.5px] font-medium text-[#6B6760]">
           {label}
         </span>
-        <span className=" text-[11.5px] text-[#A8A49E]">
+        <span className=" text-[11.5px] text-muted-foreground">
           {value} · {pct}%
         </span>
       </div>
@@ -409,7 +409,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white border border-[#E8E4DC] rounded-lg px-3 py-2 shadow-md">
-      <div className=" text-[10px] text-[#A8A49E] mb-1">{label}</div>
+      <div className=" text-[10px] text-muted-foreground mb-1">{label}</div>
       {payload.map((p: any) => (
         <div
           key={p.dataKey}
@@ -468,11 +468,11 @@ export default function AnalyticsDashboard({
             <h1 className=" text-3xl md:text-[34px] font-medium text-[#1C2025] tracking-tight leading-tight">
               Registry Analytics
             </h1>
-            <p className="text-[13px] text-[#A8A49E] mt-1.5 tracking-[.01em]">
+            <p className="text-[13px] text-muted-foreground mt-1.5 tracking-[.01em]">
               District-level livestock overview — {province}
             </p>
           </div>
-          <div className=" text-[11px] text-[#A8A49E] bg-[#E8E4DC] px-3.5 py-1.5 rounded self-start sm:self-auto">
+          <div className=" text-[11px] text-muted-foreground bg-[#E8E4DC] px-3.5 py-1.5 rounded self-start sm:self-auto">
             {today}
           </div>
         </div>
@@ -642,7 +642,7 @@ export default function AnalyticsDashboard({
                     {stats.vaccinationPct}
                     <span className="text-[22px] opacity-50">%</span>
                   </div>
-                  <div className="text-[10.5px] text-[#A8A49E] mt-1.5 tracking-[.08em] uppercase font-medium">
+                  <div className="text-[10.5px] text-muted-foreground mt-1.5 tracking-[.08em] uppercase font-medium">
                     Coverage
                   </div>
                 </div>
@@ -680,7 +680,7 @@ export default function AnalyticsDashboard({
                 />
               ))}
               <div className="mt-5 pt-4 border-t border-[#E8E4DC]">
-                <div className="text-[10.5px] font-semibold tracking-[.08em] uppercase text-[#A8A49E] mb-3">
+                <div className="text-[10.5px] font-semibold tracking-[.08em] uppercase text-muted-foreground mb-3">
                   Production Purpose
                 </div>
                 {stats.purposeData.map((d) => (
@@ -698,7 +698,7 @@ export default function AnalyticsDashboard({
                           }}
                         />
                       </div>
-                      <span className=" text-[11px] text-[#A8A49E] w-3">
+                      <span className=" text-[11px] text-muted-foreground w-3">
                         {d.value}
                       </span>
                     </div>
@@ -786,7 +786,9 @@ export default function AnalyticsDashboard({
                       className="w-2.5 h-2.5 rounded-[2px]"
                       style={{ background: c }}
                     />
-                    <span className="text-[11px] text-[#A8A49E]">{l}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {l}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -868,7 +870,7 @@ export default function AnalyticsDashboard({
               </div>
               {stats.wardNumbers && (
                 <div className="mt-3.5 flex gap-1.5">
-                  <span className="text-[10.5px] text-[#A8A49E]">
+                  <span className="text-[10.5px] text-muted-foreground">
                     Ward range:
                   </span>
                   <span className=" text-[10.5px] font-medium text-[#6B6760]">
@@ -921,7 +923,7 @@ export default function AnalyticsDashboard({
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div className="mt-3 flex justify-between text-[10.5px] text-[#A8A49E] pt-3.5 border-t border-[#E8E4DC]">
+              <div className="mt-3 flex justify-between text-[10.5px] text-muted-foreground pt-3.5 border-t border-[#E8E4DC]">
                 <span>
                   Youngest: <b className="text-[#6B6760] ">{stats.minAge}y</b>
                 </span>
@@ -1000,7 +1002,7 @@ export default function AnalyticsDashboard({
                   </div>
                 )}
               </div>
-              <div className="mt-3 text-[10.5px] text-[#A8A49E]">
+              <div className="mt-3 text-[10.5px] text-muted-foreground">
                 Above district threshold of{" "}
                 <span className=" font-semibold text-[#4A7C59]">75%</span>
               </div>

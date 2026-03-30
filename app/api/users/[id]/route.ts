@@ -29,7 +29,7 @@ async function putHandler(request: NextRequest, { params }: Params) {
         const token = await getAccessToken();
         const client = getDirectusClient(token!);
 
-        if (body.userType) {
+        if (body.user_type) {
             const roles = await client.request(
                 readRoles({
                     filter: {
