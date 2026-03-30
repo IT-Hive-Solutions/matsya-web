@@ -65,6 +65,7 @@ export default function ResetPassword() {
     },
   });
   const handleSubmit = async (data: ForgotPasswordDTO) => {
+    setIsLoading(true);
     await resetPasswordMutation.mutateAsync(data);
   };
 
@@ -159,8 +160,9 @@ export default function ResetPassword() {
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 mt-6 transition-all duration-200"
                   disabled={isLoading}
+                  isLoading={isLoading}
                 >
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {"Change Password"}
                 </Button>
               </form>
             </Form>
