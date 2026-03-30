@@ -5,7 +5,7 @@ import type React from "react";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { AppDownloadLinkDirectus } from "@/core/interfaces/appDownloadLink.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { getAssetURL } from "@/core/lib/directus";
+import { getAssetURL, getDownloadUrl } from "@/core/lib/directus";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -224,7 +224,7 @@ export default function NavigationDrawer({
               <Link
                 href={
                   fetchedDownloadLinkData?.data?.apk
-                    ? getAssetURL(fetchedDownloadLinkData?.data?.apk)
+                    ? getDownloadUrl(fetchedDownloadLinkData?.data?.apk)
                     : "#"
                 }
                 target="_blank"
