@@ -1,22 +1,4 @@
-import { endpoints } from "@/core/contants/endpoints";
-import { IAnimal } from "@/core/interfaces/animal.interface";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { useQuery } from "@tanstack/react-query";
-import { Separator } from "@/components/ui/separator";
-import {
-  Calendar,
-  MapPin,
-  Phone,
-  User,
-  AlertCircle,
-  Syringe,
-  CheckCircle,
-  XCircle,
-  X,
-} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import React, { useEffect, useState } from "react";
-import { Badge } from "../ui/badge";
 import {
   Card,
   CardContent,
@@ -24,11 +6,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { StatusBadge } from "./view-entries";
-import Image from "next/image";
-import { getAssetURL } from "@/core/lib/directus";
+import { Separator } from "@/components/ui/separator";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { endpoints } from "@/core/contants/endpoints";
+import { IAnimal } from "@/core/interfaces/animal.interface";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  MapPin,
+  Phone,
+  Syringe,
+  User,
+  X,
+  XCircle,
+} from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import Loading from "../loading";
+import { Badge } from "../ui/badge";
+import { StatusBadge } from "./view-entries";
 
 type Props = {
   onClose: () => void;
@@ -55,12 +54,18 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
     enabled: !!animalId,
   });
   useEffect(() => {
+    return () => {
+      setAnimal(undefined);
+    };
+  }, []);
+
+  useEffect(() => {
     if (fetchedAnimalData?.data) {
       setAnimal(fetchedAnimalData?.data);
     }
   }, [fetchedAnimalData]);
 
-  if (isLoading) {
+  if (isLoading || (animal?.id !== animalId && animal !== undefined)) {
     return <Loading />;
   }
   return (
