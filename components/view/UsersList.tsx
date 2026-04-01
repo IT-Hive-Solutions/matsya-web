@@ -168,8 +168,8 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
       toast.success("User created successfully!");
     },
-    onError: (err) => {
-      toast.error("Error creating user!");
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error ?? "Error fetching user!");
     },
     onSettled: () => {
       setLoadingId(null);

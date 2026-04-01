@@ -47,6 +47,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             "animal_type.*",
             "animal_category.*",
             "owners_id.*",
+            "owners_id.district_id.*",
             "production_capacity.*",
           ],
         },
@@ -195,7 +196,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
             </div>
           </div>
           {animal?.image && (
-            <div className="w-full max-h-96 flex flex-col gap-2 pt-4">
+            <div className="w-full flex flex-col gap-2 pt-4">
               <p className="text-sm text-muted-foreground">Tagging Image</p>
               <Image
                 src={
@@ -206,6 +207,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
                 // src={"http://directus-koko8soc8sckg0c4woggkwsk.159.65.150.129.sslip.io/assets/eb9db6bc-f6ef-42a1-8d2b-4a6c7ca6a844"}
                 height={300}
                 width={300}
+                objectFit="fit"
                 alt={String(animal?.animal_type?.animal_name) ?? ""}
               />
             </div>
@@ -245,7 +247,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">District ID</p>
+              <p className="text-sm text-muted-foreground">District</p>
               <p className="font-medium">
                 {animal?.owners_id.district_id.district_name}
               </p>

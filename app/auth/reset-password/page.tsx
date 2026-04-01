@@ -57,8 +57,8 @@ export default function ResetPassword() {
         router.push("/");
       }, 3000);
     },
-    onError: (err) => {
-      toast.error("Error creating user!");
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error ?? "Error updating password!");
     },
     onSettled: () => {
       setIsLoading(false);
