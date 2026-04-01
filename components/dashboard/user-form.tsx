@@ -129,8 +129,8 @@ export default function UserForm({
         setIsFormSubmitting(false);
       }, 500);
     },
-    onError: (err) => {
-      toast.error("Error creating user!");
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error ?? "Error creating user!");
     },
   });
   const updateUserMutation = useMutation({
@@ -146,8 +146,8 @@ export default function UserForm({
         setIsFormSubmitting(false);
       }, 500);
     },
-    onError: (err) => {
-      toast.error("Error creating user!");
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error ?? "Error updating user!");
     },
   });
   const onSubmit = (data: CreateUserDTO) => {

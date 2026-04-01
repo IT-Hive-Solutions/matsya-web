@@ -56,10 +56,13 @@ export default function LoginPage() {
       // router.push("/");
       // router.refresh();
     },
-    onError: (err) => {
+    onError: (err: any) => {
       setIsLoading(false);
+      console.log({ error: err?.response?.data?.error });
 
-      toast.error("Error creating user!");
+      toast.error(
+        err?.response?.data?.error ?? "Error Occurred while loging!",
+      );
     },
   });
   const handleSubmit = async (data: LoginDTO) => {
