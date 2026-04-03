@@ -133,12 +133,12 @@ export default function NavigationDrawer({
         directusEndpoints.app_download_link,
       ),
   });
-  const handleDownloadApplication = (downloadUrl: string) => {
-    const tab = window.open("", "_blank");
-    tab!.location.href = getDownloadUrl(downloadUrl);
+  const handleDownloadApplication = (fieldId: string) => {
+    const tab = window.open("", "_blank"); // open immediately on gesture
+    tab!.location.href = getDownloadUrl(fieldId); // then navigate it
     setTimeout(() => {
-      tab?.close();
-    }, 200);
+      tab!.close();
+    }, 300);
   };
 
   return (
