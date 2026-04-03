@@ -133,6 +133,13 @@ export default function NavigationDrawer({
         directusEndpoints.app_download_link,
       ),
   });
+  const handleDownloadApplication = (downloadUrl: string) => {
+    const tab = window.open("", "_blank");
+    tab!.location.href = getDownloadUrl(downloadUrl);
+    setTimeout(() => {
+      tab?.close();
+    }, 200);
+  };
 
   return (
     <>
@@ -216,20 +223,15 @@ export default function NavigationDrawer({
           <hr className="border-border my-2" />
           <div className="h-full flex flex-col justify-end py-4">
             {fetchedDownloadLinkData?.data?.apk && (
-              <a
-                href={
-                  fetchedDownloadLinkData?.data?.apk
-                    ? getDownloadUrl(fetchedDownloadLinkData?.data?.apk)
-                    : "#"
+              <Button
+                variant={"outline"}
+                className="w-full"
+                onClick={() =>
+                  handleDownloadApplication(fetchedDownloadLinkData?.data?.apk)
                 }
-                target="_blank"
-                rel="noopener noreferrer"
-                download
               >
-                <Button variant={"outline"} className="w-full">
-                  Download Mobile App
-                </Button>
-              </a>
+                Download Mobile App
+              </Button>
             )}
           </div>
         </div>
