@@ -68,12 +68,7 @@ export default function NavigationDrawer({
       label: "New Entry",
       icon: <Plus size={20} />,
       section: "new-entry",
-      requiredRoles: [
-        "admin",
-        "province-level",
-        "local-level",
-        "vaccinator",
-      ],
+      requiredRoles: ["admin", "province-level", "local-level", "vaccinator"],
     },
     {
       id: "view-entries",
@@ -220,7 +215,7 @@ export default function NavigationDrawer({
 
           <hr className="border-border my-2" />
           <div className="h-full flex flex-col justify-end py-4">
-            {fetchedDownloadLinkData && (
+            {fetchedDownloadLinkData?.data?.apk && (
               <Link
                 href={
                   fetchedDownloadLinkData?.data?.apk
@@ -228,6 +223,7 @@ export default function NavigationDrawer({
                     : "#"
                 }
                 target="_blank"
+                rel="noopener noreferrer"
                 download
               >
                 <Button variant={"outline"} className="w-full">
