@@ -228,6 +228,7 @@ export default function NavigationDrawer({
                     : "#"
                 }
                 target="_blank"
+                download
               >
                 <Button variant={"outline"} className="w-full">
                   Download Mobile App
