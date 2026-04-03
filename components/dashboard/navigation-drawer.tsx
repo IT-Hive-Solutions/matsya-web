@@ -216,7 +216,7 @@ export default function NavigationDrawer({
           <hr className="border-border my-2" />
           <div className="h-full flex flex-col justify-end py-4">
             {fetchedDownloadLinkData?.data?.apk && (
-              <Link
+              <a
                 href={
                   fetchedDownloadLinkData?.data?.apk
                     ? getDownloadUrl(fetchedDownloadLinkData?.data?.apk)
@@ -229,7 +229,7 @@ export default function NavigationDrawer({
                 <Button variant={"outline"} className="w-full">
                   Download Mobile App
                 </Button>
-              </Link>
+              </a>
             )}
           </div>
         </div>
