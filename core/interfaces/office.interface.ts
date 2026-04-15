@@ -11,8 +11,11 @@ export interface OfficeDirectus {
     office_email: string;
     district_id: number;
     province_id: number;
+    min_assigned_tag_number: number;
+    max_assigned_tag_number: number;
     date_created?: string;
     date_updated?: string;
+
 };
 
 
@@ -29,6 +32,8 @@ export interface IOffice {
     office_address: string;
     office_contact: string;
     office_email: string;
+    min_assigned_tag_number: number;
+    max_assigned_tag_number: number;
     province_id: IProvince;
     district_id: IDistrict;
 }

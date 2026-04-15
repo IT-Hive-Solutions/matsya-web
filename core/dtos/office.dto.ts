@@ -7,6 +7,8 @@ export const CreateOfficeSchema = z.object({
     district_id: z.number({ required_error: "District is required!" }),
     province_id: z.number({ required_error: "Province is required!" }),
     mun_id: z.number().optional(),
+    min_assigned_tag_number: z.number().optional(),
+    max_assigned_tag_number: z.number().optional(),
     ward_number: z.number().optional(),
 });
 

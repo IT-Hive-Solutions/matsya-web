@@ -87,6 +87,8 @@ export default function OfficeForm({
       office_contact: "",
       province_id: undefined,
       ward_number: undefined,
+      max_assigned_tag_number: undefined,
+      min_assigned_tag_number: undefined,
     },
     resolver: zodResolver(CreateOfficeSchema),
   });
@@ -195,6 +197,8 @@ export default function OfficeForm({
         office_email: office?.office_email,
         office_contact: office?.office_contact,
         province_id: office?.district_id?.province_id?.id,
+        max_assigned_tag_number: office?.max_assigned_tag_number,
+        min_assigned_tag_number: office?.min_assigned_tag_number,
         ward_number: undefined,
       };
 
@@ -261,6 +265,59 @@ export default function OfficeForm({
                       <Input
                         placeholder="e.g., someone@example.com"
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Office Name */}
+              <FormField
+                control={form.control}
+                name="min_assigned_tag_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minimum Assigned Tag Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="e.g., 0000000001"
+                        {...field}
+                        onChange={(e) => {
+                          const parsed = parseInt(e.target.value ?? "");
+                          if (!isNaN(parsed)) {
+                            field.onChange(parsed);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="max_assigned_tag_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Assigned Tag Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="e.g., 000000000123"
+                        {...field}
+                        onChange={(e) => {
+                          const parsed = parseInt(e.target.value ?? "");
+                          if (e.target.value === "") {
+                            field.onChange(0);
+                          }
+                          if (!isNaN(parsed)) {
+                            field.onChange(parsed);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
