@@ -5,6 +5,7 @@ export interface AnimalCategoryDirectus {
     status: Status;
     sort: number;
     category_name: string;
+    tag_prefix?: number;
     date_created?: string;
     date_updated?: string;
 };
@@ -14,6 +15,7 @@ export interface IAnimalCategories {
     status: Status;
     sort: number;
     category_name: string;
+    tag_prefix?: number;
     date_created?: string;
     date_updated?: string;
 }

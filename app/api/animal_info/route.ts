@@ -23,8 +23,8 @@ async function getHandler(request: NextRequest) {
         }));
         // Determine the user's role
         const userRole = userData.role.name; // "vaccinator", "admin", etc.
-        const userDistrictId = userData.office_id.district_id?.id;
-        const userProvinceId = userData.office_id.province_id;
+        const userDistrictId = userData.office_id?.district_id?.id;
+        const userProvinceId = userData.office_id?.province_id;
         const { searchParams } = new URL(request.url);
         const searchQuery = searchParams.get('searchQuery')?.trim();
 
@@ -128,6 +128,7 @@ async function getHandler(request: NextRequest) {
                     "production_capacity.*",
                     "owners_id.district_id.*",
                     "owners_id.district_id.province_id.*",
+                    "user_created.*"
                 ],
                 filter: filter, // Apply the filter
                 sort: ['-date_created'],
@@ -229,7 +230,7 @@ async function postHandler(request: NextRequest) {
                     owners_name: body.owners_name,
                     owners_contact: body.owners_contact,
                     ward_number: body.ward_number,
-                    district_id: body.district_id,
+                    district_id: body?.district_id,
                     local_level_name: body.local_level_name,
                     date: body.date,
                     latitude: body.latitude,

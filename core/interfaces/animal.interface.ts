@@ -5,6 +5,7 @@ import { IAnimalType } from "./animalType.interface";
 import { IOwner } from "./ownersInfo.interface";
 import { IProductionCapacity } from "./productionCapacity.interface";
 import { Status } from "./status.interface";
+import { IUser } from "./user.interface";
 
 
 export interface AnimalInfoDirectus {
@@ -34,7 +35,7 @@ export interface IAnimal {
     id: number;
     status: string;
     sort: null | number;
-    user_created: string;
+    user_created: IUser;
     date_created: string;
     user_updated: string | null;
     date_updated: string | null;

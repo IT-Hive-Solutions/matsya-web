@@ -8,6 +8,7 @@ export async function exportAnimalData(data: IAnimal[]) {
     // ── Column definitions ──────────────────────────────────────────────────────
     sheet.columns = [
         // Owner columns
+        { header: "Created By", key: "createdBy", width: 20 },
         { header: "Owner Name", key: "ownerName", width: 20 },
         { header: "Owner Contact", key: "ownerContact", width: 16 },
         { header: "Ward Number", key: "wardNumber", width: 12 },
@@ -70,6 +71,7 @@ export async function exportAnimalData(data: IAnimal[]) {
             const altFill = idx % 2 === 0 ? animalFillA : animalFillB;
 
             row.values = [
+                isFirst ? `${animal.user_created?.first_name ?? ""} ${animal.user_created?.last_name ?? ""} ` : "",
                 isFirst ? owner?.owners_name : "",
                 isFirst ? owner?.owners_contact : "",
                 isFirst ? (owner?.ward_number ?? "N/A") : "",
