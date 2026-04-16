@@ -41,7 +41,7 @@ export const animalCategoriesColumns: ColumnDef<IAnimalCategories>[] = [
   },
   {
     accessorKey: "tag_prefix",
-    header: "Name",
+    header: "Tag Prefix",
     cell: ({ row }) => {
       return <p className="min-w-24 pr-2">{row.original.tag_prefix ?? "-"}</p>;
     },

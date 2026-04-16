@@ -606,7 +606,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                     control={form.control}
                     name={`cattleEntries.${idx}.age_months`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex-1">
                         <FormLabel>Age (Months)</FormLabel>
                         <FormControl>
                           <Input
