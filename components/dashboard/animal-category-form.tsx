@@ -61,6 +61,7 @@ export default function AnimalCategoryForm({
   const form = useForm<CreateAnimalCategoryDTO>({
     defaultValues: {
       category_name: "",
+      tag_prefix: undefined,
     },
     resolver: zodResolver(CreateAnimalCategorySchema),
   });
@@ -176,6 +177,33 @@ export default function AnimalCategoryForm({
                       <Input
                         placeholder="e.g., District Veterinary Animal Category "
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tag_prefix"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tag Number Prefix</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., 001992 "
+                        {...field}
+                        type="number"
+                        onChange={(e) => {
+                          const parsed = parseInt(e.target.value);
+                          if (e.target.value === "") {
+                            field.onChange(undefined);
+                            return;
+                          }
+                          if (!isNaN(parsed)) {
+                            field.onChange(parsed);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

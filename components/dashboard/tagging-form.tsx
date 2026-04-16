@@ -1,19 +1,8 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import FormSection from "@/components/form/form-section";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -23,22 +12,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import FormSection from "@/components/form/form-section";
-import { useToast } from "@/components/ui/use-toast";
-import { IUser } from "@/core/interfaces/user.interface";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { CreateAnimalSchema } from "@/core/dtos/animal.dto";
-import { monthOptions } from "@/core/enums/month.enum";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { endpoints } from "@/core/contants/endpoints";
+import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
-import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
+import { IUser } from "@/core/interfaces/user.interface";
+import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X } from "lucide-react";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
 
 interface TaggingFormProps {
   user: IUser;
@@ -132,6 +128,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       setAnimalTypeOptions(payload);
     }
   }, [animalTypesFetched]);
+
   useEffect(() => {
     if (animalCategoryFetched?.data) {
       const payload = animalCategoryFetched?.data?.map(
@@ -202,6 +199,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       remove(index);
     }
   };
+  console.log({ formData: form.watch() });
 
   const handleImageUpload = async (file: File, index: number) => {
     if (!file) return;
@@ -486,7 +484,16 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                       </FormLabel>
                       <Select
                         {...field}
-                        onValueChange={(val) => field.onChange(parseInt(val))}
+                        onValueChange={(val) => {
+                          field.onChange(parseInt(val));
+                          const tagNumber = animalCategoryFetched?.data?.find(
+                            (cat) => cat.id === parseInt(val),
+                          )?.tag_prefix;
+                          form.setValue(
+                            `cattleEntries.${idx}.tag_number`,
+                            tagNumber ? tagNumber?.toString() : "",
+                          );
+                        }}
                         value={field.value?.toString() ?? ""}
                       >
                         <FormControl>
