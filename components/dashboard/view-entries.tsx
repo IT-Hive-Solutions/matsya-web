@@ -169,8 +169,8 @@ export default function OwnerAnimalView({
         searchQuery: debouncedSearchValue,
         // fields: [
         //   "*.*",
-        //   "owners_id.district_id.*",
-        //   "owners_id.district_id.province_id.*",
+        // "owners_id.district_id.*",
+        // "owners_id.district_id.province_id.*",
         // ],
       }),
   });
