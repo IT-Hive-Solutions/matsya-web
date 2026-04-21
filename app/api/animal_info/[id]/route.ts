@@ -1,3 +1,4 @@
+import { VerificationStatus } from '@/core/enums/verification-status.enum';
 import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
 import { readItem, updateItem } from '@directus/sdk';
@@ -57,7 +58,7 @@ async function putHandler(request: NextRequest, { params }: Params) {
                 owners_id: body.owners_id,
                 production_capacity: body.production_capacity,
                 num_of_animals: body.num_of_animals,
-                verification_status: body.verification_status,
+                verification_status: VerificationStatus.Pending,
             })
         );
 
