@@ -470,7 +470,7 @@ export default function OwnerAnimalView({
                                 {animal.animal_category.category_name}
                               </Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground font-mono">
+                            <p className=" text-muted-foreground font-mono">
                               Tag: {animal.tag_number}
                             </p>
                           </div>
@@ -513,7 +513,7 @@ export default function OwnerAnimalView({
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {animal.age_years} Years and
+                                {animal.age_years} Years {" "}
                                 {animal.age_months} Months
                               </p>
                             </div>
