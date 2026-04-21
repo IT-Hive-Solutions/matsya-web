@@ -42,6 +42,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Checkbox } from "../ui/checkbox";
+import Loading from "../loading";
 
 interface AnimalFormProps {
   onClose: () => void;
@@ -68,7 +69,17 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
     }[]
   >([]);
 
-  const { data: fetchedAnimalData } = useQuery({
+  useEffect(() => {
+    return () => {
+      form.reset();
+    };
+  }, []);
+
+  const {
+    data: fetchedAnimalData,
+    isLoading,
+    isFetching: isAnimalFetching,
+  } = useQuery({
     queryKey: ["animal"],
     queryFn: () =>
       fetchHandler(directusEndpoints.animal_info.byId(animalId ?? -1), {
@@ -216,6 +227,10 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
       createAnimalMutation.mutateAsync(data as CreateAnimalDTO);
     }
   };
+
+  if (isLoading || isAnimalFetching || !fetchedAnimalData?.data) {
+    return <Loading />;
+  }
   return (
     <Card className="shadow-xl">
       <div className="p-6 sm:p-8">
