@@ -15,22 +15,21 @@
 //   • `last_notified_at` on each record tracks when we last sent a notification.
 //   • We skip any record notified within the last 7 days.
 
-import { NextRequest, NextResponse } from "next/server";
-import { readItems, updateItem } from "@directus/sdk";
-import { getDirectusClient } from "@/core/lib/directus";
-import { getAccessToken } from "@/core/lib/auth";
+import { getDirectusWithStaticToken } from "@/core/lib/directus";
 import { sendNotification } from "@/core/lib/notification";
+import { readItems, updateItem } from "@directus/sdk";
+import { NextRequest, NextResponse } from "next/server";
 
 // ─── Config — adjust these to match your collection ──────────────────────────
 
 const COLLECTION = "animal_info";   // ← replace with your collection name
 const DATE_FIELD = "vaccinated_date";        // ← the date field to watch
 const OWNER_FIELD = "user_created";          // ← field that holds the owner's user ID
-const LABEL_FIELD = "name";             // ← a human-readable field for the notification text
+const LABEL_FIELD = "animal_category.category_name";             // ← a human-readable field for the notification text
 
 // Warning fires when the date is between these many months ago
-const WARN_MONTH_START = 11;   // start of warning window (11 months ago)
-const WARN_MONTH_END = 12;     // end of warning window (12 months ago = already expired)
+const WARN_MONTH_START = 12;   // start of warning window (11 months ago)
+const WARN_MONTH_END = 13;     // end of warning window (12 months ago = already expired)
 
 // How many days must pass before we re-notify the same record
 const NOTIFY_COOLDOWN_DAYS = 7;
@@ -53,15 +52,13 @@ interface CronResult {
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-    // ── Auth: verify the cron secret to block unauthorized calls ──────────────
-    const authHeader = request.headers.get("authorization");
-    const expectedToken = `Bearer ${process.env.CRON_SECRET}`;
+    // const authHeader = request.headers.get("authorization");
+    // const expectedToken = `Bearer ${process.env.CRON_SECRET}`;
 
-    if (authHeader !== expectedToken) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const token = await getAccessToken()
-    const directus = getDirectusClient(token!);
+    // if (authHeader !== expectedToken) {
+    //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
+    const directus = getDirectusWithStaticToken();
     const result: CronResult = { processed: 0, notified: 0, skipped: 0, errors: [] };
 
     try {
@@ -87,24 +84,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         //   either never notified, or last notified more than COOLDOWN days ago.
         const records = (await directus.request(
             readItems(COLLECTION as "animal_info", {
-                filter: {
-                    _and: [
-                        // Date is within the 11–12 month warning window
-                        { [DATE_FIELD]: { _gte: warnEnd.toISOString().split("T")[0] } },
-                        { [DATE_FIELD]: { _lte: warnStart.toISOString().split("T")[0] } },
-                        // Not notified recently (null = never notified, or older than cooldown)
-                        {
-                            _or: [
-                                { last_notified_at: { _null: true } },
-                                { last_notified_at: { _lte: cooldownCutoff.toISOString() } },
-                            ],
-                        },
-                    ],
-                },
+                // filter: {
+                //     _and: [
+                //         // Date is within the 11–12 month warning window
+                //         { [DATE_FIELD]: { _gte: warnEnd.toISOString().split("T")[0] } },
+                //         { [DATE_FIELD]: { _lte: warnStart.toISOString().split("T")[0] } },
+                //         // Not notified recently (null = never notified, or older than cooldown)
+                //         {
+                //             _or: [
+                //                 { last_notified_at: { _null: true } },
+                //                 { last_notified_at: { _lte: cooldownCutoff.toISOString() } },
+                //             ],
+                //         },
+                //     ],
+                // },
                 fields: ["id", DATE_FIELD, OWNER_FIELD, LABEL_FIELD, "last_notified_at"],
                 limit: 100, // process in batches — increase or paginate if needed
             })
         )) as CollectionRecord[];
+
+        console.log("Windows Data:::: ", { records });
 
         result.processed = records.length;
 
@@ -116,7 +115,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         await Promise.allSettled(
             records.map(async (record) => {
                 const userId = record[OWNER_FIELD] as string | null;
-                const label = (record[LABEL_FIELD] as string) ?? "your record";
+                const categoryObj = record[LABEL_FIELD] as { category_name?: string } | null;
+                const label = categoryObj?.category_name ?? "your record";
                 const dateValue = record[DATE_FIELD] as string;
 
                 if (!userId) {
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
                         type: "warning",
                         data: {
                             url: `/${COLLECTION}/${record.id}`,   // deep link into the app
-                            recordId: record.id,
+                            recordId: String(record.id),
                             daysRemaining: String(daysRemaining),
                         },
                     });
@@ -155,6 +155,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
                     result.notified++;
                 } catch (err) {
+
                     const msg = err instanceof Error ? err.message : "Unknown error";
                     result.errors.push(`Record ${record.id}: ${msg}`);
                 }
@@ -164,6 +165,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         console.log("[cron/check-expiry] Result:", result);
         return NextResponse.json({ success: true, ...result });
     } catch (error) {
+        console.log("cron Jobs", { error });
+
         const message = error instanceof Error ? error.message : "Unknown error";
         console.error("[cron/check-expiry] Fatal error:", message);
         return NextResponse.json({ error: message }, { status: 500 });

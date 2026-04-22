@@ -17,7 +17,7 @@ import type {
     SendNotificationResponse,
     UserFcmToken,
 } from "@/core/lib/notification";
-import { getDirectusClient } from "@/core/lib/directus";
+import { getDirectusClient, getDirectusWithStaticToken } from "@/core/lib/directus";
 import { getAccessToken } from "@/core/lib/auth";
 import admin from "@/core/lib/firebase/admin";
 
@@ -35,7 +35,7 @@ export async function POST(
             );
         }
         const token = await getAccessToken();
-        const directus = getDirectusClient(token!);
+        const directus = getDirectusWithStaticToken();
 
         // ── 1. Save notification to Directus (in-app record) ──────────────────────
         await directus.request(
@@ -64,9 +64,8 @@ export async function POST(
         }
 
         const tokenValues = tokens.map((t) => t.token);
-
-        // ── 3. Send push via Firebase Admin ───────────────────────────────────────
-        const fcmResponse = await admin.messaging().sendEachForMulticast({
+        console.log({ tokenValues });
+        const payload = {
             tokens: tokenValues,
             notification: {
                 title,
@@ -88,7 +87,11 @@ export async function POST(
                     badge: "/badge-72x72.png",
                 },
             },
-        });
+        }
+        console.log("notification push payload :::::: ", payload);
+
+        // ── 3. Send push via Firebase Admin ───────────────────────────────────────
+        const fcmResponse = await admin.messaging().sendEachForMulticast(payload);
 
         // ── 4. Clean up invalid/expired tokens ────────────────────────────────────
         const expiredTokens: string[] = [];
