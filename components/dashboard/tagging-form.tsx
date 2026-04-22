@@ -199,7 +199,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       remove(index);
     }
   };
-  console.log({ formData: form.watch() });
 
   const handleImageUpload = async (file: File, index: number) => {
     if (!file) return;

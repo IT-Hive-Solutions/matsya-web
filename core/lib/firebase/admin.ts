@@ -6,7 +6,6 @@ const serviceAccount: ServiceAccount = {
   // Firebase stores the private key with literal \n — replace them with real newlines
   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
 };
-console.log({ serviceAccount });
 
 if (!admin.apps.length) {
   admin.initializeApp({
