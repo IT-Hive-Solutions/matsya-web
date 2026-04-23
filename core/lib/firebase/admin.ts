@@ -1,16 +1,16 @@
-import admin, { ServiceAccount } from "firebase-admin";
+import { getApps, initializeApp, cert, getApp } from "firebase-admin/app";
+import { getMessaging } from "firebase-admin/messaging";
 
-const serviceAccount: ServiceAccount = {
+const serviceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID!,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-  // Firebase stores the private key with literal \n — replace them with real newlines
   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
 };
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
+const adminApp =
+  getApps().length === 0
+    ? initializeApp({ credential: cert(serviceAccount) })
+    : getApp();
 
-export default admin;
+export const adminMessaging = getMessaging(adminApp);
+export default adminApp;
