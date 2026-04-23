@@ -9,6 +9,8 @@ export default async function Home() {
   if (user.needs_password_change) {
     redirect(`/auth/reset-password?email=${user.email}`);
   }
+  console.log({ user });
+
   return (
     <div className="w-screen h-screen overflow-hidden">
       {user && <Dashboard user={user as IUser} />}

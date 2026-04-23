@@ -14,7 +14,7 @@ import {
     staticToken
 } from "@directus/sdk";
 import { AppDownloadLinkDirectus } from '../interfaces/appDownloadLink.interface';
-import { DIRECTUS_BASE_URL } from '../contants/directusEndpoints';
+import { DIRECTUS_BASE_URL, DIRECTUS_STATIC_TOKEN } from '../contants/directusEndpoints';
 
 
 export type Schema = {
@@ -34,6 +34,11 @@ export type Schema = {
 export function getDirectusClient(token: string) {
     return createDirectus(DIRECTUS_BASE_URL)
         .with(staticToken(token))  // token already managed by your cookie system
+        .with(rest())
+}
+export function getDirectusWithStaticToken() {
+    return createDirectus(DIRECTUS_BASE_URL)
+        .with(staticToken(DIRECTUS_STATIC_TOKEN))  // token already managed by your cookie system
         .with(rest())
 }
 

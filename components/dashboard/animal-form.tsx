@@ -111,8 +111,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
   useEffect(() => {
     const data = fetchedAnimalData?.data;
     if (data) {
-      console.log({ fetchedData: data });
-
       const payload: UpdateAnimalDTO = {
         age_months: data?.age_months,
         age_years: data?.age_years,
@@ -127,7 +125,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
         owners_contact: data?.owners_id?.owners_contact,
         vaccinated_date: data?.vaccinated_date,
       };
-      console.log({ payload });
 
       form.reset(payload);
     }
@@ -187,7 +184,6 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
     resolver: zodResolver(CreateAnimalSchema),
     reValidateMode: "onChange",
   });
-  console.log({ formData: form.watch() });
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: CreateAnimalDTO) =>
@@ -265,7 +261,11 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                   <FormItem>
                     <FormLabel>Tag Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 0001" {...field} />
+                      <Input
+                        placeholder="e.g., 0001"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,9 +333,9 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          type="data"
+                          type="date"
                           {...field}
-                          value={field.value}
+                          value={field.value ?? ""}
                           disabled
                         />
                       </FormControl>
@@ -352,7 +352,11 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                   <FormItem>
                     <FormLabel>Owner's Contact Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="9xxxxxxxxx" {...field} />
+                      <Input
+                        placeholder="9xxxxxxxxx"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -407,6 +411,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                         type="number"
                         placeholder="Age in Years"
                         {...field}
+                        value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value))
                         }
@@ -429,6 +434,7 @@ export default function AnimalForm({ onClose, animalId }: AnimalFormProps) {
                         type="number"
                         placeholder="Age in Months"
                         {...field}
+                        value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value))
                         }

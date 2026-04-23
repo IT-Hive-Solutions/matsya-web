@@ -13,6 +13,8 @@
  * });
  */
 
+import { sendNotificationDirect } from "./notification-sender";
+
 export interface Notification {
     id: string;
     user_id: string;
@@ -24,12 +26,12 @@ export interface Notification {
     date_created: string;
 }
 export interface UpdateNotificationPayload {
-  read: boolean;
+    read: boolean;
 }
 
 export interface UpdateNotificationResponse {
-  success: boolean;
-  notification: Notification;
+    success: boolean;
+    notification: Notification;
 }
 
 export interface UserFcmToken {
@@ -58,28 +60,28 @@ export interface SendNotificationResponse {
     error?: string;
 }
 export interface GetNotificationsResponse {
-  notifications: Notification[];
-  unreadCount: number;
-  total: number;
+    notifications: Notification[];
+    unreadCount: number;
+    total: number;
 }
 
 export async function sendNotification(
     payload: SendNotificationPayload
 ): Promise<SendNotificationResponse> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    try {
 
-    const response = await fetch(`${baseUrl}/api/notifications/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-    });
+        const response = await sendNotificationDirect(payload);
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Failed to send notification: ${error}`);
+        if (response.error && !response.success) {
+            const error = response.error;
+            throw new Error(`Failed to send notification: ${error}`);
+        }
+
+        return response;
+    } catch (error) {
+        console.log("sendNotification error", { error });
+        throw error;
     }
-
-    return response.json() as Promise<SendNotificationResponse>;
 }
 
 /**

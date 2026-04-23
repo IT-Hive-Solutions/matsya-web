@@ -92,7 +92,6 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
         refetchOnWindowFocus: true,
         placeholderData: (prev) => prev,
     });
-    console.log({ data });
 
     const notifications: Notification[] = data?.notifications ?? [];
 
@@ -225,7 +224,6 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
             await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
             const registration = await navigator.serviceWorker.ready;
-            console.log({ registration });
 
 
 
@@ -253,7 +251,6 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
             });
 
             const messaging = await getFirebaseMessaging();
-            console.log({ messaging });
 
             if (!messaging) return;
 
@@ -261,7 +258,6 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
                 vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY!,
                 serviceWorkerRegistration: registration,
             });
-            console.log({ token });
 
             if (!token) {
                 console.warn("FCM token not received.");
@@ -270,7 +266,6 @@ export function useNotifications(userId: string | null): UseNotificationsReturn 
 
             // POST to our API route — Directus SDK runs there, not here
             await registerFcmToken(userId, token);
-            console.log("FCM token registered.");
         } catch (err) {
             console.error("Permission/token error:", err);
         }

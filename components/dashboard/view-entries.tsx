@@ -144,7 +144,6 @@ export default function OwnerAnimalView({
       ),
     onSuccess: (res) => {
       queryClient.invalidateQueries();
-      console.log({ res });
       selectedOwner?.animals.map(
         (animal) =>
           res.id === animal.id &&
@@ -215,6 +214,12 @@ export default function OwnerAnimalView({
         ),
     );
     setFilteredData(newFilteredData);
+    if (selectedOwner) {
+      const updatedSelectedOwner = newFilteredData.find(
+        (group) => group.owner.id === selectedOwner.owner.id,
+      );
+      setSelectedOwner(updatedSelectedOwner || null);
+    }
   }, [fetchedAnimalList]);
 
   if (isLoading && !isFetching) {
@@ -513,8 +518,8 @@ export default function OwnerAnimalView({
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <p className="text-sm font-medium text-slate-900">
-                                {animal.age_years} Years {" "}
-                                {animal.age_months} Months
+                                {animal.age_years} Years {animal.age_months}{" "}
+                                Months
                               </p>
                             </div>
                           </div>

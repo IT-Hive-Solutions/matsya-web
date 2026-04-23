@@ -58,7 +58,6 @@ export default function LoginPage() {
     },
     onError: (err: any) => {
       setIsLoading(false);
-      console.log({ error: err?.response?.data?.error });
 
       toast.error(
         err?.response?.data?.error ?? "Error Occurred while loging!",

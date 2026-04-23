@@ -21,13 +21,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { endpoints } from "@/core/contants/endpoints";
 import { CreateAnimalSchema } from "@/core/dtos/animal.dto";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import { mutateApiRouteHandler, mutateHandler } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X } from "lucide-react";
@@ -199,7 +200,6 @@ export default function TaggingForm({ user }: TaggingFormProps) {
       remove(index);
     }
   };
-  console.log({ formData: form.watch() });
 
   const handleImageUpload = async (file: File, index: number) => {
     if (!file) return;
@@ -273,7 +273,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
 
   const createAnimalMutation = useMutation({
     mutationFn: (payload: FormValues) =>
-      mutateHandler(directusEndpoints.animal_info["create-multiple"], payload),
+      mutateApiRouteHandler(endpoints.animal_info["create-multiple"], payload),
     onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["animals"],
@@ -295,6 +295,8 @@ export default function TaggingForm({ user }: TaggingFormProps) {
   });
 
   const onSubmit = async (data: FormValues) => {
+    console.log("SUBMITTINTTTTTTT");
+    
     await createAnimalMutation.mutateAsync(data);
   };
 
