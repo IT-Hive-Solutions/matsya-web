@@ -67,7 +67,7 @@ async function postHandler(request: NextRequest) {
                         { status: 404 }
                     );
                 }
-                body.owner_id = newOwner.id;
+                body.owners_id = newOwner.id;
             } else {
 
                 const updatePayload: any = {

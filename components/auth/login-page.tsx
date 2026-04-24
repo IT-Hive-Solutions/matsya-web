@@ -19,6 +19,7 @@ import {
 } from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -59,9 +60,7 @@ export default function LoginPage() {
     onError: (err: any) => {
       setIsLoading(false);
 
-      toast.error(
-        err?.response?.data?.error ?? "Error Occurred while loging!",
-      );
+      toast.error(err?.response?.data?.error ?? "Error Occurred while loging!");
     },
   });
   const handleSubmit = async (data: LoginDTO) => {
@@ -75,7 +74,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl  from-primary to-primary/80 mb-4 shadow-lg">
-            <span className="text-4xl">🐄</span>
+            <Image src={"/logo.png"} alt="Logo" width={32} height={32} />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">AIVR</h1>
           <p className="text-muted-foreground text-sm">

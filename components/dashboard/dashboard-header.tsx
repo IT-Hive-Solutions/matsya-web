@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Months } from "@/core/enums/month.enum";
 import { IUser } from "@/core/interfaces/user.interface";
 import NotificationBell from "./notification-bell";
+import Image from "next/image";
 
 interface HeaderProps {
   user?: IUser;
@@ -26,8 +27,8 @@ export default function DashboardHeader({ user }: HeaderProps) {
         <div className="h-full flex items-center justify-between ">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
-              <span className="text-lg">🐄</span>
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg ">
+              <Image src={"/logo.png"} alt="Logo" width={32} height={32} />
             </div>
             <div>
               <h1 className="text-lg sm:text-xl font-bold text-foreground">
