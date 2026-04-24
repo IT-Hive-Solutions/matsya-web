@@ -8,13 +8,13 @@ import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import {
-  fetchApiRouteHandler,
-  fetchHandler,
+  fetchApiRouteHandler
 } from "@/core/services/apiHandler/fetchHandler";
 import {
-  updateApiRouteHandler,
-  updateHandler,
+  updateApiRouteHandler
 } from "@/core/services/apiHandler/mutateHandler";
+import { exportAnimalData } from "@/core/services/exportAnimalData";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 import { useEscapeKey } from "@/hooks/useEscapePress";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -44,9 +44,6 @@ import { Button } from "../ui/button";
 import AnimalDetail from "./animal-detail";
 import AnimalForm from "./animal-form";
 import EntryRejectionWithReason from "./rejectEntryModal";
-import { useDebounceHook } from "@/hooks/useDebounceHook";
-import { exportAnimalData } from "@/core/services/exportAnimalData";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
 
 interface ViewEntriesPageProps {
   user: IUser;
@@ -635,7 +632,7 @@ export default function OwnerAnimalView({
                                   VerificationStatus.Draft ||
                                 animal.verification_status ===
                                   VerificationStatus.Rejected
-                              ))&& (
+                              )) ||  !(animal.verification_status === VerificationStatus.Validated) && (
                               <EntryRejectionWithReason
                                 className="w-max"
                                 title="Reject Animal?"
