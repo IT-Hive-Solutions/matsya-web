@@ -476,13 +476,17 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {!(
+                          {(!(
                             animal.verification_status ===
                               VerificationStatus.Rejected ||
                             animal.verification_status ===
                               VerificationStatus.Validated
                           ) &&
-                            user.role.name !== "district-level" && (
+                            user.role.name !== "district-level") || (
+                              animal.verification_status === VerificationStatus.Rejected &&
+                              user.role.name === "vaccinator"
+                            )
+                             && (
                               <Button
                                 variant={"ghost"}
                                 onClick={() => {
