@@ -7,12 +7,8 @@ import { endpoints } from "@/core/contants/endpoints";
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import {
-  fetchApiRouteHandler
-} from "@/core/services/apiHandler/fetchHandler";
-import {
-  updateApiRouteHandler
-} from "@/core/services/apiHandler/mutateHandler";
+import { fetchApiRouteHandler } from "@/core/services/apiHandler/fetchHandler";
+import { updateApiRouteHandler } from "@/core/services/apiHandler/mutateHandler";
 import { exportAnimalData } from "@/core/services/exportAnimalData";
 import { useDebounceHook } from "@/hooks/useDebounceHook";
 import { useEscapeKey } from "@/hooks/useEscapePress";
@@ -482,22 +478,21 @@ export default function OwnerAnimalView({
                             animal.verification_status ===
                               VerificationStatus.Validated
                           ) &&
-                            user.role.name !== "district-level") || (
-                              animal.verification_status === VerificationStatus.Rejected &&
-                              user.role.name === "vaccinator"
-                            )
-                             && (
-                              <Button
-                                variant={"ghost"}
-                                onClick={() => {
-                                  setEditDialogOpen(true);
-                                  setSelectedAnimal(animal.id);
-                                }}
-                                className="gap-2 cursor-pointer"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                            )}
+                            user.role.name !== "district-level") ||
+                            (animal.verification_status ===
+                              VerificationStatus.Rejected &&
+                              user.role.name === "vaccinator" && (
+                                <Button
+                                  variant={"ghost"}
+                                  onClick={() => {
+                                    setEditDialogOpen(true);
+                                    setSelectedAnimal(animal.id);
+                                  }}
+                                  className="gap-2 cursor-pointer"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                              ))}
                           <Button
                             variant={"ghost"}
                             onClick={() => {
@@ -618,25 +613,12 @@ export default function OwnerAnimalView({
                                 </div>
                               </AlertDialogWrapper>
                             )}
-                          {}
-                          {(!(
-                            animal.verification_status ===
-                              VerificationStatus.Validated ||
-                            animal.verification_status ===
-                              VerificationStatus.Rejected
-                          ) &&
-                            !(user.role.name === "district-level") &&
-                            !(
+
+                          {(user.role.name === "local-level" || user.role.name === "admin") &&
+                            (animal.verification_status ===
+                              VerificationStatus.Pending ||
                               animal.verification_status ===
-                                VerificationStatus.Pending &&
-                              user.role.name === "local-level"
-                            ) ) || (user.role.name === "local-level" &&
-                              !(
-                                animal.verification_status ===
-                                  VerificationStatus.Draft ||
-                                animal.verification_status ===
-                                  VerificationStatus.Rejected
-                              )) ||  !(animal.verification_status === VerificationStatus.Validated) && (
+                                VerificationStatus.Draft) && (
                               <EntryRejectionWithReason
                                 className="w-max"
                                 title="Reject Animal?"
