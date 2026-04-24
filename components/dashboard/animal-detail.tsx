@@ -28,6 +28,7 @@ import { useEffect, useState } from "react";
 import Loading from "../loading";
 import { Badge } from "../ui/badge";
 import { StatusBadge } from "./view-entries";
+import { toDateTimeLocal } from "@/core/services/dateTime/formatDate";
 
 type Props = {
   onClose: () => void;
@@ -256,7 +257,7 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
               <p className="text-sm text-muted-foreground">Registration Date</p>
               <p className="font-medium flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {animal?.owners_id.date}
+                {toDateTimeLocal(animal?.owners_id.date ?? "")}
               </p>
             </div>
           </div>
