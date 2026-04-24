@@ -618,7 +618,7 @@ export default function OwnerAnimalView({
                               </AlertDialogWrapper>
                             )}
                           {}
-                          {!(
+                          {(!(
                             animal.verification_status ===
                               VerificationStatus.Validated ||
                             animal.verification_status ===
@@ -629,28 +629,35 @@ export default function OwnerAnimalView({
                               animal.verification_status ===
                                 VerificationStatus.Pending &&
                               user.role.name === "local-level"
-                            ) && (
-                              <EntryRejectionWithReason
-                                className="w-max"
-                                title="Reject Animal?"
-                                description="This animal record will be marked as rejected. Continue?"
-                                onConfirm={async (setOpen, reason) => {
-                                  await handleUpdateVerificationStatusMutation.mutateAsync(
-                                    {
-                                      id: animal.id,
-                                      verification_status:
-                                        VerificationStatus.Rejected,
-                                      reason,
-                                    },
-                                  );
-                                  setOpen && setOpen(false);
-                                }}
-                                triggerVariant={"outline"}
-                              >
-                                <LucideOctagonMinus className="h-4 w-4" />
-                                <span>Reject</span>
-                              </EntryRejectionWithReason>
-                            )}
+                            )) ||
+                            (user.role.name === "local-level" &&
+                              !(
+                                animal.verification_status ===
+                                  VerificationStatus.Draft ||
+                                animal.verification_status ===
+                                  VerificationStatus.Rejected
+                              ) && (
+                                <EntryRejectionWithReason
+                                  className="w-max"
+                                  title="Reject Animal?"
+                                  description="This animal record will be marked as rejected. Continue?"
+                                  onConfirm={async (setOpen, reason) => {
+                                    await handleUpdateVerificationStatusMutation.mutateAsync(
+                                      {
+                                        id: animal.id,
+                                        verification_status:
+                                          VerificationStatus.Rejected,
+                                        reason,
+                                      },
+                                    );
+                                    setOpen && setOpen(false);
+                                  }}
+                                  triggerVariant={"outline"}
+                                >
+                                  <LucideOctagonMinus className="h-4 w-4" />
+                                  <span>Reject</span>
+                                </EntryRejectionWithReason>
+                              ))}
                           {animal.verification_status ===
                             VerificationStatus.Draft &&
                             (user.role.name === "local-level" ||
