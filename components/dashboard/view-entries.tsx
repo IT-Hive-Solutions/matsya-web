@@ -618,7 +618,7 @@ export default function OwnerAnimalView({
                               </AlertDialogWrapper>
                             )}
                           {}
-                          {!(
+                          {(!(
                             animal.verification_status ===
                               VerificationStatus.Validated ||
                             animal.verification_status ===
@@ -629,7 +629,13 @@ export default function OwnerAnimalView({
                               animal.verification_status ===
                                 VerificationStatus.Pending &&
                               user.role.name === "local-level"
-                            ) && (
+                            ) ) || (user.role.name === "local-level" &&
+                              !(
+                                animal.verification_status ===
+                                  VerificationStatus.Draft ||
+                                animal.verification_status ===
+                                  VerificationStatus.Rejected
+                              ))&& (
                               <EntryRejectionWithReason
                                 className="w-max"
                                 title="Reject Animal?"
