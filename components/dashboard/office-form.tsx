@@ -172,6 +172,8 @@ export default function OfficeForm({
       toast.error("Error creating office!");
     },
   });
+  console.log({formdata: form.watch()});
+  
   const onSubmit = (data: CreateOfficeDTO) => {
     setIsFormSubmitting(true);
     if (isEditing && id) {
@@ -260,6 +262,24 @@ export default function OfficeForm({
                     <FormControl>
                       <Input
                         placeholder="e.g., someone@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="office_contact"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Office Contact</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., 9xx-xxxxxxx or 01-xxxxxxx"
                         {...field}
                       />
                     </FormControl>
