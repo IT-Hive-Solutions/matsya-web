@@ -154,6 +154,9 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
       });
       toast.success("Data Deleted Successfully");
     },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error ?? "Error deleting data!");
+    }
   });
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ResetPasswordDTO) =>
