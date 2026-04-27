@@ -54,6 +54,7 @@ async function putHandler(request: NextRequest, { params }: Params) {
             animal_category: body.animal_category,
             animal_type: body.animal_type,
             is_vaccination_applied: body.is_vaccination_applied,
+            sero_survelience: body.sero_survelience,
             latitude: body.latitude,
             longitude: body.longitude,
             owners_id: body.owners_id,

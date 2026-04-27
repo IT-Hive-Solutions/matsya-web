@@ -28,7 +28,10 @@ import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
 import { IUser } from "@/core/interfaces/user.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { mutateApiRouteHandler, mutateHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  mutateApiRouteHandler,
+  mutateHandler,
+} from "@/core/services/apiHandler/mutateHandler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X } from "lucide-react";
@@ -165,6 +168,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
           age_months: undefined,
           age_years: undefined,
           is_vaccination_applied: false,
+          sero_survelience: false,
           latitude: undefined,
           longitude: undefined,
           owners_contact: undefined,
@@ -295,8 +299,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
   });
 
   const onSubmit = async (data: FormValues) => {
-    console.log("SUBMITTINTTTTTTT");
-    
+
     await createAnimalMutation.mutateAsync(data);
   };
 
@@ -643,6 +646,25 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                         </FormControl>
                         <FormLabel className="mt-0! cursor-pointer">
                           FMD Vaccine Applied
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`cattleEntries.${idx}.sero_survelience`}
+                  render={({ field }) => (
+                    <FormItem className="flex items-end space-y-0">
+                      <div className="flex items-center gap-3">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="mt-0! cursor-pointer">
+                          Sero Survelience
                         </FormLabel>
                       </div>
                     </FormItem>

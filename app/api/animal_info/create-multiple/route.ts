@@ -116,6 +116,7 @@ async function postHandler(request: NextRequest) {
                 tag_number: animal.tag_number,
                 verification_status: VerificationStatus.Pending,
                 is_vaccination_applied: animal.is_vaccination_applied,
+                sero_survelience: animal.sero_survelience,
                 production_capacity: animal.production_capacity,
                 latitude: body.latitude,
                 longitude: body.longitude,

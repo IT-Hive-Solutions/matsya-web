@@ -8,6 +8,7 @@ export const CreateAnimalSchema = z.object({
     animal_type: z.number().optional(),
     tag_number: z.string().optional(),
     is_vaccination_applied: z.boolean().optional(),
+    sero_survelience: z.boolean().optional(),
     vaccinated_date: z.string().optional(),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
