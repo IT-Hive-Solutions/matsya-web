@@ -168,7 +168,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
           age_months: undefined,
           age_years: undefined,
           is_vaccination_applied: false,
-          sero_survelience: false,
+          sero_surveillance: false,
           latitude: undefined,
           longitude: undefined,
           owners_contact: undefined,
@@ -653,7 +653,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name={`cattleEntries.${idx}.sero_survelience`}
+                  name={`cattleEntries.${idx}.sero_surveillance`}
                   render={({ field }) => (
                     <FormItem className="flex items-end space-y-0">
                       <div className="flex items-center gap-3">
@@ -664,7 +664,7 @@ export default function TaggingForm({ user }: TaggingFormProps) {
                           />
                         </FormControl>
                         <FormLabel className="mt-0! cursor-pointer">
-                          Sero Survelience
+                          Sero Surveillance
                         </FormLabel>
                       </div>
                     </FormItem>
