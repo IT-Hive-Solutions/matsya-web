@@ -133,12 +133,35 @@ export default function NavigationDrawer({
         directusEndpoints.app_download_link,
       ),
   });
-  const handleDownloadApplication = (fieldId: string) => {
-    const tab = window.open("", "_blank"); // open immediately on gesture
-    tab!.location.href = getDownloadUrl(fieldId); // then navigate it
-    setTimeout(() => {
-      tab!.close();
-    }, 300);
+  const handleDownloadApplication = async (fieldId: string) => {
+    try {
+      const url = getDownloadUrl(fieldId);
+
+      // 1. Fetch the file data
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      // 2. Convert to a Blob (raw data)
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // 3. Create an invisible anchor tag to trigger the download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+
+      // You can dynamically set the filename here if you know it,
+      // otherwise the browser will try to guess or use a default.
+      link.download = "application-file";
+
+      // 4. Append, click, and clean up
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Add a toast notification here if you have one (e.g., toast.error("Download failed"))
+    }
   };
 
   return (
@@ -223,15 +246,22 @@ export default function NavigationDrawer({
           <hr className="border-border my-2" />
           <div className="h-full flex flex-col justify-end py-4">
             {fetchedDownloadLinkData?.data?.apk && (
-              <Button
-                variant={"outline"}
+              <Link
+                // href={getDownloadUrl(fetchedDownloadLinkData.data.apk)}
+                href={'/app/app-release.apk'}
+                target="_blank"
                 className="w-full"
-                onClick={() =>
-                  handleDownloadApplication(fetchedDownloadLinkData?.data?.apk)
-                }
               >
-                Download Mobile App
-              </Button>
+                <Button
+                  variant={"outline"}
+                  className="w-full"
+                  // onClick={() =>
+                  //   handleDownloadApplication(fetchedDownloadLinkData?.data?.apk)
+                  // }
+                >
+                  Download Mobile App
+                </Button>
+              </Link>
             )}
           </div>
         </div>
