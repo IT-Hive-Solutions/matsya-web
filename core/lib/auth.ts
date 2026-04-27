@@ -1,8 +1,6 @@
 import { cookies } from "next/headers";
-import { cookieConfig } from "../contants/cookie.config";
+import { ACCESS_TOKEN_COOKIE, cookieConfig, REFRESH_TOKEN_COOKIE } from "../contants/cookie.config";
 
-const ACCESS_TOKEN_COOKIE = "directus_access_token";
-const REFRESH_TOKEN_COOKIE = "directus_refresh_token";
 
 
 export const ACCESS_MAX_AGE = 60 * 15;         // 15 minutes

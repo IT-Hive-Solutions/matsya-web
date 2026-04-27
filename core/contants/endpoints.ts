@@ -2,6 +2,7 @@ export const baseUrl = process.env.NEXT_BASE_PUBLIC_URL ?? "/api"
 export const endpoints = {
     auth: {
         login: `${baseUrl}/auth/login`,
+        "refresh-auth": `${baseUrl}/auth/refresh`,
         cookies: `${baseUrl}/auth/cookie`,
         "reset-password": `${baseUrl}/auth/reset-password`,
         "forgot-password": `${baseUrl}/auth/forgot-password`
