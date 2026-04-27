@@ -101,7 +101,7 @@ async function postHandler(request: NextRequest) {
 
         const mailInfo = await sendMail({
             html: `<p>Your account has been created. Your temporary password is: <strong>${newPassword}</strong>. Use your phone number and password to login</p>
-                   <p>Please change your password after logging in for the first time.</p>`,
+                   <p>Please change your password after logging in for the first time.</p> <strong><a href={'${process.env.NEXT_PUBLIC_BASE_APP_BASE_URL}/auth/login'}>Click Here</a></strong> to login</p>`,
             subject: 'Your New Account Details',
             to: body.email,
         })
