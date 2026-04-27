@@ -21,7 +21,6 @@ export default function DashboardHeader({ user }: HeaderProps) {
     };
     return labels[type] || type;
   };
-  console.log({ user });
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-40 h-[10vh] shadow-sm">

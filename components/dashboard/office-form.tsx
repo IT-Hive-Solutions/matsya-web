@@ -172,7 +172,6 @@ export default function OfficeForm({
       toast.error("Error creating office!");
     },
   });
-  console.log({formdata: form.watch()});
   
   const onSubmit = (data: CreateOfficeDTO) => {
     setIsFormSubmitting(true);

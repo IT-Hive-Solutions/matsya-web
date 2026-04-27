@@ -39,7 +39,6 @@ export async function sendNotificationDirect(
     }
 
     const tokenValues = tokens.map((t) => t.token);
-    console.log({ tokenValues });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -60,7 +59,6 @@ export async function sendNotificationDirect(
             },
         },
     });
-    console.log({ fcmResponse });
 
 
     // 4. Clean up expired tokens
