@@ -90,7 +90,7 @@ export function DataTableWithPagination<TData>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end px-2 pb-4  ">
+      {/* <div className="flex items-center justify-end px-2 pb-4  ">
         <div className=" flex items-center  gap-4 ">
           <div className="flex w-25 items-center justify-center text-sm font-medium">
             Page {table?.getState().pagination.pageIndex + 1} of{" "}
@@ -117,7 +117,7 @@ export function DataTableWithPagination<TData>({
             </Button>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
