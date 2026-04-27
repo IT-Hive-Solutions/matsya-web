@@ -14,12 +14,14 @@ export default function DashboardHeader({ user }: HeaderProps) {
   const getUserTypeLabel = (type: string) => {
     const labels: { [key: string]: string } = {
       vaccinator: "Vaccinator",
+      admin: "Admin",
       "local-level": "Local Level Officer",
       "district-level": "District Level Officer",
       "province-level": "Province Level Officer",
     };
     return labels[type] || type;
   };
+  console.log({ user });
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-40 h-[10vh] shadow-sm">
@@ -48,8 +50,11 @@ export default function DashboardHeader({ user }: HeaderProps) {
               <p className="text-sm font-medium text-foreground">
                 {user?.first_name ?? ""} {user?.last_name ?? ""}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {user?.user_type && getUserTypeLabel(user?.user_type as Months)}
+
+              <p className="text-xs text-left text-muted-foreground">
+                {user?.office_id?.office_name &&
+                  `${user.office_id.office_name} - `}
+                {user?.role?.name && getUserTypeLabel(user?.role?.name ?? "")}
               </p>
             </div>
             <form action="/api/auth/logout" method="POST">
