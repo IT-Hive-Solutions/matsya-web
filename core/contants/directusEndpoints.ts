@@ -1,5 +1,8 @@
 export const DIRECTUS_BASE_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || "";
 export const DIRECTUS_STATIC_TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_STATIC_TOKEN || ""
+
+console.log("DIRECTUS_BASE_URL", DIRECTUS_BASE_URL);
+
 export const directusEndpoints = {
     auth: {
         login: `${DIRECTUS_BASE_URL}/auth/login`,

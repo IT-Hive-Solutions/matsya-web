@@ -19,7 +19,7 @@ async function proxyRequest(
     headers.set("Authorization", `Bearer ${accessToken}`);
     headers.delete("host");
     headers.delete("cookie"); // Never forward cookies to Directus
-
+    headers.delete("accept-encoding");
     return fetch(targetUrl.toString(), {
         method: req.method,
         headers,
@@ -60,6 +60,7 @@ async function handler(
 
     // First attempt
     let directusRes = await proxyRequest(req, path, accessToken);
+    console.log({ directusRes });
 
     // If 401, try refresh
     if (directusRes.status === 401) {

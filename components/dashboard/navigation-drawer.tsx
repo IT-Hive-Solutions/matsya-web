@@ -245,24 +245,24 @@ export default function NavigationDrawer({
 
           <hr className="border-border my-2" />
           <div className="h-full flex flex-col justify-end py-4">
-            {/* {fetchedDownloadLinkData?.data?.apk && ( */}
-            <Link
-              // href={getDownloadUrl(fetchedDownloadLinkData.data.apk)}
-              href={"/app/app-release.apk"}
-              target="_blank"
-              className="w-full"
-            >
-              <Button
-                variant={"outline"}
+            {fetchedDownloadLinkData?.data?.apk && (
+              <Link
+                href={getDownloadUrl(fetchedDownloadLinkData.data.apk)}
+                // href={"/app/app-release.apk"}
+                target="_blank"
                 className="w-full"
-                // onClick={() =>
-                //   handleDownloadApplication(fetchedDownloadLinkData?.data?.apk)
-                // }
               >
-                Download Mobile App
-              </Button>
-            </Link>
-            {/* )} */}
+                <Button
+                  variant={"outline"}
+                  className="w-full"
+                  // onClick={() =>
+                  //   handleDownloadApplication(fetchedDownloadLinkData?.data?.apk)
+                  // }
+                >
+                  Download Mobile App
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>

@@ -1,11 +1,11 @@
-    import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { setAuthCookies } from "@/core/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { email, password } = await body;
+        const { email, password } = body;
 
         // Validation
         if (!email || !password) {
@@ -17,14 +17,26 @@ export async function POST(req: NextRequest) {
 
         const directusRes = await fetch(directusEndpoints.auth.login, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+            },
             body: JSON.stringify({ email, password }),
+
         });
 
         if (!directusRes.ok) {
-            const err = await directusRes.json();
+            const errorText = await directusRes.text(); // Read as raw string first
+            let errorMessage = `Login failed with status ${directusRes.status}`;
+            try {
+                // Try to parse it as JSON
+                const errJson = JSON.parse(errorText);
+                errorMessage = errJson?.errors?.[0]?.message ?? errorMessage;
+            } catch (parseError) {
+                // If it crashes, it means Directus returned HTML (e.g., 502/404 page)
+                console.error("Directus returned non-JSON error:", errorText);
+            }
             return NextResponse.json(
-                { error: err?.errors?.[0]?.message ?? "Login failed" },
+                { error: errorMessage },
                 { status: directusRes.status }
             );
         }
