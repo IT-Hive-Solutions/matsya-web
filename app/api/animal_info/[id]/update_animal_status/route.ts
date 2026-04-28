@@ -1,6 +1,7 @@
 import { VerificationStatus } from "@/core/enums/verification-status.enum";
 import { getAccessToken } from "@/core/lib/auth";
 import { getDirectusClient } from "@/core/lib/directus";
+import { sendNotificationDirect } from "@/core/lib/notification-sender";
 import { updateItem } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -31,6 +32,21 @@ async function putHandler(request: NextRequest, { params }: Params) {
                 rejection_reason: body?.rejection_reason ?? ""
             })
         );
+
+        if (body?.verification_status === VerificationStatus.Rejected) {
+
+            await sendNotificationDirect({
+                userId: updatedAnimal.user_created,
+                title: "Animal Verification Update",
+                body: `Your animal submission has been rejected. Reason: ${body.rejection_reason}`,
+                type: "alert",
+                data: {
+                    animalId: id,
+                    status: body.verification_status
+                }
+            });
+
+        }
         // console.log({ updatedAnimal });
 
 
