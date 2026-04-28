@@ -41,7 +41,8 @@ export interface IAnimal {
     date_updated: string | null;
     tag_number: string;
     verification_status: VerificationStatus;
-    is_vaccination_applied: string;
+    is_vaccination_applied: boolean;
+    sero_surveillance: boolean;
     production_capacity: IProductionCapacity;
     rejection_reason: string;
     vaccinated_date: string;

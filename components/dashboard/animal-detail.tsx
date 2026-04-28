@@ -183,6 +183,24 @@ const AnimalDetail = ({ onClose, animalId }: Props) => {
               </p>
             </div>
             <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Sero Surveillance
+              </p>
+              <p className="font-medium">
+                {animal?.sero_surveillance ? (
+                  <Badge variant="default" className="gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Yes
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="gap-1">
+                    <XCircle className="w-3 h-3" />
+                    No
+                  </Badge>
+                )}
+              </p>
+            </div>
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Vaccination Date</p>
               <p className="font-medium">
                 {animal?.vaccinated_date ? (
