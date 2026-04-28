@@ -5,6 +5,38 @@ import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "./core/contants/cooki
 const PROTECTED_ROUTES = ["/"];
 const PUBLIC_ROUTES = ["/auth/login", "/api/auth/login"];
 
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+        const base64Payload = token.split(".")[1];
+        if (!base64Payload) return null;
+
+        // Edge runtime doesn't have Buffer, so use atob with padding fix
+        const padded = base64Payload.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonStr = atob(padded);
+        return JSON.parse(jsonStr);
+    } catch {
+        return null;
+    }
+}
+
+
+function isTokenExpired(token: string | undefined): boolean {
+    if (!token) return true;
+
+    const payload = decodeJwtPayload(token);
+    if (!payload || typeof payload.exp !== "number") {
+        // If there's no exp claim, treat as expired to be safe
+        return true;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const clockSkewBuffer = 30; // seconds — refresh slightly before actual expiry
+
+    return payload.exp < nowInSeconds + clockSkewBuffer;
+}
+
+
 export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
@@ -16,7 +48,9 @@ export async function proxy(req: NextRequest) {
     const accessToken = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
     const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
-    if (accessToken) return NextResponse.next();
+    if (accessToken && !isTokenExpired(accessToken)) {
+        return NextResponse.next();
+    }
 
     // No access token but has refresh — redirect to a refresh endpoint
     if (!refreshToken) {

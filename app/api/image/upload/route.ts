@@ -7,7 +7,7 @@ async function postHandler(request: NextRequest) {
     try {
         const formData = await request.formData();
         const file = formData.get("image");
-        console.log({ file });
+        // console.log({ file });
 
         if (!file) {
             return NextResponse.json({ error: "No image provided" }, { status: 400 });

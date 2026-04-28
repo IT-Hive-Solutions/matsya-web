@@ -58,7 +58,7 @@ async function postHandler(req: NextRequest) {
                 subject: 'Your New Account Details',
                 to: user.email,
             })
-            console.log({ mailInfo });
+            // console.log({ mailInfo });
         }
 
 

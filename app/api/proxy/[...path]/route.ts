@@ -60,7 +60,7 @@ async function handler(
 
     // First attempt
     let directusRes = await proxyRequest(req, path, accessToken);
-    console.log({ directusRes });
+    // console.log({ directusRes });
 
     // If 401, try refresh
     if (directusRes.status === 401) {

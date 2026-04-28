@@ -31,7 +31,7 @@ async function putHandler(request: NextRequest, { params }: Params) {
                 rejection_reason: body?.rejection_reason ?? ""
             })
         );
-        console.log({ updatedAnimal });
+        // console.log({ updatedAnimal });
 
 
         return NextResponse.json({

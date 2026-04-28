@@ -15,6 +15,8 @@ export async function POST(_req: NextRequest) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refresh_token: refreshToken, mode: "json" }),
         });
+        console.log("refresh-token:  ", { directusRes });
+
 
         if (!directusRes.ok) {
             // Refresh token is invalid — force logout

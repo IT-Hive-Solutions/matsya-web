@@ -90,7 +90,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             })
         )) as CollectionRecord[];
 
-        console.log({ records });
+        // console.log({ records });
 
         result.processed = records.length;
 
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             })
         );
 
-        console.log("[cron/check-expiry] Result:", result);
+        // console.log("[cron/check-expiry] Result:", result);
         return NextResponse.json({ success: true, ...result });
 
     } catch (error) {
