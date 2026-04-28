@@ -25,6 +25,7 @@ async function getHandler(request: NextRequest) {
         const userRole = userData.role.name; // "vaccinator", "admin", etc.
         const userDistrictId = userData.office_id?.district_id?.id;
         const userProvinceId = userData.office_id?.province_id;
+        const userOfficeId = userData.office_id?.id;
         const { searchParams } = new URL(request.url);
         const searchQuery = searchParams.get('searchQuery')?.trim();
 
@@ -70,8 +71,6 @@ async function getHandler(request: NextRequest) {
                 break;
 
             case "district-level":
-            case "local-level":
-
                 // District level, and local level see animals from their district
                 if (userDistrictId) {
                     roleFilter = {
@@ -83,6 +82,19 @@ async function getHandler(request: NextRequest) {
                             }
                         }
                     };
+                }
+                break;
+            case "local-level":
+                if (userOfficeId) {
+                    roleFilter = {
+                        user_created: {
+                            office_id: {
+                                id: {
+                                    _eq: userOfficeId
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
             case "vaccinator":
