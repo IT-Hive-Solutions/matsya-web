@@ -1,7 +1,10 @@
 "use client";
 import { endpoints } from "@/core/contants/endpoints";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import {
+  fetchApiRouteHandler,
+  fetchHandler,
+} from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -24,6 +27,7 @@ import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { useRouter } from "next/navigation";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -38,6 +42,11 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const debouncedSearchValue = useDebounceHook({
+    value: searchQuery,
+    delay: 300,
+  });
 
   const userColumns: ColumnDef<IUser>[] = [
     {
@@ -156,7 +165,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.error ?? "Error deleting data!");
-    }
+    },
   });
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: ResetPasswordDTO) =>
@@ -180,20 +189,22 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
 
   const { data: fetchedUserList, isLoading } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", debouncedSearchValue],
     queryFn: () =>
-      fetchHandler<IUser[]>(directusEndpoints.users, {
-        fields: [
-          "*",
-          "office_id.*",
-          "role.*",
-          "office_id.province_id.*",
-          "office_id.district_id.*",
-        ],
+      fetchApiRouteHandler<IUser[]>(endpoints.users, {
+        // fields: [
+        //   "*",
+        //   "office_id.*",
+        //   "role.*",
+        //   "office_id.province_id.*",
+        //   "office_id.district_id.*",
+        // ],
+        searchQuery: debouncedSearchValue,
       }),
   });
 
   useEffect(() => {
+    console.log("fetchedUserList?.data", fetchedUserList);
     if (fetchedUserList?.data) {
       setUserLists(fetchedUserList?.data);
     }
@@ -204,9 +215,9 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     columns: userColumns,
   });
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  // if (isLoading) {
+  //   return <Loading />;
+  // }
 
   return (
     <div className="flex flex-col gap-2">
@@ -216,8 +227,9 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="max-w-xs"
       />
-
-      {userLists?.length > 0 ? (
+      {isLoading ? (
+        <Loading />
+      ) : userLists?.length > 0 ? (
         <DataTableWithPagination table={userTable} />
       ) : (
         <Card className="p-12 text-center border-border/50">

@@ -5,29 +5,51 @@ import { getAccessToken } from '@/core/lib/auth';
 import { getDirectusClient } from '@/core/lib/directus';
 import { generateSecurePassword } from '@/core/services/apiHandler/handleGeneratePassword';
 import { sendMail } from '@/core/services/mail/sendMail';
-import { createUser, readRoles } from '@directus/sdk';
+import { createUser, readRoles, readUsers } from '@directus/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 // // GET - Fetch all users
-// async function getHandler(request: NextRequest) {
-//     try {
-//         const users = await directus.request(
-//             readUsers({
-//                 fields: ['*', 'office_id.*' as any, 'office_id.province_id.*' as any, 'office_id.district_id.*' as any]
-//             })
-//         );
+async function getHandler(request: NextRequest) {
+    try {
 
-//         return NextResponse.json({
-//             success: true,
-//             data: users
-//         });
-//     } catch (error: any) {
-//         return NextResponse.json(
-//             { success: false, error: error.message || 'Failed to fetch users' },
-//             { status: 500 }
-//         );
-//     }
-// }
+        const token = await getAccessToken();
+        const client = getDirectusClient(token!);
+
+        const { searchParams } = new URL(request.url);
+
+        const searchQuery = searchParams.get('searchQuery')?.trim();
+
+        // Build the search filter if a query is provided
+        const searchFilter = searchQuery
+            ? {
+                _or: [
+                    { first_name: { _contains: searchQuery } },
+                    { last_name: { _contains: searchQuery } },
+                    { email: { _contains: searchQuery } },
+                    { phone_number: { _contains: searchQuery } },
+                    { office_id: { office_name: { _contains: searchQuery } } },
+                ],
+            }
+            : null;
+
+        const users = await client.request(
+            readUsers({
+                fields: ['*', 'office_id.*' as any, 'office_id.province_id.*' as any, 'office_id.district_id.*' as any, "role.*" as any,],
+                filter: searchFilter as any,
+            })
+        );
+
+        return NextResponse.json({
+            success: true,
+            data: { data: users }
+        });
+    } catch (error: any) {
+        return NextResponse.json(
+            { success: false, error: error.message || 'Failed to fetch users' },
+            { status: 500 }
+        );
+    }
+}
 
 // // POST - Create new item
 async function postHandler(request: NextRequest) {
@@ -69,7 +91,7 @@ async function postHandler(request: NextRequest) {
 
         const newPassword = generateSecurePassword(8)
 
-        
+
         const [first_name, ...rest] = body.full_name.split(" ")
         const last_name = rest.join(" ")
 
@@ -120,5 +142,5 @@ async function postHandler(request: NextRequest) {
 }
 
 
-// export const GET = withMiddleware(getHandler)
+export const GET = getHandler
 export const POST = postHandler

@@ -540,12 +540,12 @@ export default function OwnerAnimalView({
                             <Badge
                               variant="secondary"
                               className={`${
-                                !(animal.is_vaccination_applied == "no")
+                                !(animal.is_vaccination_applied)
                                   ? "bg-emerald-100 text-emerald-700"
                                   : "bg-slate-100 text-muted-foreground"
                               } border-0 text-xs px-2 py-0.5`}
                             >
-                              {!(animal.is_vaccination_applied == "no")
+                              {!(animal.is_vaccination_applied)
                                 ? "Applied"
                                 : "Not Applied"}
                             </Badge>
