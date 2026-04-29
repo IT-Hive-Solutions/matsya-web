@@ -133,7 +133,11 @@ function useAnalytics(animals: IAnimal[]) {
       else if (a.verification_status === "draft") ownerMap[oid].pending++;
       else ownerMap[oid].rejected++;
     });
-    const ownerData = Object.values(ownerMap);
+    const ownerData = Object.values(ownerMap).sort((a, b) =>
+      a.approved + a.pending + a.rejected > b.approved + b.pending + b.rejected
+        ? -1
+        : 1,
+    );
 
     // Districts
     const districtMap: Record<number, { label: string; count: number }> = {};
@@ -715,19 +719,16 @@ export default function AnalyticsDashboard({
             {/* Stacked horizontal bar — per owner */}
             <CardShell
               title="Animals per Owner"
-              desc="Verification status breakdown"
+              desc="Verification status breakdown of top 5 owners"
               badge={{
-                label: `${stats.owners} owner${stats.owners !== 1 ? "s" : ""}`,
+                label: `${stats.owners} Total owner${stats.owners !== 1 ? "s" : ""}`,
                 variant: "sage",
               }}
               delay=".52s"
             >
-              <ResponsiveContainer
-                width="100%"
-                height={Math.max(120, stats.ownerData.length * 52)}
-              >
+              <ResponsiveContainer width="100%" height={Math.max(120, 5 * 52)}>
                 <BarChart
-                  data={stats.ownerData}
+                  data={stats.ownerData.slice(0, 5)}
                   layout="vertical"
                   margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                   barCategoryGap="35%"
