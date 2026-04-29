@@ -1,21 +1,82 @@
 const API_BASE = "/api/proxy";
 
-async function apiFetch(path: string, options?: RequestInit) {
+let isRefreshing = false;
+
+let refreshQueue: Array<{
+    resolve: () => void;
+    reject: (err: Error) => void;
+}> = [];
+
+function drainQueue(success: boolean) {
+    const error = new Error("Session expired");
+    refreshQueue.forEach(({ resolve, reject }) =>
+        success ? resolve() : reject(error)
+    );
+    refreshQueue = [];
+}
+
+async function refreshTokens(): Promise<boolean> {
+    try {
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+            method: "POST",
+            credentials: "same-origin",
+        });
+
+
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+function redirectToLogin() {
+    if (typeof window !== "undefined") {
+        window.location.href = "/auth/login?reason=session_expired";
+    }
+}
+
+export async function apiFetch(
+    path: string,
+    options?: RequestInit
+): Promise<Response> {
     const res = await fetch(`${API_BASE}/${path}`, {
         ...options,
-        credentials: "same-origin", // sends cookies automatically
+        credentials: "same-origin",
     });
+    console.log("response statis---------", res.status);
 
-    if (res.status === 401) {
-        // Token expired and refresh failed server-side → redirect to login
-        if (typeof window !== "undefined") {
-            window.location.href = "/auth/login?reason=session_expired";
-        }
+    // Request succeeded — return as-is
+    if (res.status !== 401 && res.status !== 500) return res;
+
+    //  Got a 401 — attempt token refresh, but only one refresh at a time
+    if (isRefreshing) {
+        // Another request is already refreshing — queue this one
+        return new Promise<Response>((resolve, reject) => {
+            refreshQueue.push({
+                resolve: () =>
+                    apiFetch(path, options).then(resolve).catch(reject),
+                reject,
+            });
+        });
+    }
+
+
+    isRefreshing = true;
+
+    const refreshed = await refreshTokens();
+    isRefreshing = false;
+
+    if (!refreshed) {
+        drainQueue(false);
+        redirectToLogin();
         throw new Error("Session expired");
     }
 
-    return res;
+    drainQueue(true);
+
+    return apiFetch(path, options);
 }
+
 
 export const authClient = {
     login: (email: string, password: string) =>

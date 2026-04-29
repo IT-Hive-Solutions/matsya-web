@@ -28,7 +28,7 @@ async function proxyRequest(
     } as RequestInit);
 }
 
-async function tryRefresh(): Promise<{
+export async function tryRefresh(): Promise<{
     accessToken: string;
     refreshToken: string;
 } | null> {
@@ -54,12 +54,10 @@ async function handler(
     const { path } = await params;
     let accessToken = await getAccessToken();
 
-    if (!accessToken) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+
 
     // First attempt
-    let directusRes = await proxyRequest(req, path, accessToken);
+    let directusRes = await proxyRequest(req, path, accessToken!);
     // console.log({ directusRes });
 
     // If 401, try refresh

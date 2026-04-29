@@ -3,7 +3,8 @@ import { ACCESS_TOKEN_COOKIE, cookieConfig, REFRESH_TOKEN_COOKIE } from "../cont
 
 
 
-export const ACCESS_MAX_AGE = 60 * 15;         // 15 minutes
+export const ACCESS_MAX_AGE = 60 * 60 * 24;         // 24 hours
+// export const ACCESS_MAX_AGE = 15 ;         // 24 hours
 export const REFRESH_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 // --- Server-side cookie readers (Next.js server components / route handlers)
@@ -21,13 +22,14 @@ export async function getRefreshToken(): Promise<string | undefined> {
 export function setAuthCookies(
     response: Response,
     accessToken: string,
-    refreshToken: string
+    refreshToken: string,
+    expiresIn?: number
 ) {
     const headers = new Headers(response.headers);
 
     const accessCookie = serializeCookie(ACCESS_TOKEN_COOKIE, accessToken, {
         ...cookieConfig,
-        maxAge: ACCESS_MAX_AGE,
+        maxAge: expiresIn ?? ACCESS_MAX_AGE,
     });
 
     const refreshCookie = serializeCookie(REFRESH_TOKEN_COOKIE, refreshToken, {

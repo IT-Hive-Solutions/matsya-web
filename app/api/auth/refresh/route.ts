@@ -15,6 +15,7 @@ export async function POST(_req: NextRequest) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refresh_token: refreshToken, mode: "json" }),
         });
+        
         console.log("refresh-token:  ", { directusRes });
 
 
@@ -30,6 +31,7 @@ export async function POST(_req: NextRequest) {
 
         const { data } = await directusRes.json();
         const { access_token, refresh_token } = data;
+        console.log("refresh token data:::: ", data);
 
         const response = NextResponse.json({ success: true }, { status: 200 });
         const headers = setAuthCookies(response, access_token, refresh_token);

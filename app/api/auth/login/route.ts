@@ -42,10 +42,12 @@ export async function POST(req: NextRequest) {
         }
 
         const { data } = await directusRes.json();
-        const { access_token, refresh_token } = data;
+        console.log("logged in data::::", { data });
+
+        const { access_token, refresh_token, expires } = data;
 
         const response = NextResponse.json({ success: true }, { status: 200 });
-        const headers = setAuthCookies(response, access_token, refresh_token);
+        const headers = setAuthCookies(response, access_token, refresh_token, expires);
 
         return NextResponse.json({
             data: {
