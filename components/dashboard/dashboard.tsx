@@ -3,7 +3,7 @@
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { IAnimal } from "@/core/interfaces/animal.interface";
 import { IUser } from "@/core/interfaces/user.interface";
-import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
+import { fetchApiRouteHandler, fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Loading from "../loading";
@@ -13,6 +13,7 @@ import DashboardContent from "./dashboard-content";
 import DashboardHeader from "./dashboard-header";
 import ManagementPage from "./management-pages";
 import NavigationDrawer from "./navigation-drawer";
+import { endpoints } from "@/core/contants/endpoints";
 
 interface DashboardProps {
   user: IUser;
@@ -24,7 +25,7 @@ export default function Dashboard({ user }: DashboardProps) {
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
     queryFn: () =>
-      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, { fields: "*.*, owners_id.*, owners_id.district_id.*" }),
+      fetchApiRouteHandler<IAnimal[]>(endpoints.animal_info, { fields: "*.*, owners_id.*, owners_id.district_id.*" }),
   });
 
   const renderContent = () => {
