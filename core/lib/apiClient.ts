@@ -43,7 +43,6 @@ export async function apiFetch(
         ...options,
         credentials: "same-origin",
     });
-    console.log("response statis---------", res.status);
 
     // Request succeeded — return as-is
     if (res.status !== 401 && res.status !== 500) return res;

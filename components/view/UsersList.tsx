@@ -204,7 +204,6 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   });
 
   useEffect(() => {
-    console.log("fetchedUserList?.data", fetchedUserList);
     if (fetchedUserList?.data) {
       setUserLists(fetchedUserList?.data);
     }

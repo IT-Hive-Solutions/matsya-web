@@ -79,7 +79,7 @@ export async function sendNotification(
 
         return response;
     } catch (error) {
-        console.log("sendNotification error", { error });
+        // console.log("sendNotification error", { error });
         throw error;
     }
 }
