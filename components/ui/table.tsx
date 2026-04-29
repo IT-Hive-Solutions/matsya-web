@@ -11,7 +11,7 @@ const Table = React.forwardRef<
       ref={ref}
       className={cn(
         "w-full caption-bottom text-sm overflow-hidden rounded-t-xl print:rounded-0 print:border-black print:shadow-none ",
-        className
+        className,
       )}
       {...props}
     />
@@ -27,7 +27,7 @@ const TableHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "   bg-primary hover:text-black text-primary-foreground print:bg-transparent  print:text-black print:text-sm  ",
-      className
+      className,
     )}
     {...props}
   />
@@ -42,7 +42,7 @@ const TableBody = React.forwardRef<
     ref={ref}
     className={cn(
       "[&_tr:last-child]:border-0 [&_tr:last-child]:rounded-b-2xl print:border-none",
-      className
+      className,
     )}
     {...props}
   />
@@ -57,7 +57,7 @@ const TableFooter = React.forwardRef<
     ref={ref}
     className={cn(
       "border-t bg-border font-medium [&>tr]:last:border-b-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -72,7 +72,7 @@ const TableRow = React.forwardRef<
     ref={ref}
     className={cn(
       "border-b transition-colors hover:bg-[#e0f2f1] data-[state=selected]:bg-border  ",
-      className
+      className,
     )}
     {...props}
   />
@@ -87,7 +87,7 @@ const TableHead = React.forwardRef<
     ref={ref}
     className={cn(
       "h-12  px-4 text-left align-middle font-medium  [&>button]:border-primary-foreground   print:border-b  border-black [&:has([role=checkbox])]:pr-0 print:h-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -102,7 +102,7 @@ const TableCell = React.forwardRef<
     ref={ref}
     className={cn(
       "p-4 w-max align-middle [&:has([role=checkbox])]:pr-0 print:px-4 print:py-0",
-      className
+      className,
     )}
     {...props}
   />
