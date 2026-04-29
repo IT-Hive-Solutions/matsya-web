@@ -472,27 +472,38 @@ export default function OwnerAnimalView({
                               Tag: {animal.tag_number}
                             </p>
                           </div>
-                          {(!(
-                            animal.verification_status ===
-                              VerificationStatus.Rejected ||
-                            animal.verification_status ===
-                              VerificationStatus.Validated
-                          ) &&
-                            user.role.name !== "district-level") ||
-                            (animal.verification_status ===
-                              VerificationStatus.Rejected &&
-                              user.role.name === "vaccinator" && (
-                                <Button
-                                  variant={"ghost"}
-                                  onClick={() => {
-                                    setEditDialogOpen(true);
-                                    setSelectedAnimal(animal.id);
-                                  }}
-                                  className="gap-2 cursor-pointer"
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                              ))}
+                          {(() => {
+                            const isRejected =
+                              animal.verification_status ===
+                              VerificationStatus.Rejected;
+                            const isValidated =
+                              animal.verification_status ===
+                              VerificationStatus.Validated;
+                            const isVaccinator =
+                              user.role.name === "vaccinator";
+                            const isDistrictLevel =
+                              user.role.name === "district-level";
+                            const ownsData = user.id === animal.user_created.id;
+
+                            const canEdit =
+                              (!isRejected &&
+                                !isValidated &&
+                                !isDistrictLevel) ||
+                              (isRejected && isVaccinator && !isValidated && ownsData);
+
+                            return canEdit ? (
+                              <Button
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditDialogOpen(true);
+                                  setSelectedAnimal(animal.id);
+                                }}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            ) : null;
+                          })()}
                           <Button
                             variant={"ghost"}
                             onClick={() => {
@@ -540,12 +551,12 @@ export default function OwnerAnimalView({
                             <Badge
                               variant="secondary"
                               className={`${
-                                !(animal.is_vaccination_applied)
+                                animal.is_vaccination_applied
                                   ? "bg-emerald-100 text-emerald-700"
                                   : "bg-slate-100 text-muted-foreground"
                               } border-0 text-xs px-2 py-0.5`}
                             >
-                              {!(animal.is_vaccination_applied)
+                              {animal.is_vaccination_applied
                                 ? "Applied"
                                 : "Not Applied"}
                             </Badge>

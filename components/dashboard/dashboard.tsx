@@ -24,7 +24,7 @@ export default function Dashboard({ user }: DashboardProps) {
   const { data: fetchedAnimalList, isLoading } = useQuery({
     queryKey: ["animals"],
     queryFn: () =>
-      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, { fields: "*.*, owners_id.district_id.*" }),
+      fetchHandler<IAnimal[]>(directusEndpoints.animal_info, { fields: "*.*, owners_id.*, owners_id.district_id.*" }),
   });
 
   const renderContent = () => {

@@ -62,14 +62,10 @@ async function putHandler(request: NextRequest, { params }: Params) {
             num_of_animals: body.num_of_animals,
         }
 
-        if (animal.verification_status === VerificationStatus.Rejected) {
-            updatePayload.verification_status = VerificationStatus.Pending;
-        } else if (animal.verification_status === VerificationStatus.Verified) {
-            updatePayload.verification_status = VerificationStatus.Validated;
-        } else if (animal.verification_status === VerificationStatus.Validated) {
-            updatePayload.verification_status = VerificationStatus.Validated;
-        } else {
-            updatePayload.verification_status = VerificationStatus.Pending;
+        if (animal.verification_status === VerificationStatus.Rejected
+            ||
+            animal.verification_status === VerificationStatus.Draft) {
+            updatePayload.verification_status = VerificationStatus.Draft;
         }
 
         const updatedAnimal = await client.request(

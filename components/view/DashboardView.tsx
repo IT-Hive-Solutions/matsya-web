@@ -45,7 +45,7 @@ const C = {
 function useAnalytics(animals: IAnimal[]) {
   return useMemo(() => {
     const total = animals.length;
-    const owners = new Set(animals.map((a) => a.owners_id.id));
+    const owners = new Set(animals.map((a) => a.owners_id?.id ?? "unknown"));
 
     // Verification
     const approved = animals.filter(
@@ -119,9 +119,9 @@ function useAnalytics(animals: IAnimal[]) {
       { name: string; approved: number; pending: number; rejected: number }
     > = {};
     animals.forEach((a) => {
-      const oid = a.owners_id.id;
+      const oid = a.owners_id?.id ?? "";
       if (!ownerMap[oid]) {
-        const parts = a.owners_id.owners_name.trim().split(/\s+/);
+        const parts = (a.owners_id?.owners_name ?? "").trim().split(/\s+/);
         const short =
           parts.length > 1
             ? `${parts[0][0]}. ${parts.slice(1).join(" ")}`
@@ -138,10 +138,10 @@ function useAnalytics(animals: IAnimal[]) {
     // Districts
     const districtMap: Record<number, { label: string; count: number }> = {};
     animals.forEach((a) => {
-      const did = a.owners_id.district_id.id;
+      const did = a.owners_id?.district_id?.id ?? "";
       if (!districtMap[did]) {
         districtMap[did] = {
-          label: `District ${did} · ${a.owners_id.local_level_name}`,
+          label: `District ${did} · ${a.owners_id?.local_level_name}`,
           count: 0,
         };
       }
@@ -152,7 +152,7 @@ function useAnalytics(animals: IAnimal[]) {
       .map(([, v]) => v);
 
     const wardNumbers = [
-      ...new Set(animals.map((a) => a.owners_id.ward_number)),
+      ...new Set(animals.map((a) => a.owners_id?.ward_number)),
     ]
       .sort()
       .join(" · ");
