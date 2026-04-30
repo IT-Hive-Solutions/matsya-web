@@ -177,7 +177,7 @@ function AnimalSubTable({
                   </td>
 
                   {/* Tag */}
-                  <td className="px-4 py-3 font-mono text-xs text-slate-600">
+                  <td className="px-4 py-3  text-xs text-slate-600">
                     {animal.tag_number}
                   </td>
 
@@ -668,7 +668,7 @@ export default function OwnerAnimalView({
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 py-4">
           <DataTableWithPagination
             table={table}
             isLoading={isFetching}

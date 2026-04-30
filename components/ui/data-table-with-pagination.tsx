@@ -39,7 +39,7 @@ export function DataTableWithPagination<TData>({
   return (
     <div className={`${fullWidth ? "w-full" : "w-max"} h-full flex flex-col gap-4`}>
       <div
-        className={`${fullWidth ? "w-full" : "w-max"} rounded-xl shadow-md print:shadow-none print:rounded-sm print:border-black h-full border `}
+        className={`${fullWidth ? "w-full" : "w-max"} rounded-xl  print:shadow-none print:rounded-sm print:border-black h-full border `}
       >
         <Table>
           <TableHeader className="heading-h5 bg-slate-50">
