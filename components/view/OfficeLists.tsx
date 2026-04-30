@@ -1,25 +1,25 @@
 "use client";
-import { endpoints } from "@/core/contants/endpoints";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { IOffice } from "@/core/interfaces/office.interface";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import {
+  PAGE_SIZE,
+  useCustomReactPaginatedTable,
+} from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Config } from "../dashboard/management-pages";
-import Loading from "../loading";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
-import { useRouter } from "next/navigation";
-import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
-import { toast } from "sonner";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
-
-const PAGE_SIZE = 10;
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -59,6 +59,11 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
 
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const debouncedSearchValue = useDebounceHook({
+    value: searchQuery,
+    delay: 300,
+  });
 
   const officeColumnsWithAction: ColumnDef<IOffice>[] = [
     ...officeColumns,
@@ -113,13 +118,13 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["office", pagination, searchQuery],
+    queryKey: ["office", pagination, debouncedSearchValue],
     queryFn: () =>
       fetchHandler<IOffice[]>(directusEndpoints.office, {
         fields: ["*.*", "district_id.*", "district_id.province_id.*"],
         page: pagination.pageIndex + 1, // Directus pages start at 1
         limit: pagination.pageSize,
-        searchQuery: searchQuery || undefined,
+        searchQuery: debouncedSearchValue || undefined,
       }),
     placeholderData: (prev) => prev,
   });
@@ -134,7 +139,6 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     fetchedOfficeList?.meta?.filter_count ??
     fetchedOfficeList?.meta?.total_count ??
     0;
-  const pageCount = Math.ceil(totalCount / pagination.pageSize);
 
   const officeTable = useCustomReactPaginatedTable<IOffice, any>({
     data: officeLists,

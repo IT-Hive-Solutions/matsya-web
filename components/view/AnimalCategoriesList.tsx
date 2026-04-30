@@ -3,9 +3,12 @@ import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { IAnimalCategories } from "@/core/interfaces/animalCategory.interface";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import {
+  PAGE_SIZE,
+  useCustomReactPaginatedTable,
+} from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -18,6 +21,7 @@ import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -69,6 +73,16 @@ const AnimalCategoriesLists = ({
     IAnimalCategories[]
   >([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
+
+  const debouncedSearchValue = useDebounceHook({
+    value: searchQuery,
+    delay: 300,
+  });
+
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -109,10 +123,18 @@ const AnimalCategoriesLists = ({
       },
     },
   ];
-  const { data: fetchedAnimalCategoriesList, isLoading } = useQuery({
-    queryKey: ["animal-categories"],
+  const {
+    data: fetchedAnimalCategoriesList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["animal-categories", pagination, debouncedSearchValue],
     queryFn: () =>
-      fetchHandler<IAnimalCategories[]>(directusEndpoints.animal_category),
+      fetchHandler<IAnimalCategories[]>(directusEndpoints.animal_category, {
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        searchQuery: debouncedSearchValue || undefined,
+      }),
   });
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
@@ -130,17 +152,20 @@ const AnimalCategoriesLists = ({
     }
   }, [fetchedAnimalCategoriesList]);
 
+  const totalCount =
+    fetchedAnimalCategoriesList?.meta?.filter_count ??
+    fetchedAnimalCategoriesList?.meta?.total_count ??
+    0;
   const animalCategoriesTable = useCustomReactPaginatedTable<
     IAnimalCategories,
     any
   >({
     data: animalCategoriesLists,
     columns: animalCategoriesColumnsWithAction,
+    pagination: pagination,
+    setPagination: setPagination,
+    total: totalCount,
   });
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -151,7 +176,10 @@ const AnimalCategoriesLists = ({
       />
 
       {animalCategoriesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalCategoriesTable} />
+        <DataTableWithPagination
+          table={animalCategoriesTable}
+          isLoading={isFetching || isLoading}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">

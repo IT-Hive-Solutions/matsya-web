@@ -2,9 +2,12 @@
 import { endpoints } from "@/core/contants/endpoints";
 import { IAnimalType } from "@/core/interfaces/animalType.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import {
+  PAGE_SIZE,
+  useCustomReactPaginatedTable,
+} from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Config } from "../dashboard/management-pages";
@@ -19,6 +22,7 @@ import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { Badge } from "../ui/badge";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -62,8 +66,17 @@ const AnimalTypesLists = ({
 }: Props) => {
   const [animalTypesLists, setAnimalTypesLists] = useState<IAnimalType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const debouncedSearchValue = useDebounceHook({
+    value: searchQuery,
+    delay: 300,
+  });
 
   const animalTypesColumnsWithAction: ColumnDef<IAnimalType>[] = [
     ...animalTypesColumns,
@@ -104,9 +117,19 @@ const AnimalTypesLists = ({
     },
   ];
 
-  const { data: fetchedAnimalTypesList, isLoading } = useQuery({
-    queryKey: ["animal-type"],
-    queryFn: () => fetchHandler<IAnimalType[]>(directusEndpoints.animal_types),
+  const {
+    data: fetchedAnimalTypesList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["animal-type", pagination, debouncedSearchValue],
+    queryFn: () =>
+      fetchHandler<IAnimalType[]>(directusEndpoints.animal_types, {
+        page: pagination.pageIndex + 1, // Directus pages start at 1
+        limit: pagination.pageSize,
+        searchQuery: debouncedSearchValue || undefined,
+      }),
+    placeholderData: (prev) => prev,
   });
 
   const deleteMutation = useMutation({
@@ -119,20 +142,25 @@ const AnimalTypesLists = ({
       toast.success("Data Deleted Successfully");
     },
   });
+
   useEffect(() => {
     if (fetchedAnimalTypesList?.data) {
       setAnimalTypesLists(fetchedAnimalTypesList?.data);
     }
   }, [fetchedAnimalTypesList]);
 
+  const totalCount =
+    fetchedAnimalTypesList?.meta?.filter_count ??
+    fetchedAnimalTypesList?.meta?.total_count ??
+    0;
+
   const animalTypesTable = useCustomReactPaginatedTable<IAnimalType, any>({
     data: animalTypesLists,
     columns: animalTypesColumnsWithAction,
+    pagination: pagination,
+    setPagination: setPagination,
+    total: totalCount,
   });
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -143,7 +171,10 @@ const AnimalTypesLists = ({
       />
 
       {animalTypesLists?.length > 0 ? (
-        <DataTableWithPagination table={animalTypesTable} />
+        <DataTableWithPagination
+          table={animalTypesTable}
+          isLoading={isFetching || isLoading}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">

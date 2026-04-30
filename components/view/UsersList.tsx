@@ -1,33 +1,33 @@
 "use client";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
 import { endpoints } from "@/core/contants/endpoints";
+import { ResetPasswordDTO } from "@/core/dtos/reset-password.dto";
 import { IUser } from "@/core/interfaces/user.interface";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import {
   fetchApiRouteHandler,
   fetchHandler,
 } from "@/core/services/apiHandler/fetchHandler";
-import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import { mutateApiRouteHandler } from "@/core/services/apiHandler/mutateHandler";
+import {
+  PAGE_SIZE,
+  useCustomReactPaginatedTable,
+} from "@/hooks/reactTableHook";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import ConfirmationDialog from "../ui/confirmation-dialog";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
-import ConfirmationDialog from "../ui/confirmation-dialog";
-import { ResetPasswordDTO } from "@/core/dtos/reset-password.dto";
-import {
-  mutateApiRouteHandler,
-  mutateHandler,
-} from "@/core/services/apiHandler/mutateHandler";
-import { toast } from "sonner";
-import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { useRouter } from "next/navigation";
-import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
-import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -39,6 +39,10 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   const [userLists, setUserLists] = useState<IUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -155,6 +159,7 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
       },
     },
   ];
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteHandler(directusEndpoints.users.byId(id)),
     onSuccess: (data) => {
@@ -188,18 +193,25 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     },
   });
 
-  const { data: fetchedUserList, isLoading } = useQuery({
-    queryKey: ["users", debouncedSearchValue],
+  const {
+    data: fetchedUserList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["users", debouncedSearchValue, pagination],
     queryFn: () =>
-      fetchApiRouteHandler<IUser[]>(endpoints.users, {
-        // fields: [
-        //   "*",
-        //   "office_id.*",
-        //   "role.*",
-        //   "office_id.province_id.*",
-        //   "office_id.district_id.*",
-        // ],
-        searchQuery: debouncedSearchValue,
+      fetchHandler<IUser[]>(directusEndpoints.users, {
+        fields: [
+          "*",
+          "office_id.*",
+          "role.*",
+          "office_id.province_id.*",
+          "office_id.district_id.*",
+          "role.*",
+        ],
+        page: pagination.pageIndex + 1, // Directus pages start at 1
+        limit: pagination.pageSize,
+        searchQuery: debouncedSearchValue || undefined,
       }),
   });
 
@@ -209,14 +221,18 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
     }
   }, [fetchedUserList]);
 
+  const totalCount =
+    fetchedUserList?.meta?.filter_count ??
+    fetchedUserList?.meta?.total_count ??
+    0;
+
   const userTable = useCustomReactPaginatedTable<IUser, any>({
     data: userLists,
     columns: userColumns,
+    pagination: pagination,
+    setPagination: setPagination,
+    total: totalCount,
   });
-
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
 
   return (
     <div className="flex flex-col gap-2">
@@ -226,10 +242,11 @@ const UserLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="max-w-xs"
       />
-      {isLoading ? (
-        <Loading />
-      ) : userLists?.length > 0 ? (
-        <DataTableWithPagination table={userTable} />
+      {userLists?.length > 0 ? (
+        <DataTableWithPagination
+          table={userTable}
+          isLoading={isLoading || isFetching}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">

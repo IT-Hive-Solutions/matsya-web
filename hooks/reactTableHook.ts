@@ -21,6 +21,9 @@ interface TableProps<TData, TValue> {
 
 }
 
+export const PAGE_SIZE = 10;
+
+
 export function useCustomReactTable<TData, TValue>({ data, columns }: TableProps<TData, TValue>) {
     const table = useReactTable<TData>({
         data,

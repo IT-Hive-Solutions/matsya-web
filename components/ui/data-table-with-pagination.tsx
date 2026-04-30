@@ -1,7 +1,7 @@
 "use client";
 
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
-import { Loader2 } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import React from "react";
+import { Button } from "./button";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData> {
@@ -37,7 +38,9 @@ export function DataTableWithPagination<TData>({
   const colCount = table._getColumnDefs().length;
 
   return (
-    <div className={`${fullWidth ? "w-full" : "w-max"} h-full flex flex-col gap-4`}>
+    <div
+      className={`${fullWidth ? "w-full" : "w-max"} h-full flex flex-col gap-4`}
+    >
       <div
         className={`${fullWidth ? "w-full" : "w-max"} rounded-xl  print:shadow-none print:rounded-sm print:border-black h-full border `}
       >
@@ -46,10 +49,16 @@ export function DataTableWithPagination<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-slate-600 font-semibold text-xs uppercase tracking-wider">
+                  <TableHead
+                    key={header.id}
+                    className="text-slate-600 font-semibold text-xs uppercase tracking-wider"
+                  >
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -78,8 +87,12 @@ export function DataTableWithPagination<TData>({
                       onClick={() => onRowClick?.(row.original)}
                       className={[
                         onRowClick ? "cursor-pointer" : "",
-                        isSelected ? "bg-slate-50 border-l-2 border-l-slate-900" : "",
-                        row.getIsExpanded() ? "bg-slate-50 border-b-0" : "hover:bg-slate-50/60",
+                        isSelected
+                          ? "bg-slate-50 border-l-2 border-l-slate-900"
+                          : "",
+                        row.getIsExpanded()
+                          ? "bg-slate-50 border-b-0"
+                          : "hover:bg-slate-50/60",
                         "transition-colors",
                       ]
                         .filter(Boolean)
@@ -87,14 +100,20 @@ export function DataTableWithPagination<TData>({
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
 
                     {/* Expanded sub-component row */}
                     {row.getIsExpanded() && renderSubComponent && (
-                      <TableRow key={`${row.id}-expanded`} className="hover:bg-transparent">
+                      <TableRow
+                        key={`${row.id}-expanded`}
+                        className="hover:bg-transparent"
+                      >
                         <TableCell
                           colSpan={colCount}
                           className="p-0 border-b border-slate-200"
@@ -108,7 +127,10 @@ export function DataTableWithPagination<TData>({
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={colCount} className="h-24 text-center print:h-0">
+                <TableCell
+                  colSpan={colCount}
+                  className="h-24 text-center print:h-0"
+                >
                   No records found.
                 </TableCell>
               </TableRow>
@@ -116,6 +138,54 @@ export function DataTableWithPagination<TData>({
           </TableBody>
         </Table>
       </div>
+      {(table.getPageCount() ?? 1) > 1 && (
+        <div className="flex items-center justify-between px-2 pb-4">
+          <p className="text-sm text-slate-500">
+            Showing{" "}
+            <span className="font-medium text-slate-900">
+              {table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+                1}
+            </span>{" "}
+            –{" "}
+            <span className="font-medium text-slate-900">
+              {Math.min(
+                (table.getState().pagination.pageIndex + 1) *
+                  table.getState().pagination.pageSize,
+                // pageCount * pageSize is an upper bound when total isn't directly accessible here
+                table.getPageCount() * table.getState().pagination.pageSize,
+              )}
+            </span>
+          </p>
+
+          <div className="flex items-center gap-4">
+            <div className="flex w-28 items-center justify-center text-sm font-medium text-slate-600">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span className="sr-only">Previous page</span>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <span className="sr-only">Next page</span>
+                <ChevronRightIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

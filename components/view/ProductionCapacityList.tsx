@@ -1,25 +1,27 @@
 "use client";
-import { endpoints } from "@/core/contants/endpoints";
-import { IAnimalType } from "@/core/interfaces/animalType.interface";
+import { directusEndpoints } from "@/core/contants/directusEndpoints";
+import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
+import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
-import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
+import {
+  PAGE_SIZE,
+  useCustomReactPaginatedTable,
+} from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Config } from "../dashboard/management-pages";
 import Loading from "../loading";
+import AlertDialogWrapper from "../ui/AlertDialogWrapper";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { DataTableWithPagination } from "../ui/data-table-with-pagination";
 import { Input } from "../ui/input";
-import { useRouter } from "next/navigation";
-import AlertDialogWrapper from "../ui/AlertDialogWrapper";
-import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
-import { toast } from "sonner";
-import { IProductionCapacity } from "@/core/interfaces/productionCapacity.interface";
-import { directusEndpoints } from "@/core/contants/directusEndpoints";
-import { Badge } from "../ui/badge";
+import { useDebounceHook } from "@/hooks/useDebounceHook";
 
 type Props = {
   currentConfig: Config;
@@ -62,8 +64,17 @@ const ProductionCapacityLists = ({
     IProductionCapacity[]
   >([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const debouncedSearchValue = useDebounceHook({
+    value: searchQuery,
+    delay: 300,
+  });
 
   const productionCapacityColumnsWithAction: ColumnDef<IProductionCapacity>[] =
     [
@@ -105,11 +116,20 @@ const ProductionCapacityLists = ({
       },
     ];
 
-  const { data: fetchedProductionCapacityList, isLoading } = useQuery({
-    queryKey: ["production-capacity"],
+  const {
+    data: fetchedProductionCapacityList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["production-capacity", pagination, debouncedSearchValue],
     queryFn: () =>
       fetchHandler<IProductionCapacity[]>(
         directusEndpoints.production_capacity,
+        {
+          page: pagination.pageIndex + 1, // Directus pages start at 1
+          limit: pagination.pageSize,
+          searchQuery: debouncedSearchValue || undefined,
+        },
       ),
   });
 
@@ -129,17 +149,20 @@ const ProductionCapacityLists = ({
     }
   }, [fetchedProductionCapacityList]);
 
+  const totalCount =
+    fetchedProductionCapacityList?.meta?.filter_count ??
+    fetchedProductionCapacityList?.meta?.total_count ??
+    0;
   const productionCapacityTable = useCustomReactPaginatedTable<
     IProductionCapacity,
     any
   >({
     data: productionCapacityLists,
     columns: productionCapacityColumnsWithAction,
+    pagination: pagination,
+    setPagination: setPagination,
+    total: totalCount,
   });
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -150,7 +173,10 @@ const ProductionCapacityLists = ({
       />
 
       {productionCapacityLists?.length > 0 ? (
-        <DataTableWithPagination table={productionCapacityTable} />
+        <DataTableWithPagination
+          table={productionCapacityTable}
+          isLoading={isLoading || isFetching}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
