@@ -4,7 +4,7 @@ import { IOffice } from "@/core/interfaces/office.interface";
 import { fetchHandler } from "@/core/services/apiHandler/fetchHandler";
 import { useCustomReactPaginatedTable } from "@/hooks/reactTableHook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, PaginationState } from "@tanstack/react-table";
 import { Edit, Plus, Trash } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Config } from "../dashboard/management-pages";
@@ -18,6 +18,8 @@ import AlertDialogWrapper from "../ui/AlertDialogWrapper";
 import { deleteHandler } from "@/core/services/apiHandler/deleteHandler";
 import { toast } from "sonner";
 import { directusEndpoints } from "@/core/contants/directusEndpoints";
+
+const PAGE_SIZE = 10;
 
 type Props = {
   currentConfig: Config;
@@ -50,6 +52,11 @@ export const officeColumns: ColumnDef<IOffice>[] = [
 const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
   const [officeLists, setOfficeLists] = useState<IOffice[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
+
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -100,27 +107,42 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
       toast.success("Data Deleted Successfully");
     },
   });
-  const { data: fetchedOfficeList, isLoading } = useQuery({
-    queryKey: ["office"],
+
+  const {
+    data: fetchedOfficeList,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["office", pagination, searchQuery],
     queryFn: () =>
       fetchHandler<IOffice[]>(directusEndpoints.office, {
         fields: ["*.*", "district_id.*", "district_id.province_id.*"],
+        page: pagination.pageIndex + 1, // Directus pages start at 1
+        limit: pagination.pageSize,
+        searchQuery: searchQuery || undefined,
       }),
+    placeholderData: (prev) => prev,
   });
+
   useEffect(() => {
     if (fetchedOfficeList?.data) {
       setOfficeLists(fetchedOfficeList?.data);
     }
   }, [fetchedOfficeList]);
 
+  const totalCount =
+    fetchedOfficeList?.meta?.filter_count ??
+    fetchedOfficeList?.meta?.total_count ??
+    0;
+  const pageCount = Math.ceil(totalCount / pagination.pageSize);
+
   const officeTable = useCustomReactPaginatedTable<IOffice, any>({
     data: officeLists,
     columns: officeColumnsWithAction,
+    pagination: pagination,
+    setPagination: setPagination,
+    total: totalCount,
   });
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -131,7 +153,10 @@ const OfficeLists = ({ currentConfig, setShowForm, setEditing }: Props) => {
       />
 
       {officeLists?.length > 0 ? (
-        <DataTableWithPagination table={officeTable} />
+        <DataTableWithPagination
+          table={officeTable}
+          isLoading={isFetching || isLoading}
+        />
       ) : (
         <Card className="p-12 text-center border-border/50">
           <p className="text-muted-foreground mb-4 text-sm">
