@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import React from "react";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData> {
@@ -70,7 +71,7 @@ export function DataTableWithPagination<TData>({
                     : false;
 
                 return (
-                  <>
+                  <React.Fragment key={row.id}>
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
@@ -102,7 +103,7 @@ export function DataTableWithPagination<TData>({
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })
             ) : (
