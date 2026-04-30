@@ -1,11 +1,14 @@
 import { authClient } from "@/core/lib/apiClient"
 import axios from "axios";
 
-export interface SearchFilter {
+export interface SearchPaginationFilter {
     searchQuery?: string;
     fromDate?: string;
     toDate?: string;
-    fields?: string | string[]
+    fields?: string | string[],
+    page?: number;
+    limit?: number;
+
 }
 
 export interface FetchResult<T = any> {
@@ -19,7 +22,7 @@ export interface FetchResult<T = any> {
 
 export const fetchHandler = async <T = any>(
     url: string,
-    filter?: SearchFilter
+    filter?: SearchPaginationFilter
 ): Promise<FetchResult<T>> => {
     // Build Directus filter query params
     const params = new URLSearchParams();
@@ -37,6 +40,12 @@ export const fetchHandler = async <T = any>(
         params.set("fields", String(filter.fields))
     }
 
+
+    params.set("meta", "*");
+    if (filter?.limit) params.set("limit", String(filter.limit));
+    if (filter?.page) params.set("page", String(filter.page));
+
+
     const queryString = params.toString();
     const fullPath = queryString ? `${url}?${queryString}` : url;
 
@@ -53,7 +62,7 @@ export const fetchHandler = async <T = any>(
 
 
 
-export const fetchApiRouteHandler = async  <T = any>(url: string, filter?: SearchFilter): Promise<FetchResult<T>> => {
+export const fetchApiRouteHandler = async  <T = any>(url: string, filter?: SearchPaginationFilter): Promise<FetchResult<T>> => {
 
     let params: any = {
     }
